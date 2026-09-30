@@ -75,9 +75,9 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 100, opacity: 0, scale: 0.9 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-4 pointer-events-none"
+          className="fixed bottom-4 sm:bottom-6 inset-x-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none pb-[env(safe-area-inset-bottom,0px)]"
         >
-          <div className="pointer-events-auto rounded-full p-2 sm:px-4 sm:py-2.5 glass-dock flex items-center gap-3 sm:gap-6 shadow-2xl max-w-2xl w-full sm:w-auto justify-between border border-white/20">
+          <div className="pointer-events-auto rounded-full p-2 sm:px-4 sm:py-2.5 glass-dock flex items-center gap-2.5 sm:gap-6 shadow-2xl max-w-2xl w-full sm:w-auto justify-between border border-white/20">
             {/* Selected Count Pill */}
             <div className="flex items-center gap-2.5 pl-2">
               <div className="w-8 h-8 rounded-full bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400 font-bold text-xs shadow-[0_0_12px_rgba(56,189,248,0.4)]">
@@ -120,12 +120,13 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
               whileTap={{ scale: isExporting ? 1 : 0.97 }}
               disabled={isExporting}
               onClick={handleDownloadZip}
-              className="liquid-gradient-btn px-5 py-2.5 rounded-full text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg disabled:opacity-60 whitespace-nowrap"
+              className="liquid-gradient-btn px-4 sm:px-5 py-2.5 rounded-full text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg disabled:opacity-60 whitespace-nowrap"
             >
               {isExporting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>{exportProgress?.status || "Bundling ZIP..."}</span>
+                  <span className="hidden sm:inline">{exportProgress?.status || "Bundling ZIP..."}</span>
+                  <span className="sm:hidden">{exportProgress?.percent ? `Exporting (${exportProgress.percent}%)` : "Bundling..."}</span>
                 </>
               ) : (
                 <>
