@@ -30,6 +30,22 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
   const selectedCount = frames.filter((f) => f.selected).length;
   const isAllSelected = selectedCount === frames.length && frames.length > 0;
 
+  const lastTapRef = React.useRef<{ [id: string]: number }>({});
+
+  const handleCardClick = (frame: ExtractedFrame) => {
+    const now = Date.now();
+    const lastTap = lastTapRef.current[frame.id] || 0;
+    if (now - lastTap < 350) {
+      // Double tap detected (mobile) -> expand view
+      onPreviewFrame(frame);
+      lastTapRef.current[frame.id] = 0;
+    } else {
+      // Single tap -> toggle selection
+      lastTapRef.current[frame.id] = now;
+      onToggleSelect(frame.id);
+    }
+  };
+
   return (
     <div className="w-full space-y-6">
       {/* Gallery Toolbar Header */}
@@ -43,7 +59,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               Extracted Frames Gallery
             </h3>
             <p className="text-xs text-white/50">
-              <span className="text-sky-400 font-semibold">{selectedCount}</span> of {frames.length} frames selected for download
+              <span className="text-sky-400 font-semibold">{selectedCount}</span> of {frames.length} frames selected • <span className="text-white/70">Double-click to expand</span>
             </p>
           </div>
         </div>
@@ -80,7 +96,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
       {/* Frames Grid */}
       <motion.div
         layout
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 items-start"
       >
         <AnimatePresence>
           {frames.map((frame, index) => {
@@ -95,19 +111,26 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 transition={{ duration: 0.3, delay: Math.min(index * 0.02, 0.4) }}
                 onMouseEnter={() => setHoveredFrameId(frame.id)}
                 onMouseLeave={() => setHoveredFrameId(null)}
-                onClick={() => onToggleSelect(frame.id)}
+                onClick={() => handleCardClick(frame)}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  onPreviewFrame(frame);
+                }}
                 className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
                   frame.selected
                     ? "glass-card-selected ring-2 ring-sky-400/80 scale-[1.01]"
                     : "glass-panel-interactive border border-white/10 hover:border-white/30"
                 }`}
               >
-                {/* Image Container with Aspect Ratio */}
-                <div className="relative aspect-video w-full overflow-hidden bg-black/40">
+                {/* Image Container with Original Aspect Ratio */}
+                <div 
+                  className="relative w-full overflow-hidden bg-black/50 flex items-center justify-center"
+                  style={{ aspectRatio: `${frame.width} / ${frame.height}` }}
+                >
                   <img
                     src={frame.dataUrl}
                     alt={`Frame at ${frame.formattedTime}`}
-                    className={`w-full h-full object-cover transition-transform duration-500 ease-out ${
+                    className={`w-full h-full object-contain transition-transform duration-500 ease-out ${
                       isHovered ? "scale-105" : "scale-100"
                     }`}
                     loading="lazy"
@@ -150,7 +173,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                     >
                       {/* Zoom Button */}
                       <button
-                        title="Preview Frame"
+                        title="Expand Single Frame"
                         onClick={(e) => {
                           e.stopPropagation();
                           onPreviewFrame(frame);
