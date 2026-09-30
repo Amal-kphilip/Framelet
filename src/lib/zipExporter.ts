@@ -20,7 +20,6 @@ export async function exportFramesToZip(
 
   const zip = new JSZip();
   const baseName = videoName.replace(/\.[^/.]+$/, "");
-  const folder = zip.folder(`${baseName}_frames`) || zip;
 
   const total = frames.length;
 
@@ -31,14 +30,14 @@ export async function exportFramesToZip(
     status: "Preparing high-resolution images...",
   });
 
-  // Add frames to zip folder
+  // Add frames directly to ZIP root (no subfolder)
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
     const paddedIndex = String(frame.index).padStart(4, "0");
     const safeTime = frame.formattedTime.replace(":", "m").replace(".", "s");
     const filename = `${baseName}_frame_${paddedIndex}_${safeTime}.jpg`;
 
-    folder.file(filename, frame.blob);
+    zip.file(filename, frame.blob);
 
     if (onProgress && i % 5 === 0) {
       const p = 10 + Math.round((i / total) * 60);
@@ -67,7 +66,7 @@ export async function exportFramesToZip(
     })),
   };
 
-  folder.file("metadata.json", JSON.stringify(metadata, null, 2));
+  zip.file("metadata.json", JSON.stringify(metadata, null, 2));
 
   onProgress?.({
     percent: 75,
