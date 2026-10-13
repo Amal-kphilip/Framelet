@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { UploadCloud, Play, Pause, Clock, FileVideo, CheckCircle2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { UploadCloud, Play, Pause, Clock, FileVideo, CheckCircle2, ArrowUpRight, Film, ScanLine, ShieldCheck, HardDrive, Sparkles } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { VideoMetadata } from "@/types";
 import { formatBytes, loadVideoMetadata, MAX_ALLOWED_DURATION_SECONDS } from "@/lib/videoUtils";
 
@@ -12,6 +12,15 @@ interface VideoUploadZoneProps {
   onError: (title: string, message: string) => void;
   isProcessing: boolean;
 }
+
+const frameTiles = [
+  { tone: "ember", label: "01" },
+  { tone: "rose", label: "02" },
+  { tone: "gold", label: "03" },
+  { tone: "wine", label: "04" },
+  { tone: "copper", label: "05" },
+  { tone: "smoke", label: "06" },
+];
 
 export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   videoMetadata,
@@ -25,6 +34,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const fileRequestIdRef = useRef(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => () => { fileRequestIdRef.current += 1; }, []);
 
@@ -56,27 +66,34 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(false);
+    // Related-target checks keep the highlight from flickering across child elements.
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setIsDragging(false);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (!isProcessing) processFile(file);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && !isProcessing && !isLoadingFile) {
+      processFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      processFile(file);
-    }
+    if (e.target.files && e.target.files.length > 0) processFile(e.target.files[0]);
     // Clearing the input allows the same file to be selected again.
     e.currentTarget.value = "";
+  };
+
+  const openFilePicker = () => {
+    if (!isLoadingFile && !isProcessing) fileInputRef.current?.click();
+  };
+
+  const handleDropzoneKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if ((event.key === "Enter" || event.key === " ") && !isLoadingFile && !isProcessing) {
+      event.preventDefault();
+      openFilePicker();
+    }
   };
 
   const togglePlay = async () => {
@@ -95,7 +112,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   };
 
   return (
-    <div className="w-full">
+    <div className="framelet-upload-component w-full">
       <input
         ref={fileInputRef}
         type="file"
@@ -105,179 +122,169 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
         className="hidden"
       />
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {!videoMetadata ? (
           <motion.div
             key="upload-dropzone"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.4 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 18, clipPath: "inset(7% 0 0 0 round 24px)" }}
+            animate={{ opacity: 1, y: 0, clipPath: "inset(0% 0 0 0 round 24px)" }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.99 }}
+            transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={() => { if (!isLoadingFile && !isProcessing) fileInputRef.current?.click(); }}
-            role="group"
-            aria-label="Video upload area"
-            className={`relative group cursor-pointer rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 glass-panel border overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400 ${
-              isDragging
-                ? "border-sky-400 bg-sky-500/[0.08] shadow-[0_0_40px_rgba(56,189,248,0.25)] scale-[1.01]"
-                : "border-white/10 hover:border-white/25 hover:bg-white/[0.06] shadow-glass"
-            }`}
+            onClick={openFilePicker}
+            onKeyDown={handleDropzoneKeyDown}
+            role="button"
+            tabIndex={isLoadingFile || isProcessing ? -1 : 0}
+            aria-disabled={isLoadingFile || isProcessing}
+            aria-label="Choose a video or drop it here"
+            className={`framelet-dropzone group ${isDragging ? "is-dragging" : ""} ${isLoadingFile ? "is-loading" : ""}`}
           >
-            {/* Ambient inner glow */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
-
-            <div className="flex flex-col items-center justify-center relative z-10 max-w-lg mx-auto">
-              {/* Icon Container with Glass Ring */}
-              <div className="relative mb-6">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-sky-500/20 via-indigo-500/15 to-purple-500/20 border border-white/20 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:border-white/40 transition-all duration-300">
-                  <UploadCloud className="w-10 h-10 text-sky-400 group-hover:text-sky-300 transition-colors" />
+            <div className="framelet-dropzone-background" aria-hidden="true" />
+            <div className="framelet-dropzone-content">
+              <div className="framelet-dropzone-copy">
+                <div className="framelet-upload-label">
+                  <span className={`framelet-upload-label-dot ${isLoadingFile ? "is-busy" : ""}`} />
+                  {isLoadingFile ? "ANALYZING LOCAL FILE" : isDragging ? "RELEASE TO ADD VIDEO" : "YOUR NEXT FRAME STARTS HERE"}
                 </div>
-                {isLoadingFile && (
-                  <div className="absolute inset-0 rounded-3xl border-2 border-sky-400 border-t-transparent animate-spin" />
-                )}
+
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={isLoadingFile ? "loading" : isDragging ? "dragging" : "idle"}
+                    initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
+                    transition={{ duration: 0.22 }}
+                  >
+                    <h3 className="framelet-dropzone-title">
+                      {isLoadingFile ? <>Reading your <span>footage.</span></> : isDragging ? <>Drop it <span>like a frame.</span></> : <>Bring your video <span>into focus.</span></>}
+                    </h3>
+                    <p className="framelet-dropzone-description">
+                      {isLoadingFile
+                        ? "Checking duration, dimensions and browser decoder support. Your file stays on this device."
+                        : "Find the exact still hidden inside your clip. Scrub through moments, capture at your pace, and keep the frames that matter."}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+
+                <div className="framelet-dropzone-actions" aria-hidden="true">
+                  <span className="framelet-dropzone-cta">
+                    {isLoadingFile ? <span className="framelet-cta-spinner" /> : <UploadCloud className="h-4 w-4" />}
+                    <span>{isLoadingFile ? "Analyzing video…" : "Choose a video"}</span>
+                    {!isLoadingFile && <span className="framelet-cta-circle"><ArrowUpRight className="h-4 w-4" /></span>}
+                  </span>
+                  <span className="framelet-dropzone-shortcut">OR DROP FILE ANYWHERE IN THIS AREA</span>
+                </div>
+
+                <div className="framelet-format-row">
+                  <span>MP4</span><i /> <span>WEBM</span><i /> <span>MOV</span><i /> <span>MKV</span><i /> <span>AVI</span>
+                  <span className="framelet-format-limit">UP TO {MAX_ALLOWED_DURATION_SECONDS}s</span>
+                </div>
               </div>
 
-              <h3 className="text-2xl font-bold tracking-tight text-white mb-2">
-                {isLoadingFile ? "Analyzing video file..." : "Drop your video here"}
-              </h3>
-              <p className="text-sm text-white/60 mb-6 leading-relaxed">
-                Supports <span className="text-white/90 font-medium">MP4</span>, <span className="text-white/90 font-medium">WebM</span>, <span className="text-white/90 font-medium">MOV</span>, <span className="text-white/90 font-medium">MKV</span>, or <span className="text-white/90 font-medium">AVI</span> up to <span className="text-sky-400 font-semibold">{MAX_ALLOWED_DURATION_SECONDS} seconds</span>. Video decoding and frame encoding run locally. Browser codec support varies.
-              </p>
-
-              {/* Browse Button */}
-              <button
-                type="button"
-                onClick={(event) => { event.stopPropagation(); if (!isLoadingFile && !isProcessing) fileInputRef.current?.click(); }}
-                className="px-6 py-3 rounded-full text-sm font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 shadow-glass transition-all duration-200 flex items-center gap-2 group-hover:scale-105 active:scale-95"
-              >
-                <FileVideo className="w-4 h-4 text-sky-400" />
-                <span>Browse Video</span>
-              </button>
-
-              {/* Feature Pills */}
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-xs text-white/50">
-                <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> High-Resolution Output
-                </span>
-                <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" /> Zero Upload Wait
-                </span>
-                <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" /> Original Quality
-                </span>
+              <div className="framelet-upload-visual" aria-hidden="true">
+                <motion.div
+                  className="framelet-upload-orbit framelet-upload-orbit-one"
+                  animate={reduceMotion ? undefined : { rotate: 360 }}
+                  transition={{ duration: 38, repeat: Infinity, ease: "linear" }}
+                />
+                <motion.div
+                  className="framelet-upload-orbit framelet-upload-orbit-two"
+                  animate={reduceMotion ? undefined : { rotate: -360 }}
+                  transition={{ duration: 54, repeat: Infinity, ease: "linear" }}
+                />
+                <motion.div
+                  className="framelet-upload-film-stack"
+                  animate={reduceMotion ? undefined : { y: [0, -7, 0], rotate: [-2, -1, -2] }}
+                  transition={reduceMotion ? undefined : { duration: 6.8, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="framelet-film-sheet framelet-film-sheet-back">
+                    <span className="framelet-film-sheet-code">SEQUENCE / 002</span>
+                    <div className="framelet-film-sheet-lines"><i /><i /><i /></div>
+                  </div>
+                  <div className="framelet-film-sheet framelet-film-sheet-front">
+                    <div className="framelet-film-viewfinder"><i /><i /><i /><i /></div>
+                    <Film className="framelet-upload-film-icon" strokeWidth={1.25} />
+                    <div className="framelet-film-timecode"><span>00:00:12:08</span><span>● REC / LOCAL</span></div>
+                    <motion.div
+                      className="framelet-film-scanline"
+                      animate={reduceMotion ? undefined : { y: [0, 180, 0], opacity: [0.25, 0.8, 0.25] }}
+                      transition={reduceMotion ? undefined : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </div>
+                </motion.div>
+                <div className="framelet-upload-mini-grid">
+                  {frameTiles.map((tile, index) => (
+                    <motion.div
+                      key={tile.label}
+                      className={`framelet-mini-frame tone-${tile.tone}`}
+                      initial={reduceMotion ? false : { opacity: 0, y: 12, scale: 0.92 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ delay: reduceMotion ? 0 : 0.12 + index * 0.07, duration: 0.35, ease: "easeOut" }}
+                    >
+                      <span>{tile.label}</span><i />
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="framelet-upload-status-tag"><ScanLine className="h-3.5 w-3.5" /> FRAME EXTRACTION READY</div>
+                <div className="framelet-upload-private-tag"><ShieldCheck className="h-3.5 w-3.5" /> LOCAL ONLY</div>
               </div>
             </div>
+            <div className="framelet-dropzone-footer">
+              <span><HardDrive className="h-3.5 w-3.5" /> Processed in your browser</span>
+              <span><Sparkles className="h-3.5 w-3.5" /> Original frame dimensions</span>
+              <span><CheckCircle2 className="h-3.5 w-3.5" /> No account required</span>
+            </div>
+            {isDragging && <motion.div className="framelet-drop-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><UploadCloud className="h-8 w-8" /><span>Release to inspect your video</span></motion.div>}
           </motion.div>
         ) : (
           <motion.div
             key="video-preview-card"
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.4 }}
-            className="rounded-3xl p-6 glass-panel border border-white/15 shadow-apple-card relative overflow-hidden"
+            initial={reduceMotion ? false : { opacity: 0, y: 20, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
+            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+            className="framelet-source-card"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-              {/* Sleek Integrated Video Player */}
-              <div className="lg:col-span-7 relative group rounded-2xl overflow-hidden bg-black/60 border border-white/10 aspect-video flex items-center justify-center shadow-inner">
+            <div className="framelet-source-card-top">
+              <div className="framelet-source-status"><span /> VIDEO SOURCE READY <span className="framelet-source-divider">/</span> READY TO EXTRACT</div>
+              {!isProcessing && <button type="button" onClick={openFilePicker} className="framelet-change-video"><span>Change video</span><ArrowUpRight className="h-3.5 w-3.5" /></button>}
+            </div>
+
+            <div className="framelet-source-layout">
+              <div className="framelet-source-preview">
                 <video
                   ref={videoRef}
                   src={videoMetadata.url}
-                  className="w-full h-full object-contain"
+                  className="framelet-source-video"
                   onEnded={() => setIsPlaying(false)}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
                   playsInline
                 />
-
-                {/* Custom Glass Player Overlay */}
-                <button
-                  type="button"
-                  onClick={togglePlay}
-                  aria-label={isPlaying ? "Pause video preview" : "Play video preview"}
-                  className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-sky-400"
-                >
-                  <motion.span
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl group-hover:bg-white/30 transition-all"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-6 h-6 fill-white text-white" />
-                    ) : (
-                      <Play className="w-6 h-6 fill-white text-white ml-1" />
-                    )}
-                  </motion.span>
+                <div className="framelet-source-preview-shade" aria-hidden="true" />
+                <button type="button" onClick={togglePlay} aria-label={isPlaying ? "Pause video preview" : "Play video preview"} className="framelet-source-play">
+                  <span>{isPlaying ? <Pause className="h-5 w-5 fill-white" /> : <Play className="h-5 w-5 fill-white ml-0.5" />}</span>
                 </button>
-
-                {/* Video Duration Badge */}
-                <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-xs font-mono text-white/90 border border-white/10 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-sky-400" />
-                  {videoMetadata.formattedDuration}
-                </div>
+                <div className="framelet-source-time"><Clock className="h-3.5 w-3.5" /> {videoMetadata.formattedDuration}</div>
+                <div className="framelet-source-preview-label"><Film className="h-3.5 w-3.5" /> SOURCE FOOTAGE</div>
+                <div className="framelet-source-progress-graphic"><span /><span /><span /><span /><span /><span /><span /><span /><span /><span /><span /><span /></div>
               </div>
 
-              {/* Video Info and Details */}
-              <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-4">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">
-                      Active Video Source
-                    </span>
-                    {!isProcessing && (
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="text-xs text-white/60 hover:text-white underline underline-offset-4 transition-colors"
-                      >
-                        Change Video
-                      </button>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-semibold text-white truncate max-w-full" title={videoMetadata.name}>
-                    {videoMetadata.name}
-                  </h3>
+              <div className="framelet-source-details">
+                <div className="framelet-source-file-heading">
+                  <div className="framelet-source-file-icon"><FileVideo className="h-5 w-5" /></div>
+                  <div className="min-w-0 flex-1"><span className="framelet-source-label">CURRENT SOURCE</span><h3 title={videoMetadata.name}>{videoMetadata.name}</h3></div>
                 </div>
-
-                {/* Metadata Badges Grid */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm">
-                    <span className="text-[11px] text-white/50 block mb-0.5">Resolution</span>
-                    <span className="text-sm font-semibold text-white/90 font-mono">
-                      {videoMetadata.width} × {videoMetadata.height}
-                    </span>
-                  </div>
-
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm">
-                    <span className="text-[11px] text-white/50 block mb-0.5">Duration</span>
-                    <span className="text-sm font-semibold text-white/90 font-mono">
-                      {videoMetadata.formattedDuration} <span className="text-xs text-white/40">({Math.round(videoMetadata.duration * 10) / 10}s)</span>
-                    </span>
-                  </div>
-
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm">
-                    <span className="text-[11px] text-white/50 block mb-0.5">Aspect Ratio</span>
-                    <span className="text-sm font-semibold text-white/90">
-                      {videoMetadata.aspectRatio}
-                    </span>
-                  </div>
-
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm">
-                    <span className="text-[11px] text-white/50 block mb-0.5">File Size</span>
-                    <span className="text-sm font-semibold text-white/90 font-mono">
-                      {formatBytes(videoMetadata.size)}
-                    </span>
-                  </div>
+                <div className="framelet-source-metrics">
+                  <div><span>RESOLUTION</span><strong>{videoMetadata.width} <i>×</i> {videoMetadata.height}</strong></div>
+                  <div><span>DURATION</span><strong>{videoMetadata.formattedDuration}</strong></div>
+                  <div><span>ASPECT RATIO</span><strong>{videoMetadata.aspectRatio}</strong></div>
+                  <div><span>FILE SIZE</span><strong>{formatBytes(videoMetadata.size)}</strong></div>
                 </div>
-
-                {/* Status Notice */}
-                <div className="p-3 rounded-2xl bg-sky-500/[0.08] border border-sky-500/20 text-xs text-sky-200/90 flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-sky-400 mt-0.5 shrink-0" />
-                  <span>
-                    Metadata loaded. Frame decoding and format support may vary by browser and codec. Output size remains {videoMetadata.width}×{videoMetadata.height}.
-                  </span>
-                </div>
+                <div className="framelet-source-ready-note"><span className="framelet-source-ready-pulse" /><div><strong>File inspected successfully</strong><p>Frames will be decoded locally at {videoMetadata.width} × {videoMetadata.height}. Browser codec support can vary.</p></div></div>
+                <div className="framelet-source-bottomline"><span><ShieldCheck className="h-3.5 w-3.5" /> Stays on this device</span><span>STEP 01 <b>—</b> SOURCE</span></div>
               </div>
             </div>
           </motion.div>
