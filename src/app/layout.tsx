@@ -3,7 +3,7 @@ import "./globals.css";
 import { AmbientBackground } from "@/components/AmbientBackground";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://YOUR-PRODUCTION-DOMAIN"),
+  metadataBase: new URL("https://framelet.vercel.app"),
   title: "Framelet | Video Frame Extractor",
   applicationName: "Framelet",
   description: "Extract still frames from short videos in your browser. Choose capture intervals, select frames, and export JPEG, PNG, WebP, or ZIP files locally.",

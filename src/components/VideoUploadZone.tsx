@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { UploadCloud, Play, Pause, Clock, FileVideo, CheckCircle2, ArrowUpRight, Film, ScanLine, ShieldCheck, HardDrive, Sparkles } from "lucide-react";
+import { UploadCloud, Play, Pause, Clock, FileVideo, CheckCircle2, ArrowUpRight, Film, ScanLine, ShieldCheck, HardDrive, Sparkles, Monitor, Ratio, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { VideoMetadata } from "@/types";
 import { formatBytes, loadVideoMetadata, MAX_ALLOWED_DURATION_SECONDS } from "@/lib/videoUtils";
@@ -31,6 +31,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [previewTime, setPreviewTime] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const fileRequestIdRef = useRef(0);
@@ -109,6 +110,28 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
     } else {
       video.pause();
     }
+  };
+
+  const seekPreview = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextTime = Number(event.currentTarget.value);
+    const video = videoRef.current;
+    if (!video || !Number.isFinite(nextTime)) return;
+    video.currentTime = nextTime;
+    setPreviewTime(nextTime);
+  };
+
+  const formatPreviewTime = (seconds: number) => {
+    const safeSeconds = Math.max(0, Math.floor(Number.isFinite(seconds) ? seconds : 0));
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainder = safeSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+  };
+
+  const scrollToExtractionSettings = () => {
+    document.getElementById("extraction-controls-heading")?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
   };
 
   return (
@@ -253,11 +276,15 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
             </div>
 
             <div className="framelet-source-layout">
-              <div className="framelet-source-preview">
+              <div className={`framelet-source-preview ${isPlaying ? "is-playing" : ""}`}>
+                <div className="framelet-source-ambient" aria-hidden="true"><span /><span /><span /></div>
+                <div className="framelet-source-film-markings" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>
                 <video
                   ref={videoRef}
                   src={videoMetadata.url}
                   className="framelet-source-video"
+                  onLoadedMetadata={() => setPreviewTime(0)}
+                  onTimeUpdate={() => setPreviewTime(videoRef.current?.currentTime ?? 0)}
                   onEnded={() => setIsPlaying(false)}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
@@ -267,24 +294,41 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                 <button type="button" onClick={togglePlay} aria-label={isPlaying ? "Pause video preview" : "Play video preview"} className="framelet-source-play">
                   <span>{isPlaying ? <Pause className="h-5 w-5 fill-white" /> : <Play className="h-5 w-5 fill-white ml-0.5" />}</span>
                 </button>
-                <div className="framelet-source-time"><Clock className="h-3.5 w-3.5" /> {videoMetadata.formattedDuration}</div>
-                <div className="framelet-source-preview-label"><Film className="h-3.5 w-3.5" /> SOURCE FOOTAGE</div>
-                <div className="framelet-source-progress-graphic"><span /><span /><span /><span /><span /><span /><span /><span /><span /><span /><span /><span /></div>
+                <div className="framelet-source-preview-label"><span className="framelet-source-live-dot" /> <Film className="h-3.5 w-3.5" /> SOURCE MONITOR</div>
+                <div className="framelet-source-preview-spec">{videoMetadata.width} × {videoMetadata.height}</div>
+                <div className="framelet-source-playback">
+                  <div className="framelet-source-playback-meta">
+                    <span><b>{formatPreviewTime(previewTime)}</b><i>/</i>{videoMetadata.formattedDuration}</span>
+                    <span className="framelet-source-play-state">{isPlaying ? "PLAYING PREVIEW" : "PREVIEW READY"}</span>
+                  </div>
+                  <input
+                    className="framelet-source-seek"
+                    type="range"
+                    min={0}
+                    max={Math.max(videoMetadata.duration, 0.01)}
+                    step={0.05}
+                    value={Math.min(previewTime, videoMetadata.duration)}
+                    onChange={seekPreview}
+                    aria-label="Seek video preview"
+                    aria-valuetext={`${formatPreviewTime(previewTime)} of ${videoMetadata.formattedDuration}`}
+                    style={{ "--source-progress": `${videoMetadata.duration > 0 ? (previewTime / videoMetadata.duration) * 100 : 0}%` } as React.CSSProperties}
+                  />
+                </div>
               </div>
 
               <div className="framelet-source-details">
                 <div className="framelet-source-file-heading">
                   <div className="framelet-source-file-icon"><FileVideo className="h-5 w-5" /></div>
-                  <div className="min-w-0 flex-1"><span className="framelet-source-label">CURRENT SOURCE</span><h3 title={videoMetadata.name}>{videoMetadata.name}</h3></div>
+                  <div className="min-w-0 flex-1"><span className="framelet-source-label">CURRENT SOURCE <i>·</i> VIDEO INPUT</span><h3 title={videoMetadata.name}>{videoMetadata.name}</h3><span className="framelet-source-file-type">{videoMetadata.type?.replace("video/", "").toUpperCase() || "VIDEO"} <i /> {formatBytes(videoMetadata.size)} SOURCE FILE</span></div>
                 </div>
                 <div className="framelet-source-metrics">
-                  <div><span>RESOLUTION</span><strong>{videoMetadata.width} <i>×</i> {videoMetadata.height}</strong></div>
-                  <div><span>DURATION</span><strong>{videoMetadata.formattedDuration}</strong></div>
-                  <div><span>ASPECT RATIO</span><strong>{videoMetadata.aspectRatio}</strong></div>
-                  <div><span>FILE SIZE</span><strong>{formatBytes(videoMetadata.size)}</strong></div>
+                  <div><span className="framelet-source-metric-label"><Monitor /> RESOLUTION</span><strong>{videoMetadata.width} <i>×</i> {videoMetadata.height}</strong><small>Original dimensions</small></div>
+                  <div><span className="framelet-source-metric-label"><Clock /> DURATION</span><strong>{videoMetadata.formattedDuration}</strong><small>Full source length</small></div>
+                  <div><span className="framelet-source-metric-label"><Ratio /> ASPECT RATIO</span><strong>{videoMetadata.aspectRatio}</strong><small>{videoMetadata.width >= videoMetadata.height ? "Landscape frame" : "Portrait frame"}</small></div>
+                  <div><span className="framelet-source-metric-label"><HardDrive /> FILE SIZE</span><strong>{formatBytes(videoMetadata.size)}</strong><small>Read locally</small></div>
                 </div>
-                <div className="framelet-source-ready-note"><span className="framelet-source-ready-pulse" /><div><strong>File inspected successfully</strong><p>Frames will be decoded locally at {videoMetadata.width} × {videoMetadata.height}. Browser codec support can vary.</p></div></div>
-                <div className="framelet-source-bottomline"><span><ShieldCheck className="h-3.5 w-3.5" /> Stays on this device</span><span>STEP 01 <b>—</b> SOURCE</span></div>
+                <div className="framelet-source-ready-note"><span className="framelet-source-ready-pulse" /><div><strong>Source inspected successfully</strong><p>Video metadata is ready. Frames will be decoded in your browser; supported codecs can vary by browser.</p></div></div>
+                <div className="framelet-source-bottomline"><span><ShieldCheck className="h-3.5 w-3.5" /> Stays on this device</span><button type="button" onClick={scrollToExtractionSettings}>Configure capture <ChevronDown className="h-3.5 w-3.5" /></button></div>
               </div>
             </div>
           </motion.div>
