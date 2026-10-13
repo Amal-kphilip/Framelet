@@ -12,7 +12,7 @@ import { FramePreviewModal } from "@/components/FramePreviewModal";
 import { ToastContainer } from "@/components/Toast";
 import { ExtractedFrame, ExtractionSettings, ToastMessage, VideoMetadata } from "@/types";
 import { extractFramesViaCanvas } from "@/lib/canvasExtractor";
-import { Sparkles, Layers, ShieldCheck, Cpu } from "lucide-react";
+import { Sparkles, Layers, ShieldCheck, Cpu, Film, ArrowUpRight, ScanLine, Images } from "lucide-react";
 
 export default function Home() {
   const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
@@ -180,149 +180,221 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col relative pb-32">
+    <main className="framelet-page min-h-screen flex flex-col relative">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-      <Header onReset={handleReset} hasVideo={!!videoMetadata} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-9 w-full space-y-8">
-        {/* Hero Section */}
-        <div className={`text-center max-w-3xl mx-auto ${videoMetadata ? "space-y-2" : "space-y-4"}`} aria-live="polite">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/15 backdrop-blur-xl text-xs font-medium text-sky-300 shadow-glass"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-            <span>Next-Gen Liquid Glass Video Extraction</span>
-          </motion.div>
+      <div className="framelet-shell relative w-full">
+        <Header onReset={handleReset} hasVideo={!!videoMetadata} />
 
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className={`${videoMetadata ? "text-2xl sm:text-3xl" : "text-4xl sm:text-5xl md:text-6xl"} font-extrabold tracking-tight text-white leading-tight`}
-          >
-            {videoMetadata ? "Video Ready for Extraction" : "Extract Frames with"}{" "}
-            {!videoMetadata && <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400">
-              Precision and Control
-            </span>}
-          </motion.h1>
+        <div className="framelet-content w-full">
+          {/* Editorial hero: inspired by the reference, adapted to Framelet's workflow. */}
+          <section id="home" className={`framelet-hero ${videoMetadata ? "framelet-hero-ready" : ""}`} aria-live="polite">
+            <div className="framelet-hero-copy">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                className="framelet-eyebrow"
+              >
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>PRIVATE VIDEO WORKSPACE</span>
+              </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg text-white/60 leading-relaxed max-w-2xl mx-auto"
-          >
-            Process clips up to 90 seconds in your browser. Video files are not uploaded; codec support depends on your browser.
-          </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                className="framelet-hero-title"
+              >
+                {videoMetadata ? <>Your next <span>great frame.</span></> : <>Every frame, <span>in focus.</span></>}
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="framelet-hero-lede"
+              >
+                Turn the moments inside your video into crisp stills. Capture on your terms, preview every frame, and export what matters — right in your browser.
+              </motion.p>
+
+              <motion.a
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.26, duration: 0.55 }}
+                href="#extractor"
+                className="framelet-primary-link"
+              >
+                {videoMetadata ? "Continue to workspace" : "Start extracting"}
+                <span className="framelet-link-icon"><ArrowUpRight className="h-4 w-4" aria-hidden="true" /></span>
+              </motion.a>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, x: 18 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 0.12, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="framelet-hero-art"
+              aria-hidden="true"
+            >
+              <div className="framelet-art-glow" />
+              <div className="framelet-art-ring framelet-art-ring-outer" />
+              <div className="framelet-art-ring framelet-art-ring-inner" />
+              <div className="framelet-film-card framelet-film-card-back"><span>FRAME 024</span><i /><i /><i /></div>
+              <div className="framelet-film-card framelet-film-card-front">
+                <div className="framelet-viewfinder-corner corner-tl" />
+                <div className="framelet-viewfinder-corner corner-tr" />
+                <div className="framelet-viewfinder-corner corner-bl" />
+                <div className="framelet-viewfinder-corner corner-br" />
+                <Film className="framelet-art-film" strokeWidth={1.25} />
+                <span className="framelet-art-timecode">00:00:12:08</span>
+                <div className="framelet-art-timeline"><i /><i /><i /><i /><i /><i /><i /><i /></div>
+              </div>
+              <div className="framelet-art-stamp"><ScanLine className="h-3.5 w-3.5" /> FRAME BY FRAME</div>
+            </motion.div>
+
+            <div className="framelet-hero-indexes">
+              <div><span>01 /</span><strong>Precise capture</strong></div>
+              <div><span>02 /</span><strong>Original dimensions</strong></div>
+              <div><span>03 /</span><strong>Local by design</strong></div>
+              <div className="framelet-hero-index-note">MADE FOR THE DETAILS <span>↗</span></div>
+            </div>
+          </section>
+
+          <div id="why-framelet" className="framelet-proof-strip" aria-label="Framelet benefits">
+            <span className="framelet-proof-heading">A SMALL TOOL FOR BIG DETAILS</span>
+            <span><ShieldCheck className="h-4 w-4" aria-hidden="true" /> Files stay on your device</span>
+            <span><Film className="h-4 w-4" aria-hidden="true" /> Fine-grained frame control</span>
+            <span><Images className="h-4 w-4" aria-hidden="true" /> JPEG · PNG · WebP</span>
+          </div>
+
+          <div className="framelet-workspace" id="extractor">
+            <div className="framelet-section-intro">
+              <div>
+                <span className="framelet-section-kicker">THE WORKSPACE / 01</span>
+                <h2>Make every second <span>count.</span></h2>
+              </div>
+              <p>Drop in a clip, choose your capture rhythm, then select the exact stills you want to keep. Nothing gets uploaded.</p>
+            </div>
+
+            {/* Upload Zone */}
+            <div className="framelet-upload-wrap">
+              <VideoUploadZone
+                videoMetadata={videoMetadata}
+                onVideoSelected={handleVideoSelected}
+                onError={(title, msg) => addToast("error", title, msg)}
+                isProcessing={isProcessing}
+              />
+            </div>
+
+            {/* Controls Section (Appears after video loaded) */}
+            <AnimatePresence>
+              {videoMetadata && (
+                <ExtractionControls
+                  metadata={videoMetadata}
+                  settings={settings}
+                  onSettingsChange={setSettings}
+                  onStartExtraction={handleStartExtraction}
+                  isProcessing={isProcessing}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Progress Bar */}
+            <AnimatePresence>
+              {isProcessing && (
+                <LiquidProgressBar
+                  progress={progress}
+                  currentFrame={progressDetails.current}
+                  totalFrames={progressDetails.total}
+                  statusText={progressDetails.status}
+                  onCancel={handleCancelExtraction}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Frames Gallery */}
+            {frames.length > 0 && (
+              <FrameGallery
+                frames={frames}
+                videoName={videoMetadata?.name || "extracted_video"}
+                onToggleSelect={handleToggleSelect}
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onInvertSelection={handleInvertSelection}
+                onPreviewFrame={setPreviewFrame}
+              />
+            )}
+          </div>
+
+          {/* Feature Highlights (when empty) */}
+          {!videoMetadata && (
+            <motion.section
+              id="features"
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.28, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+              className="framelet-feature-section"
+              aria-labelledby="features-heading"
+            >
+              <div className="framelet-section-intro framelet-features-intro">
+                <div>
+                  <span className="framelet-section-kicker">THOUGHTFULLY BUILT / 02</span>
+                  <h2 id="features-heading">Less friction. <span>More feeling.</span></h2>
+                </div>
+                <p>All the essentials for finding the right still — with no account, no upload queue, and no complicated workflow.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+                <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.22 }} className="framelet-feature-card">
+                  <div className="framelet-feature-icon"><Cpu className="w-5 h-5" aria-hidden="true" /></div>
+                  <span className="framelet-feature-number">01 — PRIVATE</span>
+                  <h3>Local by default.</h3>
+                  <p>Video content stays on your device. Frames are decoded locally using your browser’s supported video codecs.</p>
+                </motion.div>
+
+                <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.22 }} className="framelet-feature-card">
+                  <div className="framelet-feature-icon"><Layers className="w-5 h-5" aria-hidden="true" /></div>
+                  <span className="framelet-feature-number">02 — PRECISE</span>
+                  <h3>Keep the detail.</h3>
+                  <p>Retain the source video dimensions for every frame. Export as PNG, JPEG, or WebP where your browser supports it.</p>
+                </motion.div>
+
+                <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.22 }} className="framelet-feature-card">
+                  <div className="framelet-feature-icon"><ShieldCheck className="w-5 h-5" aria-hidden="true" /></div>
+                  <span className="framelet-feature-number">03 — YOUR PICK</span>
+                  <h3>Only what you need.</h3>
+                  <p>Select the stills you want and package them into a ZIP archive with a helpful metadata manifest.</p>
+                </motion.div>
+              </div>
+            </motion.section>
+          )}
         </div>
 
-        {/* Upload Zone */}
-        <VideoUploadZone
-          videoMetadata={videoMetadata}
-          onVideoSelected={handleVideoSelected}
+        <footer className="framelet-footer">
+          <a href="#home" className="framelet-footer-brand" aria-label="Framelet — back to top">FRAMELET<span>®</span></a>
+          <p>Find the frame you came for.</p>
+          <a href="#extractor" className="framelet-footer-link">BACK TO WORKSPACE <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /></a>
+        </footer>
+
+        {/* Floating Action Bar */}
+        <FloatingActionBar
+          frames={frames}
+          videoName={videoMetadata?.name || "extracted_frames"}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
           onError={(title, msg) => addToast("error", title, msg)}
-          isProcessing={isProcessing}
+          onSuccess={(title, msg) => addToast("success", title, msg)}
         />
 
-        {/* Controls Section (Appears after video loaded) */}
-        <AnimatePresence>
-          {videoMetadata && (
-            <ExtractionControls
-              metadata={videoMetadata}
-              settings={settings}
-              onSettingsChange={setSettings}
-              onStartExtraction={handleStartExtraction}
-              isProcessing={isProcessing}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Progress Bar */}
-        <AnimatePresence>
-          {isProcessing && (
-            <LiquidProgressBar
-              progress={progress}
-              currentFrame={progressDetails.current}
-              totalFrames={progressDetails.total}
-              statusText={progressDetails.status}
-              onCancel={handleCancelExtraction}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Frames Gallery */}
-        {frames.length > 0 && (
-          <FrameGallery
-            frames={frames}
-            videoName={videoMetadata?.name || "extracted_video"}
-            onToggleSelect={handleToggleSelect}
-            onSelectAll={handleSelectAll}
-            onDeselectAll={handleDeselectAll}
-            onInvertSelection={handleInvertSelection}
-            onPreviewFrame={setPreviewFrame}
-          />
-        )}
-
-        {/* Feature Highlights (when empty) */}
-        {!videoMetadata && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6"
-          >
-            <div className="p-6 rounded-3xl glass-panel border border-white/10 hover:border-white/20 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-4">
-                <Cpu className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white mb-2">Private, In-Browser Processing</h3>
-              <p className="text-xs text-white/60 leading-relaxed">
-                Video content stays on your device. Frames are decoded locally using your browser’s supported video codecs.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-3xl glass-panel border border-white/10 hover:border-white/20 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4">
-                <Layers className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white mb-2">Native Resolution</h3>
-              <p className="text-xs text-white/60 leading-relaxed">
-                Keep the source video dimensions for each frame. Export as PNG, JPEG, or WebP where supported by your browser.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-3xl glass-panel border border-white/10 hover:border-white/20 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white mb-2">Selective ZIP Export</h3>
-              <p className="text-xs text-white/60 leading-relaxed">
-                Multi-select desired frames and package them instantly into structured ZIP archives with metadata manifest.
-              </p>
-            </div>
-          </motion.div>
-        )}
+        {/* Frame Preview Modal */}
+        <FramePreviewModal
+          frame={previewFrame ? frames.find((frame) => frame.id === previewFrame.id) ?? null : null}
+          videoName={videoMetadata?.name || "frame"}
+          onClose={() => setPreviewFrame(null)}
+          onToggleSelect={handleToggleSelect}
+        />
       </div>
-
-      {/* Floating Action Bar */}
-      <FloatingActionBar
-        frames={frames}
-        videoName={videoMetadata?.name || "extracted_frames"}
-        onSelectAll={handleSelectAll}
-        onDeselectAll={handleDeselectAll}
-        onError={(title, msg) => addToast("error", title, msg)}
-        onSuccess={(title, msg) => addToast("success", title, msg)}
-      />
-
-      {/* Frame Preview Modal */}
-      <FramePreviewModal
-        frame={previewFrame ? frames.find((frame) => frame.id === previewFrame.id) ?? null : null}
-        videoName={videoMetadata?.name || "frame"}
-        onClose={() => setPreviewFrame(null)}
-        onToggleSelect={handleToggleSelect}
-      />
     </main>
   );
 }

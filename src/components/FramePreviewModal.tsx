@@ -27,7 +27,9 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
   const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const copyTimerRef = React.useRef<number | null>(null);
   const onCloseRef = React.useRef(onClose);
-  onCloseRef.current = onClose;
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   const isOpen = frame !== null;
   React.useEffect(() => {

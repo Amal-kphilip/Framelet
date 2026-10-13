@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="antialiased bg-[#08080a] text-foreground min-h-screen relative selection:bg-sky-500/30 selection:text-sky-200">
+      <body className="antialiased min-h-screen relative selection:bg-orange-500/30 selection:text-white">
         <AmbientBackground />
         {children}
       </body>

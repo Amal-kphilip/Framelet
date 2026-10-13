@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Download, CheckSquare, Square, RefreshCw, ZoomIn, Clock, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from "lucide-react";
@@ -59,8 +59,6 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
   const firstVisible = filteredFrames.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
   const lastVisible = Math.min(safePage * PAGE_SIZE, filteredFrames.length);
 
-  useEffect(() => { setCurrentPage(1); }, [filter, sort, query]);
-  useEffect(() => { if (currentPage > pageCount) setCurrentPage(pageCount); }, [currentPage, pageCount]);
 
   return (
     <section aria-labelledby="frame-gallery-heading" className="w-full space-y-5">
@@ -90,12 +88,12 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" aria-hidden="true" />
             <label htmlFor="frame-search" className="sr-only">Filter by frame number or timestamp</label>
-            <input id="frame-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find frame or timestamp" className="w-full min-h-10 rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-xs text-white placeholder:text-white/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400" />
+            <input id="frame-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setCurrentPage(1); }} placeholder="Find frame or timestamp" className="w-full min-h-10 rounded-xl border border-white/10 bg-black/20 pl-9 pr-3 text-xs text-white placeholder:text-white/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400" />
           </div>
           <div className="relative">
             <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" aria-hidden="true" />
             <label htmlFor="frame-filter" className="sr-only">Filter frame selection</label>
-            <select id="frame-filter" value={filter} onChange={(event) => setFilter(event.target.value as FilterMode)} className="w-full min-h-10 appearance-none rounded-xl border border-white/10 bg-[#17171d] pl-9 pr-3 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
+            <select id="frame-filter" value={filter} onChange={(event) => { setFilter(event.target.value as FilterMode); setCurrentPage(1); }} className="w-full min-h-10 appearance-none rounded-xl border border-white/10 bg-[#17171d] pl-9 pr-3 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
               <option value="all">All frames</option>
               <option value="selected">Selected only</option>
               <option value="unselected">Unselected only</option>
@@ -103,7 +101,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
           </div>
           <div>
             <label htmlFor="frame-sort" className="sr-only">Sort frames</label>
-            <select id="frame-sort" value={sort} onChange={(event) => setSort(event.target.value as SortMode)} className="w-full min-h-10 rounded-xl border border-white/10 bg-[#17171d] px-3 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
+            <select id="frame-sort" value={sort} onChange={(event) => { setSort(event.target.value as SortMode); setCurrentPage(1); }} className="w-full min-h-10 rounded-xl border border-white/10 bg-[#17171d] px-3 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">
               <option value="time-asc">Oldest timestamp first</option>
               <option value="time-desc">Newest timestamp first</option>
               <option value="size-desc">Largest file first</option>
@@ -168,14 +166,14 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
           <Search className="w-8 h-8 text-white/35 mx-auto mb-3" aria-hidden="true" />
           <p className="text-sm font-semibold text-white/75">No matching frames</p>
           <p className="text-xs text-white/45 mt-1">Change the timestamp search or selection filter to see results.</p>
-          <button type="button" onClick={() => { setQuery(""); setFilter("all"); }} className="mt-4 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs text-white/80 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">Clear filters</button>
+          <button type="button" onClick={() => { setQuery(""); setFilter("all"); setCurrentPage(1); }} className="mt-4 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-xs text-white/80 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">Clear filters</button>
         </div>
       )}
 
       {pageCount > 1 && <nav aria-label="Frame gallery pages" className="flex items-center justify-center gap-3 pt-1">
-        <button type="button" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={safePage === 1} className="min-h-10 inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-xs text-white/80 hover:bg-white/10 disabled:opacity-35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"><ChevronLeft className="w-4 h-4" aria-hidden="true" />Previous</button>
+        <button type="button" onClick={() => setCurrentPage(Math.max(1, safePage - 1))} disabled={safePage === 1} className="min-h-10 inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-xs text-white/80 hover:bg-white/10 disabled:opacity-35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"><ChevronLeft className="w-4 h-4" aria-hidden="true" />Previous</button>
         <span aria-live="polite" className="text-xs text-white/60">Page {safePage} of {pageCount}</span>
-        <button type="button" onClick={() => setCurrentPage((page) => Math.min(pageCount, page + 1))} disabled={safePage === pageCount} className="min-h-10 inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-xs text-white/80 hover:bg-white/10 disabled:opacity-35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">Next<ChevronRight className="w-4 h-4" aria-hidden="true" /></button>
+        <button type="button" onClick={() => setCurrentPage(Math.min(pageCount, safePage + 1))} disabled={safePage === pageCount} className="min-h-10 inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-xs text-white/80 hover:bg-white/10 disabled:opacity-35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">Next<ChevronRight className="w-4 h-4" aria-hidden="true" /></button>
       </nav>}
     </section>
   );

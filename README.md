@@ -1,6 +1,6 @@
 # Framelet — Video Frame Extractor
 
-Framelet is a Next.js, React, and TypeScript web application for extracting still frames from short videos in the browser. It keeps the existing dark liquid-glass design while focusing on reliable extraction, accurate file naming, bounded gallery rendering, and accessible controls.
+Framelet is a Next.js, React, and TypeScript web application for extracting still frames from short videos in the browser. It uses a full-bleed editorial layout with a cinematic orange-red hero, a matte-black workspace, and warm accent details while focusing on reliable extraction, accurate file naming, bounded gallery rendering, and accessible controls.
 
 ## Features
 
@@ -64,7 +64,7 @@ Output-size estimates are approximate and can differ materially with image conte
 
 ## Tech stack
 
-- Next.js 14 App Router and React 18
+- Next.js 16 App Router and React 19
 - TypeScript and Tailwind CSS
 - Framer Motion and Lucide React
 - Browser Canvas / HTML video decoding
