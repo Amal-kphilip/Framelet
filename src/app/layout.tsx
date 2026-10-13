@@ -3,8 +3,24 @@ import "./globals.css";
 import { AmbientBackground } from "@/components/AmbientBackground";
 
 export const metadata: Metadata = {
-  title: "Framelet | Frame Extractor",
-  description: "High-performance client-side video frame extraction with Apple liquid glass aesthetics and zero upload wait times.",
+  title: "Framelet | Video Frame Extractor",
+  applicationName: "Framelet",
+  description: "Extract still frames from short videos in your browser. Choose capture intervals, select frames, and export JPEG, PNG, WebP, or ZIP files locally.",
+  openGraph: {
+    title: "Framelet | Video Frame Extractor",
+    description: "Extract and export video frames locally in your browser with precise capture controls and a searchable gallery.",
+    siteName: "Framelet",
+    type: "website",
+    images: [{ url: "/icon.png", width: 512, height: 512, alt: "Framelet app icon" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "Framelet | Video Frame Extractor",
+    description: "Extract and export video frames locally in your browser.",
+    images: ["/icon.png"],
+  },
+  robots: { index: true, follow: true },
+  formatDetection: { telephone: false },
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",

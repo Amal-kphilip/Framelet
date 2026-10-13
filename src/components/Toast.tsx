@@ -27,11 +27,11 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void
   onDismiss,
 }) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       onDismiss(toast.id);
-    }, 3200);
+    }, toast.type === "error" ? 6000 : 4200);
     return () => clearTimeout(timer);
-  }, [toast.id, onDismiss]);
+  }, [toast.id, toast.type, onDismiss]);
 
   const icons = {
     error: <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />,
@@ -54,8 +54,9 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.9 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      onClick={() => onDismiss(toast.id)}
-      className={`pointer-events-auto cursor-pointer w-full p-3 sm:p-4 rounded-2xl backdrop-blur-2xl border shadow-2xl flex items-start gap-3 relative overflow-hidden active:scale-98 transition-transform ${borders[toast.type]}`}
+      role={toast.type === "error" ? "alert" : "status"}
+      aria-live={toast.type === "error" ? "assertive" : "polite"}
+      className={`pointer-events-auto w-full p-3 sm:p-4 rounded-2xl backdrop-blur-2xl border shadow-2xl flex items-start gap-3 relative overflow-hidden ${borders[toast.type]}`}
     >
       {icons[toast.type]}
       <div className="flex-1 pr-1 min-w-0">
@@ -63,11 +64,10 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void
         <p className="text-xs text-white/80 leading-relaxed break-words">{toast.message}</p>
       </div>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDismiss(toast.id);
-        }}
-        className="p-1 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+        type="button"
+        onClick={() => onDismiss(toast.id)}
+        aria-label={`Dismiss notification: ${toast.title}`}
+        className="min-w-8 min-h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
       >
         <X className="w-4 h-4" />
       </button>

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "node ./node_modules/eslint/bin/eslint.js .",
+    "typecheck": "node ./node_modules/typescript/bin/tsc --noEmit",
+    "check": "npm run test && npm run typecheck && npm run lint",
+    "test": "node --test scripts/test-video-utils.cjs"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.10",

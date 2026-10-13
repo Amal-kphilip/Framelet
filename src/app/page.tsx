@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/Header";
 import { VideoUploadZone } from "@/components/VideoUploadZone";
@@ -11,8 +11,8 @@ import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { FramePreviewModal } from "@/components/FramePreviewModal";
 import { ToastContainer } from "@/components/Toast";
 import { ExtractedFrame, ExtractionSettings, ToastMessage, VideoMetadata } from "@/types";
-import { extractFramesViaCanvas, extractFramesViaFFmpeg } from "@/lib/ffmpeg";
-import { Sparkles, Layers, ShieldCheck, Film, Cpu, Zap } from "lucide-react";
+import { extractFramesViaCanvas } from "@/lib/canvasExtractor";
+import { Sparkles, Layers, ShieldCheck, Cpu } from "lucide-react";
 
 export default function Home() {
   const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
@@ -30,6 +30,25 @@ export default function Home() {
   const [frames, setFrames] = useState<ExtractedFrame[]>([]);
   const [previewFrame, setPreviewFrame] = useState<ExtractedFrame | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const extractionControllerRef = useRef<AbortController | null>(null);
+  const extractionRunIdRef = useRef(0);
+  const videoUrlRef = useRef<string | null>(null);
+  const frameUrlsRef = useRef<Set<string>>(new Set());
+
+  const releaseFrameUrls = useCallback(() => {
+    frameUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    frameUrlsRef.current.clear();
+  }, []);
+
+  useEffect(() => () => {
+    extractionRunIdRef.current += 1;
+    extractionControllerRef.current?.abort();
+    extractionControllerRef.current = null;
+    if (videoUrlRef.current) URL.revokeObjectURL(videoUrlRef.current);
+    videoUrlRef.current = null;
+    frameUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    frameUrlsRef.current.clear();
+  }, []);
 
   // Add a toast notification
   const addToast = useCallback((type: ToastMessage["type"], title: string, message: string) => {
@@ -41,68 +60,105 @@ export default function Home() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // Handle Video Selection
+  // Replace the active session and release assets owned by the previous session.
   const handleVideoSelected = useCallback((metadata: VideoMetadata) => {
+    extractionRunIdRef.current += 1;
+    extractionControllerRef.current?.abort();
+    extractionControllerRef.current = null;
+    if (videoUrlRef.current && videoUrlRef.current !== metadata.url) {
+      URL.revokeObjectURL(videoUrlRef.current);
+    }
+    releaseFrameUrls();
+    videoUrlRef.current = metadata.url;
     setVideoMetadata(metadata);
     setFrames([]);
+    setPreviewFrame(null);
+    setIsProcessing(false);
     setProgress(0);
+    setProgressDetails({ current: 0, total: 0, status: "" });
     addToast(
       "success",
-      "Video Loaded Successfully",
-      `Loaded "${metadata.name}" (${metadata.formattedDuration}, ${metadata.width}x${metadata.height})`
+      "Video Loaded",
+      `Loaded "${metadata.name}" (${metadata.formattedDuration}, ${metadata.width}×${metadata.height}).`
     );
-  }, [addToast]);
+  }, [addToast, releaseFrameUrls]);
 
-  // Handle Full Reset
   const handleReset = useCallback(() => {
-    if (videoMetadata?.url) {
-      URL.revokeObjectURL(videoMetadata.url);
-    }
-    // Revoke frame data URLs
-    frames.forEach((f) => URL.revokeObjectURL(f.dataUrl));
+    extractionRunIdRef.current += 1;
+    extractionControllerRef.current?.abort();
+    extractionControllerRef.current = null;
+    if (videoUrlRef.current) URL.revokeObjectURL(videoUrlRef.current);
+    videoUrlRef.current = null;
+    releaseFrameUrls();
     setVideoMetadata(null);
     setFrames([]);
     setIsProcessing(false);
     setProgress(0);
+    setProgressDetails({ current: 0, total: 0, status: "" });
     setPreviewFrame(null);
-  }, [videoMetadata, frames]);
+  }, [releaseFrameUrls]);
 
-  // Start Frame Extraction
-  const handleStartExtraction = async () => {
-    if (!videoMetadata) return;
+  const handleCancelExtraction = useCallback(() => {
+    if (extractionControllerRef.current && !extractionControllerRef.current.signal.aborted) {
+      setProgressDetails((current) => ({ ...current, status: "Cancelling extraction…" }));
+      extractionControllerRef.current.abort();
+    }
+  }, []);
 
+  // Start Frame Extraction with cancellation and stale-result protection.
+  const handleStartExtraction = useCallback(async () => {
+    if (!videoMetadata || isProcessing) return;
+    const controller = new AbortController();
+    const runId = ++extractionRunIdRef.current;
+    extractionControllerRef.current = controller;
     setIsProcessing(true);
     setProgress(0);
-    setProgressDetails({ current: 0, total: 0, status: "Starting client-side frame engine..." });
+    setProgressDetails({ current: 0, total: 0, status: "Preparing browser video decoder…" });
 
     try {
-      // Use client-side extraction with fallback
       const extractedFrames = await extractFramesViaCanvas(
         videoMetadata,
         settings,
         (p, current, total) => {
+          if (runId !== extractionRunIdRef.current || controller.signal.aborted) return;
           setProgress(p);
           setProgressDetails({
             current,
             total,
-            status: p < 100 ? "Extracting high-resolution frames..." : "Finalizing frame collection...",
+            status: p < 100 ? "Extracting frames locally…" : "Finalizing image files…",
           });
-        }
+        },
+        controller.signal
       );
 
+      if (runId !== extractionRunIdRef.current || controller.signal.aborted) {
+        extractedFrames.forEach((frame) => URL.revokeObjectURL(frame.dataUrl));
+        return;
+      }
+      releaseFrameUrls();
+      frameUrlsRef.current = new Set(extractedFrames.map((frame) => frame.dataUrl));
       setFrames(extractedFrames);
+      setPreviewFrame(null);
       addToast(
         "success",
-        "Extraction Complete!",
-        `Captured ${extractedFrames.length} pristine frames at ${videoMetadata.width}x${videoMetadata.height} resolution.`
+        "Extraction Complete",
+        `Captured ${extractedFrames.length} frames at ${videoMetadata.width}×${videoMetadata.height}.`
       );
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "An error occurred during frame extraction.";
-      addToast("error", "Extraction Failed", msg);
+      if (runId !== extractionRunIdRef.current) return;
+      const error = err instanceof Error ? err : new Error("An unexpected error occurred during frame extraction.");
+      if (controller.signal.aborted || error.name === "AbortError") {
+        addToast("info", "Extraction Cancelled", "The current extraction was stopped. Your previous frames, if any, are unchanged.");
+      } else {
+        addToast("error", "Extraction Failed", error.message);
+      }
     } finally {
-      setIsProcessing(false);
+      if (runId === extractionRunIdRef.current) {
+        extractionControllerRef.current = null;
+        setIsProcessing(false);
+      }
     }
-  };
+  }, [addToast, isProcessing, releaseFrameUrls, settings, videoMetadata]);
 
   // Frame Selection Handlers
   const handleToggleSelect = (id: string) => {
@@ -128,9 +184,9 @@ export default function Home() {
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       <Header onReset={handleReset} hasVideo={!!videoMetadata} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 w-full space-y-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-9 w-full space-y-8">
         {/* Hero Section */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
+        <div className={`text-center max-w-3xl mx-auto ${videoMetadata ? "space-y-2" : "space-y-4"}`} aria-live="polite">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -144,12 +200,12 @@ export default function Home() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-tight"
+            className={`${videoMetadata ? "text-2xl sm:text-3xl" : "text-4xl sm:text-5xl md:text-6xl"} font-extrabold tracking-tight text-white leading-tight`}
           >
-            Extract Frames with{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400">
-              Zero-Lag Precision
-            </span>
+            {videoMetadata ? "Video Ready for Extraction" : "Extract Frames with"}{" "}
+            {!videoMetadata && <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400">
+              Precision and Control
+            </span>}
           </motion.h1>
 
           <motion.p
@@ -158,7 +214,7 @@ export default function Home() {
             transition={{ delay: 0.2 }}
             className="text-base sm:text-lg text-white/60 leading-relaxed max-w-2xl mx-auto"
           >
-            Process clips up to 90 seconds directly in your browser. Original resolution, hardware-accelerated, zero server uploads.
+            Process clips up to 90 seconds in your browser. Video files are not uploaded; codec support depends on your browser.
           </motion.p>
         </div>
 
@@ -167,7 +223,6 @@ export default function Home() {
           videoMetadata={videoMetadata}
           onVideoSelected={handleVideoSelected}
           onError={(title, msg) => addToast("error", title, msg)}
-          onClear={handleReset}
           isProcessing={isProcessing}
         />
 
@@ -192,6 +247,7 @@ export default function Home() {
               currentFrame={progressDetails.current}
               totalFrames={progressDetails.total}
               statusText={progressDetails.status}
+              onCancel={handleCancelExtraction}
             />
           )}
         </AnimatePresence>
@@ -221,9 +277,9 @@ export default function Home() {
               <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-4">
                 <Cpu className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-white mb-2">100% Client-Side Engine</h3>
+              <h3 className="text-base font-bold text-white mb-2">Private, In-Browser Processing</h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                Videos never leave your machine. Hardware acceleration decodes video frames locally with zero network latency.
+                Video content stays on your device. Frames are decoded locally using your browser’s supported video codecs.
               </p>
             </div>
 
@@ -233,7 +289,7 @@ export default function Home() {
               </div>
               <h3 className="text-base font-bold text-white mb-2">Native Resolution</h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                Preserve exact pixels whether 1080p, 4K, or 8K. Choose between lossless PNG, WebP, or crisp JPEG exports.
+                Keep the source video dimensions for each frame. Export as PNG, JPEG, or WebP where supported by your browser.
               </p>
             </div>
 
@@ -241,7 +297,7 @@ export default function Home() {
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-white mb-2">Instant ZIP Bundling</h3>
+              <h3 className="text-base font-bold text-white mb-2">Selective ZIP Export</h3>
               <p className="text-xs text-white/60 leading-relaxed">
                 Multi-select desired frames and package them instantly into structured ZIP archives with metadata manifest.
               </p>
@@ -262,7 +318,7 @@ export default function Home() {
 
       {/* Frame Preview Modal */}
       <FramePreviewModal
-        frame={previewFrame}
+        frame={previewFrame ? frames.find((frame) => frame.id === previewFrame.id) ?? null : null}
         videoName={videoMetadata?.name || "frame"}
         onClose={() => setPreviewFrame(null)}
         onToggleSelect={handleToggleSelect}

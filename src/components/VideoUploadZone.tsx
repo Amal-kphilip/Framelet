@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
-import { UploadCloud, Film, Play, Pause, AlertCircle, Clock, Maximize2, FileVideo, CheckCircle2 } from "lucide-react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { UploadCloud, Play, Pause, Clock, FileVideo, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VideoMetadata } from "@/types";
-import { formatBytes, formatDurationSimple, loadVideoMetadata, MAX_ALLOWED_DURATION_SECONDS } from "@/lib/videoUtils";
+import { formatBytes, loadVideoMetadata, MAX_ALLOWED_DURATION_SECONDS } from "@/lib/videoUtils";
 
 interface VideoUploadZoneProps {
   videoMetadata: VideoMetadata | null;
   onVideoSelected: (metadata: VideoMetadata) => void;
   onError: (title: string, message: string) => void;
-  onClear: () => void;
   isProcessing: boolean;
 }
 
@@ -18,7 +17,6 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   videoMetadata,
   onVideoSelected,
   onError,
-  onClear,
   isProcessing,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -26,17 +24,26 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fileRequestIdRef = useRef(0);
+
+  useEffect(() => () => { fileRequestIdRef.current += 1; }, []);
 
   const processFile = useCallback(async (file: File) => {
+    const requestId = ++fileRequestIdRef.current;
     setIsLoadingFile(true);
     try {
       const metadata = await loadVideoMetadata(file);
+      if (requestId !== fileRequestIdRef.current) {
+        URL.revokeObjectURL(metadata.url);
+        return;
+      }
       onVideoSelected(metadata);
     } catch (err: unknown) {
+      if (requestId !== fileRequestIdRef.current) return;
       const errorMessage = err instanceof Error ? err.message : "Failed to process video";
       onError("Video Validation Error", errorMessage);
     } finally {
-      setIsLoadingFile(false);
+      if (requestId === fileRequestIdRef.current) setIsLoadingFile(false);
     }
   }, [onError, onVideoSelected]);
 
@@ -59,7 +66,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      processFile(file);
+      if (!isProcessing) processFile(file);
     }
   };
 
@@ -68,16 +75,22 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
       const file = e.target.files[0];
       processFile(file);
     }
+    // Clearing the input allows the same file to be selected again.
+    e.currentTarget.value = "";
   };
 
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
+  const togglePlay = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      try {
+        await video.play();
+      } catch {
+        setIsPlaying(false);
+        onError("Playback Unavailable", "Your browser could not start playback for this video. You may still be able to extract frames if its decoder is available.");
+      }
     } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
+      video.pause();
     }
   };
 
@@ -86,8 +99,9 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
       <input
         ref={fileInputRef}
         type="file"
-        accept="video/mp4,video/webm,video/quicktime,video/x-matroska,.mp4,.webm,.mov,.mkv"
+        accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.webm,.mov,.mkv,.avi"
         onChange={handleFileInput}
+        disabled={isProcessing}
         className="hidden"
       />
 
@@ -102,8 +116,10 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className={`relative group cursor-pointer rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 glass-panel border overflow-hidden ${
+            onClick={() => { if (!isLoadingFile && !isProcessing) fileInputRef.current?.click(); }}
+            role="group"
+            aria-label="Video upload area"
+            className={`relative group cursor-pointer rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 glass-panel border overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400 ${
               isDragging
                 ? "border-sky-400 bg-sky-500/[0.08] shadow-[0_0_40px_rgba(56,189,248,0.25)] scale-[1.01]"
                 : "border-white/10 hover:border-white/25 hover:bg-white/[0.06] shadow-glass"
@@ -127,12 +143,13 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                 {isLoadingFile ? "Analyzing video file..." : "Drop your video here"}
               </h3>
               <p className="text-sm text-white/60 mb-6 leading-relaxed">
-                Supports <span className="text-white/90 font-medium">MP4</span>, <span className="text-white/90 font-medium">WebM</span>, or <span className="text-white/90 font-medium">MOV</span> up to <span className="text-sky-400 font-semibold">{MAX_ALLOWED_DURATION_SECONDS} seconds</span>. Everything processed 100% locally in your browser.
+                Supports <span className="text-white/90 font-medium">MP4</span>, <span className="text-white/90 font-medium">WebM</span>, <span className="text-white/90 font-medium">MOV</span>, <span className="text-white/90 font-medium">MKV</span>, or <span className="text-white/90 font-medium">AVI</span> up to <span className="text-sky-400 font-semibold">{MAX_ALLOWED_DURATION_SECONDS} seconds</span>. Video decoding and frame encoding run locally. Browser codec support varies.
               </p>
 
               {/* Browse Button */}
               <button
                 type="button"
+                onClick={(event) => { event.stopPropagation(); if (!isLoadingFile && !isProcessing) fileInputRef.current?.click(); }}
                 className="px-6 py-3 rounded-full text-sm font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 shadow-glass transition-all duration-200 flex items-center gap-2 group-hover:scale-105 active:scale-95"
               >
                 <FileVideo className="w-4 h-4 text-sky-400" />
@@ -176,11 +193,13 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                 />
 
                 {/* Custom Glass Player Overlay */}
-                <div 
+                <button
+                  type="button"
                   onClick={togglePlay}
-                  className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center cursor-pointer"
+                  aria-label={isPlaying ? "Pause video preview" : "Play video preview"}
+                  className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-sky-400"
                 >
-                  <motion.button
+                  <motion.span
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl group-hover:bg-white/30 transition-all"
@@ -190,8 +209,8 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                     ) : (
                       <Play className="w-6 h-6 fill-white text-white ml-1" />
                     )}
-                  </motion.button>
-                </div>
+                  </motion.span>
+                </button>
 
                 {/* Video Duration Badge */}
                 <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-xs font-mono text-white/90 border border-white/10 flex items-center gap-1.5">
@@ -204,7 +223,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
               <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-4">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">
+        <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">
                       Active Video Source
                     </span>
                     {!isProcessing && (
@@ -256,7 +275,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                 <div className="p-3 rounded-2xl bg-sky-500/[0.08] border border-sky-500/20 text-xs text-sky-200/90 flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-sky-400 mt-0.5 shrink-0" />
                   <span>
-                    Validation passed. Ready to extract frames at native {videoMetadata.width}x{videoMetadata.height} resolution.
+                    Metadata loaded. Frame decoding and format support may vary by browser and codec. Output size remains {videoMetadata.width}×{videoMetadata.height}.
                   </span>
                 </div>
               </div>

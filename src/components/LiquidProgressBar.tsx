@@ -2,13 +2,14 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Cpu, Clock } from "lucide-react";
+import { Sparkles, Cpu, Clock, X } from "lucide-react";
 
 interface LiquidProgressBarProps {
   progress: number; // 0 to 100
   currentFrame?: number;
   totalFrames?: number;
   statusText?: string;
+  onCancel?: () => void;
 }
 
 export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
@@ -16,6 +17,7 @@ export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
   currentFrame = 0,
   totalFrames = 0,
   statusText = "Extracting video frames...",
+  onCancel,
 }) => {
   const roundedProgress = Math.min(100, Math.max(0, Math.round(progress)));
 
@@ -50,11 +52,22 @@ export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
             </div>
           </div>
 
-          {/* Big Percentage Display */}
-          <div className="text-right">
+          {/* Progress and cancellation controls */}
+          <div className="flex items-center gap-3 self-start sm:self-auto">
             <span className="text-3xl font-extrabold font-mono tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400">
               {roundedProgress}%
             </span>
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+                aria-label="Cancel frame extraction"
+              >
+                <X className="h-3.5 w-3.5" />
+                Cancel
+              </button>
+            )}
           </div>
         </div>
 
@@ -78,9 +91,9 @@ export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
         {/* Progress Hint */}
         <div className="flex items-center justify-between text-xs text-white/40 pt-1">
           <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-sky-400/70" /> Client-side high speed capture
+            <Clock className="w-3 h-3 text-sky-400/70" /> Local browser processing
           </span>
-          <span>Zero network latency</span>
+          <span>No video upload</span>
         </div>
       </div>
     </motion.div>

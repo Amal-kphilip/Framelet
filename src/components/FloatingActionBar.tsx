@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Archive, Download, Check, Sparkles, Loader2, CheckCheck, X } from "lucide-react";
+import { Archive, Loader2, CheckCheck, X } from "lucide-react";
 import confetti from "canvas-confetti";
 import { ExtractedFrame } from "@/types";
 import { exportFramesToZip, ZipExportProgress } from "@/lib/zipExporter";
+import { formatBytes } from "@/lib/videoUtils";
 
 interface FloatingActionBarProps {
   frames: ExtractedFrame[];
@@ -29,6 +30,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
 
   const selectedFrames = frames.filter((f) => f.selected);
   const selectedCount = selectedFrames.length;
+  const selectedBytes = selectedFrames.reduce((total, frame) => total + frame.sizeBytes, 0);
 
   const handleDownloadZip = async () => {
     if (selectedCount === 0) return;
@@ -44,7 +46,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
     try {
       await exportFramesToZip(selectedFrames, videoName, (progress) => {
         setExportProgress(progress);
-      });
+      }, frames.length);
 
       // Trigger Apple-inspired confetti celebration
       confetti({
@@ -88,7 +90,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
                   {selectedCount} {selectedCount === 1 ? "Frame" : "Frames"} Selected
                 </span>
                 <span className="text-[10px] text-white/50 leading-none">
-                  Ready to download
+                  {formatBytes(selectedBytes)} image data
                 </span>
               </div>
             </div>

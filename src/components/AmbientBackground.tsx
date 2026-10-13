@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import { useReducedMotion } from "framer-motion";
 import { motion } from "framer-motion";
 
 export const AmbientBackground: React.FC = () => {
+  const reduceMotion = useReducedMotion();
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-[#08080a]">
       {/* Background Gradient Mesh */}
@@ -25,12 +27,12 @@ export const AmbientBackground: React.FC = () => {
           background: "radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(99, 102, 241, 0.12) 50%, transparent 75%)",
           filter: "blur(90px)",
         }}
-        animate={{
+        animate={reduceMotion ? { x: 0, y: 0, scale: 1 } : {
           x: [0, 80, -40, 0],
           y: [0, -50, 60, 0],
           scale: [1, 1.15, 0.95, 1],
         }}
-        transition={{
+        transition={reduceMotion ? { duration: 0 } : {
           duration: 18,
           repeat: Infinity,
           ease: "easeInOut",
@@ -44,12 +46,12 @@ export const AmbientBackground: React.FC = () => {
           background: "radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.12) 45%, transparent 75%)",
           filter: "blur(100px)",
         }}
-        animate={{
+        animate={reduceMotion ? { x: 0, y: 0, scale: 1 } : {
           x: [0, -90, 50, 0],
           y: [0, 70, -60, 0],
           scale: [1, 0.9, 1.18, 1],
         }}
-        transition={{
+        transition={reduceMotion ? { duration: 0 } : {
           duration: 22,
           repeat: Infinity,
           ease: "easeInOut",
@@ -64,12 +66,12 @@ export const AmbientBackground: React.FC = () => {
           background: "radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, rgba(59, 130, 246, 0.1) 50%, transparent 75%)",
           filter: "blur(95px)",
         }}
-        animate={{
+        animate={reduceMotion ? { x: 0, y: 0, scale: 1 } : {
           x: [0, -60, 70, 0],
           y: [0, -80, 40, 0],
           scale: [1, 1.1, 0.9, 1],
         }}
-        transition={{
+        transition={reduceMotion ? { duration: 0 } : {
           duration: 25,
           repeat: Infinity,
           ease: "easeInOut",
