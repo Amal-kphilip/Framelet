@@ -19,9 +19,9 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
     <header className="relative z-40 w-full">
       <nav
         aria-label="Main navigation"
-        className="min-h-20 sm:h-32 py-3 sm:py-0 flex flex-row gap-2 sm:gap-[var(--space-lg)] justify-between items-center w-full"
+        className="min-h-20 sm:h-32 py-3 sm:py-0 flex flex-row gap-3 sm:gap-[var(--space-lg)] justify-between items-center w-full"
       >
-        <div className="flex items-center min-w-0">
+        <div className="flex items-center shrink-0">
           {onReset ? (
             <button
               type="button"
@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
                   filter: "invert(1) sepia(1) saturate(10000%) hue-rotate(340deg)",
                 }}
               />
-              <Typography as="span" variant="h1" className="leading-none">
+              <Typography as="span" variant="h1" className="leading-none whitespace-nowrap">
                 Framelet
               </Typography>
             </button>
@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
                   filter: "invert(1) sepia(1) saturate(10000%) hue-rotate(340deg)",
                 }}
               />
-              <Typography as="span" variant="h1" className="leading-none">
+              <Typography as="span" variant="h1" className="leading-none whitespace-nowrap">
                 Framelet
               </Typography>
             </Link>
@@ -73,9 +73,9 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
             <button
               type="button"
               onClick={onReset}
-              className="type-fluid type-button inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-2.5 sm:px-4 rounded-corner border-2 border-foreground bg-background text-foreground hover:bg-muted transition-colors whitespace-nowrap shrink-0"
+              className="hidden sm:inline-flex type-fluid type-button items-center justify-center gap-1.5 h-10 px-4 rounded-corner border-2 border-foreground bg-background text-foreground hover:bg-muted transition-colors whitespace-nowrap shrink-0"
             >
-              <RotateCcw className="size-3.5 sm:size-4 shrink-0" />
+              <RotateCcw className="size-4 shrink-0" />
               <span>New video</span>
             </button>
           )}
