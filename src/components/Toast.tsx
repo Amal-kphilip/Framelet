@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, CheckCircle2, Info, AlertTriangle, X } from "lucide-react";
+import { X } from "lucide-react";
 import { ToastMessage } from "@/types";
+import Typography from "./Typography";
 
 interface ToastProps {
   toasts: ToastMessage[];
@@ -11,13 +11,13 @@ interface ToastProps {
 }
 
 export const ToastContainer: React.FC<ToastProps> = ({ toasts, onDismiss }) => {
+  if (toasts.length === 0) return null;
+
   return (
-    <div className="fixed top-20 inset-x-3 sm:inset-x-auto sm:right-6 z-50 flex flex-col gap-2.5 max-w-full sm:max-w-sm pointer-events-none">
-      <AnimatePresence>
-        {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
-        ))}
-      </AnimatePresence>
+    <div className="fixed bottom-4 inset-x-3 sm:inset-x-auto sm:right-6 z-50 flex flex-col gap-2 max-w-full sm:max-w-sm pointer-events-none">
+      {toasts.map((toast) => (
+        <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
+      ))}
     </div>
   );
 };
@@ -27,50 +27,48 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void
   onDismiss,
 }) => {
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      onDismiss(toast.id);
-    }, toast.type === "error" ? 6000 : 4200);
+    const timer = window.setTimeout(
+      () => {
+        onDismiss(toast.id);
+      },
+      toast.type === "error" ? 5000 : 3200
+    );
     return () => clearTimeout(timer);
   }, [toast.id, toast.type, onDismiss]);
 
-  const icons = {
-    error: <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />,
-    success: <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />,
-    warning: <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />,
-    info: <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />,
-  };
-
-  const borders = {
-    error: "border-rose-500/30 bg-rose-950/80 text-rose-100",
-    success: "border-emerald-500/30 bg-emerald-950/80 text-emerald-100",
-    warning: "border-amber-500/30 bg-amber-950/80 text-amber-100",
-    info: "border-sky-500/30 bg-sky-950/80 text-sky-100",
+  const bgColors: Record<ToastMessage["type"], string> = {
+    error: "bg-[var(--toast-error)]",
+    success: "bg-[var(--toast-success)]",
+    warning: "bg-[var(--toast-warning)]",
+    info: "bg-[var(--toast-info)]",
   };
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: -20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.9 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+    <div
       role={toast.type === "error" ? "alert" : "status"}
       aria-live={toast.type === "error" ? "assertive" : "polite"}
-      className={`pointer-events-auto w-full p-3 sm:p-4 rounded-2xl backdrop-blur-2xl border shadow-2xl flex items-start gap-3 relative overflow-hidden ${borders[toast.type]}`}
+      onClick={() => onDismiss(toast.id)}
+      className={`pointer-events-auto select-none cursor-pointer w-full border-2 border-[var(--toast-border)] text-[var(--toast-text)] rounded-corner px-[var(--space-lg)] py-[var(--space-md)] flex items-start justify-between gap-3 ${bgColors[toast.type]}`}
     >
-      {icons[toast.type]}
-      <div className="flex-1 pr-1 min-w-0">
-        <h5 className="text-sm font-semibold tracking-tight text-white mb-0.5 truncate">{toast.title}</h5>
-        <p className="text-xs text-white/80 leading-relaxed break-words">{toast.message}</p>
+      <div className="flex-1 min-w-0">
+        <Typography as="h5" variant="bodySm" weight={600} className="text-[var(--toast-text)] leading-tight">
+          {toast.title}
+        </Typography>
+        <Typography as="p" variant="legal" className="text-[var(--toast-text)] opacity-90 mt-0.5 leading-snug break-words">
+          {toast.message}
+        </Typography>
       </div>
       <button
         type="button"
-        onClick={() => onDismiss(toast.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDismiss(toast.id);
+        }}
         aria-label={`Dismiss notification: ${toast.title}`}
-        className="min-w-8 min-h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+        className="shrink-0 size-6 inline-flex items-center justify-center rounded-corner border-2 border-[var(--toast-border)] bg-transparent text-[var(--toast-text)] hover:opacity-70 transition-opacity"
       >
-        <X className="w-4 h-4" />
+        <X className="size-3.5" />
       </button>
-    </motion.div>
+    </div>
   );
 };

@@ -1,21 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Sliders,
-  Sparkles,
-  Layers,
-  Image as ImageIcon,
-  Gauge,
-  AlertTriangle,
-  Clock3,
-  Check,
-  Film,
-  ScanLine,
-  ShieldCheck,
-  ArrowRight,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { ExtractionSettings, VideoMetadata } from "@/types";
 import {
   buildFrameTimestamps,
@@ -24,6 +10,7 @@ import {
   MAX_ESTIMATED_OUTPUT_BYTES,
   MAX_EXTRACTED_FRAMES,
 } from "@/lib/videoUtils";
+import Typography from "./Typography";
 
 interface ExtractionControlsProps {
   metadata: VideoMetadata;
@@ -34,11 +21,11 @@ interface ExtractionControlsProps {
 }
 
 const presets = [
-  { label: "Dense", detail: "0.2 sec", interval: 0.2, fps: 5, note: "More detail" },
-  { label: "Detail", detail: "0.5 sec", interval: 0.5, fps: 2, note: "Close review" },
-  { label: "Standard", detail: "1 sec", interval: 1, fps: 1, note: "Balanced", recommended: true },
-  { label: "Sparse", detail: "2 sec", interval: 2, fps: 0.5, note: "Quick scan" },
-  { label: "Milestones", detail: "5 sec", interval: 5, fps: 0.2, note: "Highlights" },
+  { label: "Dense", detail: "0.2s", interval: 0.2, fps: 5 },
+  { label: "Detail", detail: "0.5s", interval: 0.5, fps: 2 },
+  { label: "Standard", detail: "1.0s", interval: 1, fps: 1 },
+  { label: "Sparse", detail: "2.0s", interval: 2, fps: 0.5 },
+  { label: "Milestones", detail: "5.0s", interval: 5, fps: 0.2 },
 ];
 
 export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
@@ -56,9 +43,6 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
   const blockedBySafetyLimit = overLimit || overOutputBudget;
   const sliderValue = settings.mode === "fps" ? settings.fps : settings.interval;
   const sliderMax = settings.mode === "fps" ? 10 : 5;
-  const sliderProgress = Math.max(0, Math.min(100, ((sliderValue - 0.1) / (sliderMax - 0.1)) * 100));
-  const qualityProgress = Math.max(0, Math.min(100, ((settings.quality - 0.5) / 0.5) * 100));
-  const qualityLabel = settings.quality >= 0.9 ? "Fine detail" : settings.quality >= 0.75 ? "Balanced" : "Smaller files";
 
   const setMode = (mode: "interval" | "fps") => {
     if (isProcessing) return;
@@ -77,219 +61,229 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
   };
 
   return (
-    <motion.section
+    <section
       aria-labelledby="extraction-controls-heading"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.42, ease: [0.2, 0.7, 0.2, 1] }}
-      className="framelet-extraction-panel framelet-workspace-section w-full relative overflow-hidden"
+      className="w-full border-2 border-foreground rounded-corner bg-background p-[var(--space-xl)] flex flex-col gap-[var(--space-xl)]"
     >
-      <div className="framelet-settings-ambient" aria-hidden="true" />
-      <div className="framelet-extraction-header">
-        <div className="framelet-settings-heading">
-          <div className="framelet-settings-eyebrow">
-            <span className="framelet-settings-eyebrow-icon"><Sliders size={14} aria-hidden="true" /></span>
-            <span>Extraction settings</span>
-            <span className="framelet-settings-step">02 / 03</span>
-          </div>
-          <h2 id="extraction-controls-heading">Make every frame count<span>.</span></h2>
-          <p>Fine-tune how often we capture and how each still is saved. Your original video stays untouched.</p>
+      {/* Header & Estimated Summary */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[var(--space-md)] pb-[var(--space-md)] border-b-2 border-border">
+        <div>
+          <Typography as="h2" id="extraction-controls-heading" variant="label" weight={600}>
+            Extraction settings
+          </Typography>
+          <Typography as="p" variant="bodySm" muted>
+            Configure capture interval and output format.
+          </Typography>
         </div>
 
-        <div className="framelet-extraction-metrics" aria-label="Estimated export details">
-          <motion.div
-            key={`count-${estimatedCount}`}
-            className="framelet-extraction-metric framelet-stat-frames"
-            initial={{ opacity: 0.65, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}
-          >
-            <span className="framelet-stat-icon"><Layers size={18} aria-hidden="true" /></span>
-            <span className="framelet-stat-copy">
-              <span className="framelet-stat-label">Estimated frames</span>
-              <strong>{estimatedCount.toLocaleString()}</strong>
-            </span>
-            <span className="framelet-stat-corner" aria-hidden="true"><ArrowRight size={13} /></span>
-          </motion.div>
-          <motion.div
-            key={`bytes-${estimatedBytes}`}
-            className="framelet-extraction-metric framelet-stat-size"
-            initial={{ opacity: 0.65, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}
-          >
-            <span className="framelet-stat-icon"><ImageIcon size={18} aria-hidden="true" /></span>
-            <span className="framelet-stat-copy">
-              <span className="framelet-stat-label">Approx. image data</span>
-              <strong>{formatBytes(estimatedBytes)}</strong>
-            </span>
-            <span className="framelet-stat-corner" aria-hidden="true"><ArrowRight size={13} /></span>
-          </motion.div>
+        <div className="flex items-center gap-[var(--space-lg)]">
+          <div className="flex flex-col sm:items-end">
+            <Typography as="span" variant="legal" muted>
+              Estimated frames
+            </Typography>
+            <Typography as="span" variant="label" weight={600} className="font-mono">
+              {estimatedCount.toLocaleString()} frames (~{formatBytes(estimatedBytes)})
+            </Typography>
+          </div>
         </div>
       </div>
 
-      <div className="framelet-extraction-grid">
-        <motion.div
-          className="framelet-setting-card framelet-capture-settings"
-          initial={{ opacity: 0, y: 13 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.38, delay: 0.08 }}
-        >
-          <div className="framelet-setting-card-heading">
-            <div className="framelet-setting-card-title-group">
-              <span className="framelet-card-index">01 / TIMING</span>
-              <h3><Clock3 size={17} aria-hidden="true" /> Capture rate</h3>
-            </div>
-            <span className={`framelet-control-status ${isProcessing ? "is-locked" : ""}`}>
-              <span />{isProcessing ? "Locked" : "Adjustable"}
-            </span>
-          </div>
-
-          <div role="group" aria-label="Capture rate mode" className="framelet-mode-switch">
-            <button
-              type="button" disabled={isProcessing} aria-pressed={settings.mode !== "fps"}
-              onClick={() => setMode("interval")}
-              className={`framelet-mode-button ${settings.mode !== "fps" ? "is-active" : ""}`}
-            >
-              <Clock3 size={14} aria-hidden="true" /><span>Interval</span>
-            </button>
-            <button
-              type="button" disabled={isProcessing} aria-pressed={settings.mode === "fps"}
-              onClick={() => setMode("fps")}
-              className={`framelet-mode-button ${settings.mode === "fps" ? "is-active" : ""}`}
-            >
-              <Gauge size={14} aria-hidden="true" /><span>Frames per second</span>
-            </button>
-          </div>
-
-          <div className="framelet-rate-control">
-            <div className="framelet-rate-readout-row">
-              <label htmlFor="capture-rate">{settings.mode === "fps" ? "Frames per second" : "Seconds between frames"}</label>
-              <motion.span key={`${settings.mode}-${sliderValue}`} className="framelet-rate-readout" initial={{ scale: 0.94, opacity: 0.7 }} animate={{ scale: 1, opacity: 1 }}>
-                {settings.mode === "fps" ? `${settings.fps.toFixed(1)} FPS` : `Every ${settings.interval.toFixed(2)}s`}
-              </motion.span>
-            </div>
-            <div className="framelet-slider-shell" style={{ "--slider-progress": `${sliderProgress}%` } as React.CSSProperties}>
-              <input
-                id="capture-rate" type="range" min="0.1" max={String(sliderMax)} step="0.1" value={sliderValue}
+      {/* Two-Column Controls Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--space-xl)]">
+        {/* Left: Timing & Rate */}
+        <div className="flex flex-col gap-[var(--space-lg)]">
+          <div className="flex items-center justify-between gap-2">
+            <Typography as="span" variant="label" weight={600}>
+              01 · Capture rate
+            </Typography>
+            <div role="group" aria-label="Capture rate mode" className="inline-flex rounded-corner border-2 border-foreground overflow-hidden">
+              <button
+                type="button"
                 disabled={isProcessing}
-                aria-valuetext={settings.mode === "fps" ? `${settings.fps.toFixed(1)} frames per second` : `${settings.interval.toFixed(1)} seconds between frames`}
-                onChange={(event) => {
-                  const value = Number.parseFloat(event.target.value);
-                  onSettingsChange(settings.mode === "fps"
-                    ? { ...settings, mode: "fps", fps: value, interval: 1 / value }
-                    : { ...settings, mode: "interval", interval: value, fps: 1 / value });
-                }}
-              />
-            </div>
-            <div className="framelet-slider-range-labels">
-              {settings.mode === "fps" ? <><span>0.1 FPS <i>· slower</i></span><span>10 FPS <i>· smoother</i></span></> : <><span>0.1s <i>· dense</i></span><span>5s <i>· overview</i></span></>}
+                aria-pressed={settings.mode !== "fps"}
+                onClick={() => setMode("interval")}
+                className={`type-fluid type-button h-8 px-3 transition-colors ${
+                  settings.mode !== "fps"
+                    ? "bg-foreground text-background"
+                    : "bg-background text-foreground hover:bg-muted"
+                }`}
+              >
+                Interval (sec)
+              </button>
+              <button
+                type="button"
+                disabled={isProcessing}
+                aria-pressed={settings.mode === "fps"}
+                onClick={() => setMode("fps")}
+                className={`type-fluid type-button h-8 px-3 border-l-2 border-foreground transition-colors ${
+                  settings.mode === "fps"
+                    ? "bg-foreground text-background"
+                    : "bg-background text-foreground hover:bg-muted"
+                }`}
+              >
+                FPS
+              </button>
             </div>
           </div>
 
-          <div className="framelet-presets-wrap">
-            <div className="framelet-presets-heading"><span>Quick presets</span><span>Choose a starting point</span></div>
-            <div className="framelet-preset-grid">
-              {presets.map((preset, index) => {
+          <div className="flex flex-col gap-[var(--space-sm)]">
+            <div className="flex items-center justify-between">
+              <label htmlFor="capture-rate" className="type-fluid type-body-sm text-muted-foreground">
+                {settings.mode === "fps" ? "Frames per second" : "Seconds between frames"}
+              </label>
+              <Typography as="span" variant="label" weight={600} className="font-mono">
+                {settings.mode === "fps" ? `${settings.fps.toFixed(1)} FPS` : `Every ${settings.interval.toFixed(2)}s`}
+              </Typography>
+            </div>
+            <input
+              id="capture-rate"
+              type="range"
+              min="0.1"
+              max={String(sliderMax)}
+              step="0.1"
+              value={sliderValue}
+              disabled={isProcessing}
+              aria-valuetext={
+                settings.mode === "fps"
+                  ? `${settings.fps.toFixed(1)} frames per second`
+                  : `${settings.interval.toFixed(1)} seconds between frames`
+              }
+              onChange={(event) => {
+                const value = Number.parseFloat(event.target.value);
+                onSettingsChange(
+                  settings.mode === "fps"
+                    ? { ...settings, mode: "fps", fps: value, interval: 1 / value }
+                    : { ...settings, mode: "interval", interval: value, fps: 1 / value }
+                );
+              }}
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex flex-col gap-[var(--space-sm)]">
+            <Typography as="span" variant="legal" muted>
+              Quick presets
+            </Typography>
+            <div className="grid grid-cols-5 gap-[var(--space-sm)]">
+              {presets.map((preset) => {
                 const active = settings.mode !== "fps" && Math.abs(settings.interval - preset.interval) < 0.05;
-                const presetCount = buildFrameTimestamps(metadata.duration, { ...settings, mode: "interval", interval: preset.interval, fps: preset.fps }).length;
                 return (
-                  <motion.button
-                    key={preset.label} type="button" disabled={isProcessing} aria-pressed={active}
+                  <button
+                    key={preset.label}
+                    type="button"
+                    disabled={isProcessing}
+                    aria-pressed={active}
                     onClick={() => selectPreset(preset)}
-                    whileHover={isProcessing ? undefined : { y: -2 }} whileTap={isProcessing ? undefined : { scale: 0.98 }}
-                    className={`framelet-preset-card ${active ? "is-active" : ""}`}
-                    transition={{ duration: 0.18, delay: index * 0.012 }}
+                    className={`flex flex-col items-center justify-center py-2 px-1 rounded-corner border-2 transition-colors ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-foreground bg-background text-foreground hover:bg-muted"
+                    }`}
                   >
-                    <span className="framelet-preset-topline"><span className="framelet-preset-dot" />{preset.note}</span>
-                    <strong>{preset.label}</strong>
-                    <span className="framelet-preset-detail">{preset.detail}</span>
-                    <span className="framelet-preset-count">~{presetCount.toLocaleString()} frames</span>
-                    {active && <span className="framelet-preset-selected"><Check size={10} aria-label="Selected" /></span>}
-                  </motion.button>
+                    <span className="type-fluid type-legal font-semibold">{preset.label}</span>
+                    <span className="type-fluid type-legal opacity-75 font-mono">{preset.detail}</span>
+                  </button>
                 );
               })}
             </div>
           </div>
+        </div>
 
-          <div className="framelet-sampling-preview" aria-label={`Sampling preview across ${metadata.formattedDuration}`}>
-            <div className="framelet-sampling-preview-top"><span><ScanLine size={12} aria-hidden="true" /> Sampling preview</span><strong>{metadata.formattedDuration}</strong></div>
-            <div className="framelet-sampling-ruler" aria-hidden="true">
-              {Array.from({ length: 30 }, (_, index) => {
-                const cadence = settings.mode === "fps" ? 1 / settings.fps : settings.interval;
-                const stride = Math.max(1, Math.round(cadence * 2));
-                return <i key={index} className={index % stride === 0 ? "is-sampled" : ""} />;
-              })}
-            </div>
-          </div>
-        </motion.div>
+        {/* Right: Image Format & Quality */}
+        <div className="flex flex-col gap-[var(--space-lg)]">
+          <Typography as="span" variant="label" weight={600}>
+            02 · Output format
+          </Typography>
 
-        <motion.div
-          className="framelet-setting-card framelet-output-settings"
-          initial={{ opacity: 0, y: 13 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.38, delay: 0.15 }}
-        >
-          <div className="framelet-setting-card-heading">
-            <div className="framelet-setting-card-title-group">
-              <span className="framelet-card-index">02 / OUTPUT</span>
-              <h3><ImageIcon size={17} aria-hidden="true" /> Image format</h3>
-            </div>
-            <span className="framelet-format-status"><ShieldCheck size={12} aria-hidden="true" /> Local export</span>
-          </div>
-
-          <div role="group" aria-label="Output image format" className="framelet-format-options">
+          <div role="group" aria-label="Output image format" className="grid grid-cols-3 gap-[var(--space-sm)]">
             {(["image/jpeg", "image/png", "image/webp"] as const).map((format) => {
               const selected = settings.format === format;
               const label = format === "image/jpeg" ? "JPEG" : format === "image/png" ? "PNG" : "WebP";
-              const extension = format === "image/jpeg" ? ".jpg" : format === "image/png" ? ".png" : ".webp";
-              const description = format === "image/jpeg" ? "Compact files" : format === "image/png" ? "Lossless detail" : "Modern compression";
+              const desc = format === "image/jpeg" ? "Compact" : format === "image/png" ? "Lossless" : "Modern";
               return (
                 <button
-                  key={format} type="button" disabled={isProcessing} aria-pressed={selected}
+                  key={format}
+                  type="button"
+                  disabled={isProcessing}
+                  aria-pressed={selected}
                   onClick={() => onSettingsChange({ ...settings, format })}
-                  className={`framelet-format-card ${selected ? "is-active" : ""}`}
+                  className={`flex flex-col items-start p-3 rounded-corner border-2 transition-colors text-left ${
+                    selected
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-foreground bg-background text-foreground hover:bg-muted"
+                  }`}
                 >
-                  <span className="framelet-format-card-top"><span className="framelet-format-file-icon"><Film size={17} aria-hidden="true" /></span>{selected && <span className="framelet-format-check"><Check size={12} aria-hidden="true" /></span>}</span>
-                  <strong>{label}</strong>
-                  <span className="framelet-format-description">{description}</span>
-                  <span className="framelet-format-extension">{extension}</span>
+                  <span className="type-fluid type-label font-semibold">{label}</span>
+                  <span className="type-fluid type-legal opacity-75">{desc}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className={`framelet-quality-control ${settings.format === "image/png" ? "is-disabled" : ""}`}>
-            <div className="framelet-quality-heading">
-              <div><label htmlFor="image-quality">Image quality</label><span>{settings.format === "image/png" ? "Not used for PNG" : qualityLabel}</span></div>
-              <strong>{Math.round(settings.quality * 100)}<small>%</small></strong>
+          <div className={`flex flex-col gap-[var(--space-sm)] ${settings.format === "image/png" ? "opacity-40" : ""}`}>
+            <div className="flex items-center justify-between">
+              <label htmlFor="image-quality" className="type-fluid type-body-sm text-muted-foreground">
+                {settings.format === "image/png" ? "Quality (Lossless PNG)" : "Image quality"}
+              </label>
+              <Typography as="span" variant="label" weight={600} className="font-mono">
+                {Math.round(settings.quality * 100)}%
+              </Typography>
             </div>
-            <div className="framelet-slider-shell framelet-quality-slider" style={{ "--slider-progress": `${settings.format === "image/png" ? 100 : qualityProgress}%` } as React.CSSProperties}>
-              <input
-                id="image-quality" type="range" min="0.5" max="1.0" step="0.05" value={settings.quality}
-                disabled={isProcessing || settings.format === "image/png"}
-                aria-label="Lossy image quality"
-                onChange={(event) => onSettingsChange({ ...settings, quality: Number.parseFloat(event.target.value) })}
-              />
-            </div>
-            <p>{settings.format === "image/png" ? "PNG preserves image detail without a lossy quality setting." : "Higher quality keeps more detail. Lower quality can reduce file size."}</p>
+            <input
+              id="image-quality"
+              type="range"
+              min="0.5"
+              max="1.0"
+              step="0.05"
+              value={settings.quality}
+              disabled={isProcessing || settings.format === "image/png"}
+              aria-label="Lossy image quality"
+              onChange={(event) => onSettingsChange({ ...settings, quality: Number.parseFloat(event.target.value) })}
+              className="w-full"
+            />
           </div>
-
-          {(overLimit || overOutputBudget) && <div role="alert" className="framelet-limit-warning"><AlertTriangle size={16} aria-hidden="true" /><span>{overLimit ? `This setup would create ${estimatedCount.toLocaleString()} frames, above the ${MAX_EXTRACTED_FRAMES}-frame limit. Increase the interval or lower FPS.` : `Estimated image data is ${formatBytes(estimatedBytes)}, above the ${formatBytes(MAX_ESTIMATED_OUTPUT_BYTES)} safety limit. Use fewer frames or a smaller video.`}</span></div>}
-
-          <div className="framelet-export-summary">
-            <span><span className="framelet-export-summary-label">Output</span><strong>{estimatedCount.toLocaleString()} stills <i>·</i> {settings.format === "image/jpeg" ? "JPEG" : settings.format === "image/png" ? "PNG" : "WebP"}</strong></span>
-            <span><span className="framelet-export-summary-label">Dimensions</span><strong>{metadata.width} × {metadata.height}</strong></span>
-          </div>
-
-          <div className="framelet-extract-action-wrap">
-            <motion.button
-              whileHover={{ scale: isProcessing || blockedBySafetyLimit ? 1 : 1.012 }}
-              whileTap={{ scale: isProcessing || blockedBySafetyLimit ? 1 : 0.99 }}
-              disabled={isProcessing || blockedBySafetyLimit}
-              onClick={onStartExtraction}
-              className="framelet-extract-action"
-            >
-              <span className="framelet-extract-action-glow" aria-hidden="true" />
-              <span className="framelet-extract-action-main"><Sparkles size={17} aria-hidden="true" /><span>{isProcessing ? "Capturing frames…" : overLimit ? `Reduce below ${MAX_EXTRACTED_FRAMES} frames` : overOutputBudget ? "Reduce estimated output size" : `Extract ${estimatedCount.toLocaleString()} frames`}</span></span>
-              <span className="framelet-extract-action-arrow"><ArrowRight size={17} aria-hidden="true" /></span>
-            </motion.button>
-            <p className="framelet-estimate-note"><ShieldCheck size={11} aria-hidden="true" /> Processed locally · Estimate only; actual size varies by content.</p>
-          </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.section>
+
+      {/* Safety Limit Warning */}
+      {(overLimit || overOutputBudget) && (
+        <div
+          role="alert"
+          className="border-2 border-foreground bg-[var(--toast-warning)] text-[var(--toast-text)] rounded-corner p-[var(--space-md)] flex items-start gap-[var(--space-md)]"
+        >
+          <AlertTriangle className="size-5 shrink-0 mt-0.5" aria-hidden="true" />
+          <Typography as="p" variant="bodySm" className="text-[var(--toast-text)]">
+            {overLimit
+              ? `This setup would create ${estimatedCount.toLocaleString()} frames, above the ${MAX_EXTRACTED_FRAMES}-frame limit. Increase the interval or lower FPS.`
+              : `Estimated image data is ${formatBytes(estimatedBytes)}, above the ${formatBytes(MAX_ESTIMATED_OUTPUT_BYTES)} safety limit. Use fewer frames or a smaller video.`}
+          </Typography>
+        </div>
+      )}
+
+      {/* Action Footer */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[var(--space-md)] pt-[var(--space-md)] border-t-2 border-border">
+        <Typography as="p" variant="legal" muted>
+          Output: {estimatedCount.toLocaleString()} stills · {metadata.width} × {metadata.height} · Processed locally
+        </Typography>
+
+        <button
+          type="button"
+          disabled={isProcessing || blockedBySafetyLimit}
+          onClick={onStartExtraction}
+          className="type-fluid type-button-lg inline-flex items-center justify-center gap-2 h-11 px-6 rounded-corner bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {isProcessing && <Loader2 className="size-4 animate-spin" />}
+          <span>
+            {isProcessing
+              ? "Extracting frames..."
+              : overLimit
+              ? `Reduce below ${MAX_EXTRACTED_FRAMES} frames`
+              : overOutputBudget
+              ? "Reduce estimated output size"
+              : `Extract ${estimatedCount.toLocaleString()} frames`}
+          </span>
+        </button>
+      </div>
+    </section>
   );
 };

@@ -2,8 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { Code, Moon, Sun, RotateCcw } from "lucide-react";
+import { useTheme } from "./ThemeProvider";
+import Typography from "./Typography";
 
 interface HeaderProps {
   onReset?: () => void;
@@ -11,61 +13,102 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <header className="framelet-header">
-      <div className="framelet-header-inner">
-        <button
-          type="button"
-          onClick={onReset}
-          aria-label="Framelet home — reset current session"
-          className="framelet-brand group"
-        >
-          <Image
-            src="/icon.png"
-            alt=""
-            width={64}
-            height={64}
-            priority
-            className="framelet-brand-icon"
-          />
-          <Image
-            src="/logo.png"
-            alt="Framelet"
-            width={280}
-            height={90}
-            priority
-            className="framelet-brand-wordmark"
-          />
-        </button>
-
-        <nav className="framelet-nav" aria-label="Main navigation">
-          <a href="#home">Home</a>
-          <a href="#why-framelet">Why Framelet</a>
-          <a href="#extractor">Workspace</a>
-        </nav>
-
-        <div className="framelet-header-actions">
-          <div className="framelet-local-indicator" title="Your video is processed in your browser">
-            <span className="framelet-local-dot" />
-            <span>Local processing</span>
-          </div>
-          {hasVideo && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
-              onClick={onReset}
+    <header className="relative z-40">
+      <nav
+        aria-label="Main navigation"
+        className="h-28 sm:h-36 flex flex-row gap-[var(--space-lg)] justify-between items-center"
+      >
+        <div className="flex items-center gap-[var(--space-lg)]">
+          {onReset ? (
+            <button
               type="button"
-              className="framelet-new-video"
+              onClick={onReset}
+              aria-label="Framelet home — reset current session"
+              className="flex items-center gap-[var(--fluid-sm-lg)] text-left cursor-pointer hover:opacity-80 transition-opacity"
             >
-              New video
-            </motion.button>
+              <Image
+                src="/icon.png"
+                alt=""
+                width={36}
+                height={36}
+                priority
+                className="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0"
+                style={{
+                  filter: "invert(1) sepia(1) saturate(10000%) hue-rotate(340deg)",
+                }}
+              />
+              <Typography as="span" variant="h1" className="leading-none">
+                Framelet
+              </Typography>
+            </button>
+          ) : (
+            <Link
+              href="/"
+              aria-label="Go to Framelet homepage"
+              className="flex items-center gap-[var(--fluid-sm-lg)] hover:opacity-80 transition-opacity"
+            >
+              <Image
+                src="/icon.png"
+                alt=""
+                width={36}
+                height={36}
+                priority
+                className="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0"
+                style={{
+                  filter: "invert(1) sepia(1) saturate(10000%) hue-rotate(340deg)",
+                }}
+              />
+              <Typography as="span" variant="h1" className="leading-none">
+                Framelet
+              </Typography>
+            </Link>
           )}
-          <a href="#extractor" className="framelet-header-cta">
-            <span>Get started</span>
-            <span className="framelet-cta-arrow"><ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /></span>
-          </a>
         </div>
-      </div>
+
+        <div className="flex items-center gap-[var(--space-md)]">
+          {hasVideo && onReset && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="type-fluid type-button inline-flex items-center gap-2 h-10 px-4 rounded-corner border-2 border-foreground bg-background text-foreground hover:bg-muted transition-colors"
+            >
+              <RotateCcw className="size-4" />
+              <span>New video</span>
+            </button>
+          )}
+
+          <Link
+            href="/how-it-works"
+            className="hidden sm:inline-flex type-fluid type-button items-center h-10 px-3 rounded-corner text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            How it works
+          </Link>
+
+          <a
+            href="https://github.com/Amal-kphilip/Framelet"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View source on GitHub"
+            title="View source code on GitHub"
+            className="inline-flex items-center justify-center size-10 rounded-corner hover:bg-accent text-foreground transition-colors"
+          >
+            <Code className="size-5" />
+          </a>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            title="Toggle theme"
+            className="inline-flex items-center justify-center size-10 rounded-corner hover:bg-accent text-foreground transition-colors"
+          >
+            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          </button>
+        </div>
+      </nav>
     </header>
   );
 };
