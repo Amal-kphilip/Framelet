@@ -92,7 +92,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
   return (
     <section aria-labelledby="frame-gallery-heading" className="w-full flex flex-col gap-[var(--space-lg)]">
       {/* Toolbar */}
-      <div className="border-2 border-foreground rounded-corner bg-background p-[var(--space-xl)] flex flex-col gap-[var(--space-lg)]">
+      <div className="border-2 border-foreground rounded-corner bg-background p-4 sm:p-[var(--space-xl)] flex flex-col gap-4 sm:gap-[var(--space-lg)] overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[var(--space-md)]">
           <div>
             <Typography as="h2" id="frame-gallery-heading" variant="label" weight={600}>
@@ -256,7 +256,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               </div>
 
               {/* Card Footer */}
-              <div className="p-2 flex items-center justify-between gap-1 border-t-2 border-foreground bg-background">
+              <div className="p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-t-2 border-foreground bg-background">
                 <div className="min-w-0">
                   <Typography as="span" variant="legal" weight={600} className="font-mono block leading-tight">
                     {frame.formattedTime}
@@ -266,7 +266,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                   </Typography>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center justify-end gap-1.5 shrink-0">
                   <button
                     type="button"
                     aria-label={`Preview frame ${frame.index}`}

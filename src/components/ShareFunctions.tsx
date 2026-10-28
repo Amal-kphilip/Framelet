@@ -98,16 +98,16 @@ export const ShareFunctions: React.FC<ShareFunctionsProps> = ({ onNotify }) => {
         <button
           type="button"
           onClick={handleCopy}
-          className="group sm:w-1/2 sm:max-w-sm flex items-stretch rounded-corner border-2 border-foreground overflow-hidden bg-background text-left cursor-pointer"
+          className="group w-full sm:w-1/2 sm:max-w-sm flex items-stretch rounded-corner border-2 border-foreground overflow-hidden bg-background text-left cursor-pointer min-w-0"
           aria-label="Copy link to this tool"
         >
           <input
             readOnly
             value={SHARE_URL}
             aria-label="Tool URL"
-            className="h-10 flex-1 px-3 type-fluid type-button border-0 bg-transparent text-foreground pointer-events-none outline-none"
+            className="h-10 flex-1 min-w-0 px-3 text-xs sm:text-sm border-0 bg-transparent text-foreground pointer-events-none outline-none truncate"
           />
-          <span className="type-fluid type-button h-10 inline-flex items-center justify-center px-[var(--space-lg)] border-l-2 border-foreground bg-background group-hover:bg-muted transition-colors text-foreground">
+          <span className="h-10 shrink-0 inline-flex items-center justify-center px-3 sm:px-[var(--space-lg)] border-l-2 border-foreground bg-background group-hover:bg-muted transition-colors text-foreground">
             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           </span>
         </button>

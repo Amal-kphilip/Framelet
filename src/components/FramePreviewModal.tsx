@@ -106,7 +106,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
         aria-labelledby="frame-preview-title"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative max-w-4xl w-full max-h-[92dvh] overflow-y-auto border-2 border-foreground rounded-corner bg-background shadow-none p-[var(--space-xl)] flex flex-col gap-[var(--space-lg)] outline-none"
+        className="relative max-w-4xl w-full max-h-[92dvh] overflow-y-auto border-2 border-foreground rounded-corner bg-background shadow-none p-4 sm:p-[var(--space-xl)] flex flex-col gap-4 sm:gap-[var(--space-lg)] outline-none"
       >
         {/* Modal Header */}
         <div className="flex items-start justify-between gap-[var(--space-md)] pb-[var(--space-md)] border-b-2 border-border">
@@ -143,36 +143,36 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-md)] pt-[var(--space-sm)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
           <button
             type="button"
             onClick={() => onToggleSelect(frame.id)}
-            className={`type-fluid type-button h-10 px-4 rounded-corner border-2 border-foreground inline-flex items-center gap-2 transition-colors ${
+            className={`text-xs sm:text-sm font-semibold h-10 px-4 w-full sm:w-auto rounded-corner border-2 border-foreground inline-flex items-center justify-center gap-2 transition-colors ${
               frame.selected
                 ? "bg-foreground text-background"
                 : "bg-background text-foreground hover:bg-muted"
             }`}
           >
-            <Check className="size-4" />
+            <Check className="size-4 shrink-0" />
             <span>{frame.selected ? "Selected for ZIP" : "Select frame"}</span>
           </button>
 
-          <div className="flex items-center flex-wrap gap-[var(--space-sm)]">
+          <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleCopy}
-              className="type-fluid type-button h-10 px-4 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-2 transition-colors"
+              className="text-xs sm:text-sm font-semibold h-10 px-3 sm:px-4 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
             >
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              <span>{copied ? "Copied!" : copyError ? "Clipboard unavailable" : "Copy image"}</span>
+              {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
+              <span>{copied ? "Copied!" : copyError ? "Unavailable" : "Copy image"}</span>
             </button>
 
             <button
               type="button"
               onClick={() => downloadSingleFrame(frame, videoName)}
-              className="type-fluid type-button h-10 px-5 rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center gap-2"
+              className="text-xs sm:text-sm font-semibold h-10 px-3 sm:px-5 rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <Download className="size-4" />
+              <Download className="size-4 shrink-0" />
               <span>Save frame</span>
             </button>
           </div>

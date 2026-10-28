@@ -25,7 +25,7 @@ const presets = [
   { label: "Detail", detail: "0.5s", interval: 0.5, fps: 2 },
   { label: "Standard", detail: "1.0s", interval: 1, fps: 1 },
   { label: "Sparse", detail: "2.0s", interval: 2, fps: 0.5 },
-  { label: "Milestones", detail: "5.0s", interval: 5, fps: 0.2 },
+  { label: "Keyframes", detail: "5.0s", interval: 5, fps: 0.2 },
 ];
 
 export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
@@ -63,10 +63,10 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
   return (
     <section
       aria-labelledby="extraction-controls-heading"
-      className="w-full border-2 border-foreground rounded-corner bg-background p-[var(--space-xl)] flex flex-col gap-[var(--space-xl)]"
+      className="w-full border-2 border-foreground rounded-corner bg-background p-4 sm:p-[var(--space-xl)] flex flex-col gap-5 sm:gap-[var(--space-xl)] overflow-hidden"
     >
       {/* Header & Estimated Summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[var(--space-md)] pb-[var(--space-md)] border-b-2 border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-[var(--space-md)] pb-3 sm:pb-[var(--space-md)] border-b-2 border-border">
         <div>
           <Typography as="h2" id="extraction-controls-heading" variant="label" weight={600}>
             Extraction settings
@@ -76,46 +76,48 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
           </Typography>
         </div>
 
-        <div className="flex items-center gap-[var(--space-lg)]">
-          <div className="flex flex-col sm:items-end">
-            <Typography as="span" variant="legal" muted>
-              Estimated frames
-            </Typography>
-            <Typography as="span" variant="label" weight={600} className="font-mono">
-              {estimatedCount.toLocaleString()} frames (~{formatBytes(estimatedBytes)})
-            </Typography>
-          </div>
+        <div className="flex flex-col sm:items-end pt-1 sm:pt-0">
+          <Typography as="span" variant="legal" muted>
+            Estimated frames
+          </Typography>
+          <Typography as="span" variant="label" weight={600} className="font-mono">
+            {estimatedCount.toLocaleString()} frames (~{formatBytes(estimatedBytes)})
+          </Typography>
         </div>
       </div>
 
       {/* Two-Column Controls Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--space-xl)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-[var(--space-xl)]">
         {/* Left: Timing & Rate */}
-        <div className="flex flex-col gap-[var(--space-lg)]">
-          <div className="flex items-center justify-between gap-2">
-            <Typography as="span" variant="label" weight={600}>
+        <div className="flex flex-col gap-4 sm:gap-[var(--space-lg)] min-w-0">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <Typography as="span" variant="label" weight={600} className="shrink-0">
               01 · Capture rate
             </Typography>
-            <div role="group" aria-label="Capture rate mode" className="inline-flex rounded-corner border-2 border-foreground overflow-hidden">
+            <div
+              role="group"
+              aria-label="Capture rate mode"
+              className="inline-flex rounded-corner border-2 border-foreground overflow-hidden shrink-0"
+            >
               <button
                 type="button"
                 disabled={isProcessing}
                 aria-pressed={settings.mode !== "fps"}
                 onClick={() => setMode("interval")}
-                className={`type-fluid type-button h-8 px-3 transition-colors ${
+                className={`text-xs font-semibold h-8 px-3 whitespace-nowrap inline-flex items-center justify-center transition-colors ${
                   settings.mode !== "fps"
                     ? "bg-foreground text-background"
                     : "bg-background text-foreground hover:bg-muted"
                 }`}
               >
-                Interval (sec)
+                Interval
               </button>
               <button
                 type="button"
                 disabled={isProcessing}
                 aria-pressed={settings.mode === "fps"}
                 onClick={() => setMode("fps")}
-                className={`type-fluid type-button h-8 px-3 border-l-2 border-foreground transition-colors ${
+                className={`text-xs font-semibold h-8 px-3 whitespace-nowrap inline-flex items-center justify-center border-l-2 border-foreground transition-colors ${
                   settings.mode === "fps"
                     ? "bg-foreground text-background"
                     : "bg-background text-foreground hover:bg-muted"
@@ -126,14 +128,14 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-col gap-[var(--space-sm)]">
-            <div className="flex items-center justify-between">
-              <label htmlFor="capture-rate" className="type-fluid type-body-sm text-muted-foreground">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="capture-rate" className="text-xs sm:text-sm text-muted-foreground">
                 {settings.mode === "fps" ? "Frames per second" : "Seconds between frames"}
               </label>
-              <Typography as="span" variant="label" weight={600} className="font-mono">
+              <span className="text-xs sm:text-sm font-semibold font-mono text-foreground shrink-0">
                 {settings.mode === "fps" ? `${settings.fps.toFixed(1)} FPS` : `Every ${settings.interval.toFixed(2)}s`}
-              </Typography>
+              </span>
             </div>
             <input
               id="capture-rate"
@@ -160,11 +162,11 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
             />
           </div>
 
-          <div className="flex flex-col gap-[var(--space-sm)]">
+          <div className="flex flex-col gap-2">
             <Typography as="span" variant="legal" muted>
               Quick presets
             </Typography>
-            <div className="grid grid-cols-5 gap-[var(--space-sm)]">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {presets.map((preset) => {
                 const active = settings.mode !== "fps" && Math.abs(settings.interval - preset.interval) < 0.05;
                 return (
@@ -174,14 +176,14 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                     disabled={isProcessing}
                     aria-pressed={active}
                     onClick={() => selectPreset(preset)}
-                    className={`flex flex-col items-center justify-center py-2 px-1 rounded-corner border-2 transition-colors ${
+                    className={`flex flex-col items-center justify-center py-2 px-2 rounded-corner border-2 transition-colors min-w-0 ${
                       active
                         ? "border-foreground bg-foreground text-background"
                         : "border-foreground bg-background text-foreground hover:bg-muted"
                     }`}
                   >
-                    <span className="type-fluid type-legal font-semibold">{preset.label}</span>
-                    <span className="type-fluid type-legal opacity-75 font-mono">{preset.detail}</span>
+                    <span className="text-xs font-semibold truncate max-w-full">{preset.label}</span>
+                    <span className="text-[11px] opacity-75 font-mono">{preset.detail}</span>
                   </button>
                 );
               })}
@@ -190,12 +192,12 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
         </div>
 
         {/* Right: Image Format & Quality */}
-        <div className="flex flex-col gap-[var(--space-lg)]">
+        <div className="flex flex-col gap-4 sm:gap-[var(--space-lg)] min-w-0">
           <Typography as="span" variant="label" weight={600}>
             02 · Output format
           </Typography>
 
-          <div role="group" aria-label="Output image format" className="grid grid-cols-3 gap-[var(--space-sm)]">
+          <div role="group" aria-label="Output image format" className="grid grid-cols-3 gap-2">
             {(["image/jpeg", "image/png", "image/webp"] as const).map((format) => {
               const selected = settings.format === format;
               const label = format === "image/jpeg" ? "JPEG" : format === "image/png" ? "PNG" : "WebP";
@@ -207,27 +209,27 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                   disabled={isProcessing}
                   aria-pressed={selected}
                   onClick={() => onSettingsChange({ ...settings, format })}
-                  className={`flex flex-col items-start p-3 rounded-corner border-2 transition-colors text-left ${
+                  className={`flex flex-col items-start p-2.5 sm:p-3 rounded-corner border-2 transition-colors text-left min-w-0 ${
                     selected
                       ? "border-foreground bg-foreground text-background"
                       : "border-foreground bg-background text-foreground hover:bg-muted"
                   }`}
                 >
-                  <span className="type-fluid type-label font-semibold">{label}</span>
-                  <span className="type-fluid type-legal opacity-75">{desc}</span>
+                  <span className="text-xs sm:text-sm font-semibold">{label}</span>
+                  <span className="text-[11px] opacity-75 truncate max-w-full">{desc}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className={`flex flex-col gap-[var(--space-sm)] ${settings.format === "image/png" ? "opacity-40" : ""}`}>
-            <div className="flex items-center justify-between">
-              <label htmlFor="image-quality" className="type-fluid type-body-sm text-muted-foreground">
+          <div className={`flex flex-col gap-2 ${settings.format === "image/png" ? "opacity-40" : ""}`}>
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="image-quality" className="text-xs sm:text-sm text-muted-foreground">
                 {settings.format === "image/png" ? "Quality (Lossless PNG)" : "Image quality"}
               </label>
-              <Typography as="span" variant="label" weight={600} className="font-mono">
+              <span className="text-xs sm:text-sm font-semibold font-mono text-foreground shrink-0">
                 {Math.round(settings.quality * 100)}%
-              </Typography>
+              </span>
             </div>
             <input
               id="image-quality"
@@ -249,7 +251,7 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
       {(overLimit || overOutputBudget) && (
         <div
           role="alert"
-          className="border-2 border-foreground bg-[var(--toast-warning)] text-[var(--toast-text)] rounded-corner p-[var(--space-md)] flex items-start gap-[var(--space-md)]"
+          className="border-2 border-foreground bg-[var(--toast-warning)] text-[var(--toast-text)] rounded-corner p-3 flex items-start gap-2.5"
         >
           <AlertTriangle className="size-5 shrink-0 mt-0.5" aria-hidden="true" />
           <Typography as="p" variant="bodySm" className="text-[var(--toast-text)]">
@@ -261,7 +263,7 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
       )}
 
       {/* Action Footer */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[var(--space-md)] pt-[var(--space-md)] border-t-2 border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-[var(--space-md)] border-t-2 border-border">
         <Typography as="p" variant="legal" muted>
           Output: {estimatedCount.toLocaleString()} stills · {metadata.width} × {metadata.height} · Processed locally
         </Typography>
@@ -270,7 +272,7 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
           type="button"
           disabled={isProcessing || blockedBySafetyLimit}
           onClick={onStartExtraction}
-          className="type-fluid type-button-lg inline-flex items-center justify-center gap-2 h-11 px-6 rounded-corner bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="type-fluid type-button-lg w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-6 rounded-corner bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {isProcessing && <Loader2 className="size-4 animate-spin" />}
           <span>

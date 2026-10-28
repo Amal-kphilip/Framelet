@@ -16,18 +16,18 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="relative z-40">
+    <header className="relative z-40 w-full">
       <nav
         aria-label="Main navigation"
-        className="h-28 sm:h-36 flex flex-row gap-[var(--space-lg)] justify-between items-center"
+        className="min-h-20 sm:h-32 py-3 sm:py-0 flex flex-row gap-2 sm:gap-[var(--space-lg)] justify-between items-center w-full"
       >
-        <div className="flex items-center gap-[var(--space-lg)]">
+        <div className="flex items-center min-w-0">
           {onReset ? (
             <button
               type="button"
               onClick={onReset}
               aria-label="Framelet home — reset current session"
-              className="flex items-center gap-[var(--fluid-sm-lg)] text-left cursor-pointer hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 sm:gap-[var(--fluid-sm-lg)] text-left cursor-pointer hover:opacity-80 transition-opacity shrink-0"
             >
               <Image
                 src="/icon.png"
@@ -35,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
                 width={36}
                 height={36}
                 priority
-                className="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0"
+                className="w-7 h-7 sm:w-9 sm:h-9 object-contain shrink-0"
                 style={{
                   filter: "invert(1) sepia(1) saturate(10000%) hue-rotate(340deg)",
                 }}
@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
             <Link
               href="/"
               aria-label="Go to Framelet homepage"
-              className="flex items-center gap-[var(--fluid-sm-lg)] hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 sm:gap-[var(--fluid-sm-lg)] hover:opacity-80 transition-opacity shrink-0"
             >
               <Image
                 src="/icon.png"
@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
                 width={36}
                 height={36}
                 priority
-                className="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0"
+                className="w-7 h-7 sm:w-9 sm:h-9 object-contain shrink-0"
                 style={{
                   filter: "invert(1) sepia(1) saturate(10000%) hue-rotate(340deg)",
                 }}
@@ -68,21 +68,21 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
           )}
         </div>
 
-        <div className="flex items-center gap-[var(--space-md)]">
+        <div className="flex items-center gap-1.5 sm:gap-[var(--space-md)] shrink-0">
           {hasVideo && onReset && (
             <button
               type="button"
               onClick={onReset}
-              className="type-fluid type-button inline-flex items-center gap-2 h-10 px-4 rounded-corner border-2 border-foreground bg-background text-foreground hover:bg-muted transition-colors"
+              className="type-fluid type-button inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-2.5 sm:px-4 rounded-corner border-2 border-foreground bg-background text-foreground hover:bg-muted transition-colors whitespace-nowrap shrink-0"
             >
-              <RotateCcw className="size-4" />
+              <RotateCcw className="size-3.5 sm:size-4 shrink-0" />
               <span>New video</span>
             </button>
           )}
 
           <Link
             href="/how-it-works"
-            className="hidden sm:inline-flex type-fluid type-button items-center h-10 px-3 rounded-corner text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            className="hidden sm:inline-flex type-fluid type-button items-center h-10 px-3 rounded-corner text-muted-foreground hover:text-foreground hover:bg-accent transition-colors whitespace-nowrap"
           >
             How it works
           </Link>
@@ -93,9 +93,9 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
             rel="noopener noreferrer"
             aria-label="View source on GitHub"
             title="View source code on GitHub"
-            className="inline-flex items-center justify-center size-10 rounded-corner hover:bg-accent text-foreground transition-colors"
+            className="inline-flex items-center justify-center size-9 sm:size-10 rounded-corner hover:bg-accent text-foreground transition-colors shrink-0"
           >
-            <Code className="size-5" />
+            <Code className="size-4 sm:size-5" />
           </a>
 
           <button
@@ -103,9 +103,9 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
             onClick={toggleTheme}
             aria-label="Toggle theme"
             title="Toggle theme"
-            className="inline-flex items-center justify-center size-10 rounded-corner hover:bg-accent text-foreground transition-colors"
+            className="inline-flex items-center justify-center size-9 sm:size-10 rounded-corner hover:bg-accent text-foreground transition-colors shrink-0"
           >
-            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+            {theme === "dark" ? <Sun className="size-4 sm:size-5" /> : <Moon className="size-4 sm:size-5" />}
           </button>
         </div>
       </nav>

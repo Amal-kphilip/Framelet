@@ -72,8 +72,8 @@ export default function RootLayout({
         className={`antialiased min-h-screen flex flex-col ${avenirNext.variable} font-avenir bg-background text-foreground`}
       >
         <ThemeProvider>
-          <div className="flex flex-col flex-1 items-center">
-            <div className="max-w-[var(--max-content-width)] flex flex-col flex-1 w-full h-full px-[var(--space-xl)]">
+          <div className="flex flex-col flex-1 items-center w-full overflow-x-hidden">
+            <div className="max-w-[var(--max-content-width)] flex flex-col flex-1 w-full h-full px-4 sm:px-[var(--space-xl)]">
               {children}
             </div>
           </div>

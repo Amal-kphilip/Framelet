@@ -69,9 +69,9 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
 
   return (
     <div className="fixed bottom-4 sm:bottom-6 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none pb-[env(safe-area-inset-bottom,0px)]">
-      <div className="pointer-events-auto rounded-corner border-2 border-foreground bg-background p-2.5 sm:px-4 sm:py-3 flex items-center justify-between gap-3 sm:gap-6 max-w-2xl w-full sm:w-auto">
+      <div className="pointer-events-auto rounded-corner border-2 border-foreground bg-background p-2 sm:px-4 sm:py-3 flex items-center justify-between gap-2 sm:gap-6 max-w-2xl w-full sm:w-auto">
         {/* Selected Count Info */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <div className="size-8 rounded-corner border-2 border-foreground bg-foreground text-background flex items-center justify-center font-mono font-bold text-xs shrink-0">
             {selectedCount}
           </div>
@@ -86,13 +86,13 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
         </div>
 
         {/* Quick Actions */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={onSelectAll}
             disabled={isExporting}
             title="Select all frames"
-            className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            className="text-xs font-semibold h-9 px-2.5 sm:px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
             <CheckCheck className="size-4" />
             <span className="hidden md:inline">All</span>
@@ -114,11 +114,11 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
           type="button"
           disabled={isExporting}
           onClick={handleDownloadZip}
-          className="type-fluid type-button-lg h-10 px-4 sm:px-5 rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center gap-2 disabled:opacity-50 whitespace-nowrap"
+          className="text-xs sm:text-sm font-semibold h-9 sm:h-10 px-3 sm:px-5 rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 sm:gap-2 disabled:opacity-50 whitespace-nowrap shrink-0"
         >
           {isExporting ? (
             <>
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin shrink-0" />
               <span className="hidden sm:inline">{exportProgress?.status || "Bundling ZIP..."}</span>
               <span className="sm:hidden">
                 {exportProgress?.percent ? `${exportProgress.percent}%` : "Bundling..."}
@@ -126,8 +126,8 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
             </>
           ) : (
             <>
-              <Archive className="size-4" />
-              <span>Download ZIP ({selectedCount})</span>
+              <Archive className="size-4 shrink-0" />
+              <span>ZIP ({selectedCount})</span>
             </>
           )}
         </button>
