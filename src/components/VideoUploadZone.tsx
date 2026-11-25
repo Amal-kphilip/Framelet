@@ -79,7 +79,12 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && !isProcessing && !isLoadingFile) {
+    if (
+      e.dataTransfer.files &&
+      e.dataTransfer.files.length > 0 &&
+      !isProcessing &&
+      !isLoadingFile
+    ) {
       processFile(e.dataTransfer.files[0]);
     }
   };
@@ -165,7 +170,9 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`relative flex flex-col items-center justify-center w-full min-h-64 sm:min-h-80 md:min-h-96 p-6 sm:p-[var(--space-3xl)] gap-[var(--space-lg)] border-3 border-dashed rounded-corner transition-colors ${
-            isDragging ? "border-[var(--accent-primary)] bg-[var(--accent-secondary)]" : "border-foreground"
+            isDragging
+              ? "border-[var(--accent-primary)] bg-[var(--accent-secondary)]"
+              : "border-foreground"
           } ${isLoadingFile || isProcessing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
         >
           <div className="flex flex-col items-center gap-4 text-foreground">
@@ -211,9 +218,18 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
           {/* File header row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-[var(--space-md)] border-b-2 border-border">
             <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
-              <FileVideo className="shrink-0 size-5 text-foreground mt-0.5 sm:mt-0" strokeWidth={2} />
+              <FileVideo
+                className="shrink-0 size-5 text-foreground mt-0.5 sm:mt-0"
+                strokeWidth={2}
+              />
               <div className="min-w-0 flex-1">
-                <Typography as="h3" variant="label" weight={600} className="truncate" title={videoMetadata.name}>
+                <Typography
+                  as="h3"
+                  variant="label"
+                  weight={600}
+                  className="truncate"
+                  title={videoMetadata.name}
+                >
                   {videoMetadata.name}
                 </Typography>
                 <Typography as="p" variant="legal" muted className="leading-snug mt-0.5">

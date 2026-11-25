@@ -55,9 +55,10 @@ export function buildFrameTimestamps(duration: number, settings: ExtractionSetti
     return Array.from({ length: count }, (_, index) => (index / (count - 1)) * finalTime);
   }
 
-  const interval = settings.mode === "fps"
-    ? 1 / Math.max(0.1, Math.min(10, settings.fps || 1))
-    : Math.max(0.1, Math.min(5, settings.interval || 1));
+  const interval =
+    settings.mode === "fps"
+      ? 1 / Math.max(0.1, Math.min(10, settings.fps || 1))
+      : Math.max(0.1, Math.min(5, settings.interval || 1));
   const timestamps: number[] = [];
 
   // Always capture the opening frame, and avoid asking a decoder to seek exactly to EOF.
@@ -83,7 +84,8 @@ export function estimateOutputBytes(
   settings: ExtractionSettings
 ): number {
   // A deliberately rough estimate. Real output size depends strongly on image content and quality.
-  const bytesPerPixel = settings.format === "image/png" ? 1.2 : settings.format === "image/webp" ? 0.22 : 0.3;
+  const bytesPerPixel =
+    settings.format === "image/png" ? 1.2 : settings.format === "image/webp" ? 0.22 : 0.3;
   return Math.max(0, frameCount * width * height * bytesPerPixel);
 }
 
@@ -91,11 +93,18 @@ export async function loadVideoMetadata(file: File): Promise<VideoMetadata> {
   const validExtensions = ["mp4", "webm", "mov", "mkv", "avi"];
   const extension = file.name.split(".").pop()?.toLowerCase() || "";
   const validMimeTypes = [
-    "video/mp4", "video/webm", "video/quicktime", "video/x-matroska",
-    "video/avi", "video/x-msvideo", "application/octet-stream",
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
+    "video/x-matroska",
+    "video/avi",
+    "video/x-msvideo",
+    "application/octet-stream",
   ];
   if (!validMimeTypes.includes(file.type) && !validExtensions.includes(extension)) {
-    throw new Error("Unsupported file type. Choose an MP4, WebM, MOV, MKV, or AVI file; playback still depends on your browser's codec support.");
+    throw new Error(
+      "Unsupported file type. Choose an MP4, WebM, MOV, MKV, or AVI file; playback still depends on your browser's codec support."
+    );
   }
 
   const videoUrl = URL.createObjectURL(file);
@@ -108,7 +117,15 @@ export async function loadVideoMetadata(file: File): Promise<VideoMetadata> {
   try {
     await new Promise<void>((resolve, reject) => {
       let settled = false;
-      const timeoutId = window.setTimeout(() => finish(new Error("Video metadata loading timed out. Try a smaller or browser-compatible video.")), VIDEO_METADATA_TIMEOUT_MS);
+      const timeoutId = window.setTimeout(
+        () =>
+          finish(
+            new Error(
+              "Video metadata loading timed out. Try a smaller or browser-compatible video."
+            )
+          ),
+        VIDEO_METADATA_TIMEOUT_MS
+      );
       const cleanup = () => {
         window.clearTimeout(timeoutId);
         video.removeEventListener("loadedmetadata", onLoadedMetadata);
@@ -120,11 +137,17 @@ export async function loadVideoMetadata(file: File): Promise<VideoMetadata> {
         settled = true;
         cleanup();
         if (error) reject(error);
-      else resolve();
+        else resolve();
       };
       const onLoadedMetadata = () => finish();
-      const onError = () => finish(new Error("The browser could not read this video. Its codec may not be supported, even if the file extension is accepted."));
-      const onAbort = () => finish(new Error("Video metadata loading was interrupted. Please try again."));
+      const onError = () =>
+        finish(
+          new Error(
+            "The browser could not read this video. Its codec may not be supported, even if the file extension is accepted."
+          )
+        );
+      const onAbort = () =>
+        finish(new Error("Video metadata loading was interrupted. Please try again."));
       video.addEventListener("loadedmetadata", onLoadedMetadata);
       video.addEventListener("error", onError);
       video.addEventListener("abort", onAbort);
@@ -135,13 +158,19 @@ export async function loadVideoMetadata(file: File): Promise<VideoMetadata> {
     const width = video.videoWidth;
     const height = video.videoHeight;
     if (!Number.isFinite(duration) || duration <= 0) {
-      throw new Error("This video has no finite, readable duration. Live streams and some damaged files are not supported.");
+      throw new Error(
+        "This video has no finite, readable duration. Live streams and some damaged files are not supported."
+      );
     }
     if (!width || !height) {
-      throw new Error("The browser could not determine the video's dimensions. The file may use an unsupported codec.");
+      throw new Error(
+        "The browser could not determine the video's dimensions. The file may use an unsupported codec."
+      );
     }
     if (duration > MAX_ALLOWED_DURATION_SECONDS) {
-      throw new Error(`Video duration (${Math.round(duration)}s) exceeds the ${MAX_ALLOWED_DURATION_SECONDS}-second limit. Please upload a shorter clip.`);
+      throw new Error(
+        `Video duration (${Math.round(duration)}s) exceeds the ${MAX_ALLOWED_DURATION_SECONDS}-second limit. Please upload a shorter clip.`
+      );
     }
 
     return {

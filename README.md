@@ -10,6 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 <!-- TODO: Add live demo URL once deployed -->
+
 **Live Demo:** _Coming soon (TODO: add deployment link)_
 
 <!-- TODO: Add screenshot or demo GIF of Framelet in action -->
@@ -86,18 +87,18 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Scripts
 
-| Command                | Description                                                   |
-| ---------------------- | ------------------------------------------------------------- |
-| `npm run dev`          | Start the Next.js development server (Webpack)                |
-| `npm run build`        | Build the production application (Webpack)                    |
-| `npm run start`        | Serve the production build                                    |
-| `npm run lint`         | Run ESLint across the repository                              |
-| `npm run format`       | Format files with Prettier                                    |
-| `npm run format:check` | Check formatting with Prettier                                |
-| `npm run typecheck`    | Run TypeScript compiler checks (`tsc --noEmit`)               |
-| `npm test`             | Run unit tests once with Vitest                               |
-| `npm run test:watch`   | Run Vitest in watch mode                                      |
-| `npm run check`        | Run `lint`, `format:check`, `typecheck`, `test`, and `build`  |
+| Command                | Description                                                  |
+| ---------------------- | ------------------------------------------------------------ |
+| `npm run dev`          | Start the Next.js development server (Webpack)               |
+| `npm run build`        | Build the production application (Webpack)                   |
+| `npm run start`        | Serve the production build                                   |
+| `npm run lint`         | Run ESLint across the repository                             |
+| `npm run format`       | Format files with Prettier                                   |
+| `npm run format:check` | Check formatting with Prettier                               |
+| `npm run typecheck`    | Run TypeScript compiler checks (`tsc --noEmit`)              |
+| `npm test`             | Run unit tests once with Vitest                              |
+| `npm run test:watch`   | Run Vitest in watch mode                                     |
+| `npm run check`        | Run `lint`, `format:check`, `typecheck`, `test`, and `build` |
 
 ---
 
@@ -115,7 +116,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 │   └── types/                # Shared TypeScript interfaces
 ├── next.config.mjs           # Next.js config and security headers
 ├── eslint.config.mjs         # ESLint 9 flat configuration
-├── vitest.config.ts          # Vitest configuration
+├── vitest.config.mjs         # Vitest configuration
 └── package.json              # Dependencies, scripts, and lint-staged config
 ```
 

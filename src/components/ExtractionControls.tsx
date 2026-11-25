@@ -38,7 +38,12 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
   const timestamps = buildFrameTimestamps(metadata.duration, settings);
   const estimatedCount = timestamps.length;
   const overLimit = estimatedCount > MAX_EXTRACTED_FRAMES;
-  const estimatedBytes = estimateOutputBytes(estimatedCount, metadata.width, metadata.height, settings);
+  const estimatedBytes = estimateOutputBytes(
+    estimatedCount,
+    metadata.width,
+    metadata.height,
+    settings
+  );
   const overOutputBudget = estimatedBytes > MAX_ESTIMATED_OUTPUT_BYTES;
   const blockedBySafetyLimit = overLimit || overOutputBudget;
   const sliderValue = settings.mode === "fps" ? settings.fps : settings.interval;
@@ -134,7 +139,9 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                 {settings.mode === "fps" ? "Frames per second" : "Seconds between frames"}
               </label>
               <span className="text-xs sm:text-sm font-semibold font-mono text-foreground shrink-0">
-                {settings.mode === "fps" ? `${settings.fps.toFixed(1)} FPS` : `Every ${settings.interval.toFixed(2)}s`}
+                {settings.mode === "fps"
+                  ? `${settings.fps.toFixed(1)} FPS`
+                  : `Every ${settings.interval.toFixed(2)}s`}
               </span>
             </div>
             <input
@@ -168,7 +175,8 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
             </Typography>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               {presets.map((preset) => {
-                const active = settings.mode !== "fps" && Math.abs(settings.interval - preset.interval) < 0.05;
+                const active =
+                  settings.mode !== "fps" && Math.abs(settings.interval - preset.interval) < 0.05;
                 return (
                   <button
                     key={preset.label}
@@ -182,7 +190,9 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                         : "border-foreground bg-background text-foreground hover:bg-muted"
                     }`}
                   >
-                    <span className="text-xs font-semibold truncate max-w-full">{preset.label}</span>
+                    <span className="text-xs font-semibold truncate max-w-full">
+                      {preset.label}
+                    </span>
                     <span className="text-[11px] opacity-75 font-mono">{preset.detail}</span>
                   </button>
                 );
@@ -200,8 +210,14 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
           <div role="group" aria-label="Output image format" className="grid grid-cols-3 gap-2">
             {(["image/jpeg", "image/png", "image/webp"] as const).map((format) => {
               const selected = settings.format === format;
-              const label = format === "image/jpeg" ? "JPEG" : format === "image/png" ? "PNG" : "WebP";
-              const desc = format === "image/jpeg" ? "Compact" : format === "image/png" ? "Lossless" : "Modern";
+              const label =
+                format === "image/jpeg" ? "JPEG" : format === "image/png" ? "PNG" : "WebP";
+              const desc =
+                format === "image/jpeg"
+                  ? "Compact"
+                  : format === "image/png"
+                    ? "Lossless"
+                    : "Modern";
               return (
                 <button
                   key={format}
@@ -222,7 +238,9 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
             })}
           </div>
 
-          <div className={`flex flex-col gap-2 ${settings.format === "image/png" ? "opacity-40" : ""}`}>
+          <div
+            className={`flex flex-col gap-2 ${settings.format === "image/png" ? "opacity-40" : ""}`}
+          >
             <div className="flex items-center justify-between gap-2">
               <label htmlFor="image-quality" className="text-xs sm:text-sm text-muted-foreground">
                 {settings.format === "image/png" ? "Quality (Lossless PNG)" : "Image quality"}
@@ -240,7 +258,9 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
               value={settings.quality}
               disabled={isProcessing || settings.format === "image/png"}
               aria-label="Lossy image quality"
-              onChange={(event) => onSettingsChange({ ...settings, quality: Number.parseFloat(event.target.value) })}
+              onChange={(event) =>
+                onSettingsChange({ ...settings, quality: Number.parseFloat(event.target.value) })
+              }
               className="w-full"
             />
           </div>
@@ -265,7 +285,8 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
       {/* Action Footer */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-[var(--space-md)] border-t-2 border-border">
         <Typography as="p" variant="legal" muted>
-          Output: {estimatedCount.toLocaleString()} stills · {metadata.width} × {metadata.height} · Processed locally
+          Output: {estimatedCount.toLocaleString()} stills · {metadata.width} × {metadata.height} ·
+          Processed locally
         </Typography>
 
         <button
@@ -279,10 +300,10 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
             {isProcessing
               ? "Extracting frames..."
               : overLimit
-              ? `Reduce below ${MAX_EXTRACTED_FRAMES} frames`
-              : overOutputBudget
-              ? "Reduce estimated output size"
-              : `Extract ${estimatedCount.toLocaleString()} frames`}
+                ? `Reduce below ${MAX_EXTRACTED_FRAMES} frames`
+                : overOutputBudget
+                  ? "Reduce estimated output size"
+                  : `Extract ${estimatedCount.toLocaleString()} frames`}
           </span>
         </button>
       </div>

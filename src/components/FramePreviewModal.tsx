@@ -37,7 +37,8 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
   React.useEffect(() => {
     if (!isOpen) return;
     const previousOverflow = document.body.style.overflow;
-    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = "hidden";
     const focusAnimation = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
 
@@ -163,7 +164,11 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
               onClick={handleCopy}
               className="text-xs sm:text-sm font-semibold h-10 px-3 sm:px-4 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
             >
-              {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
+              {copied ? (
+                <Check className="size-4 shrink-0" />
+              ) : (
+                <Copy className="size-4 shrink-0" />
+              )}
               <span>{copied ? "Copied!" : copyError ? "Unavailable" : "Copy image"}</span>
             </button>
 

@@ -51,10 +51,19 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void
       className={`pointer-events-auto select-none cursor-pointer w-full border-2 border-[var(--toast-border)] text-[var(--toast-text)] rounded-corner px-[var(--space-lg)] py-[var(--space-md)] flex items-start justify-between gap-3 ${bgColors[toast.type]}`}
     >
       <div className="flex-1 min-w-0">
-        <Typography as="h5" variant="bodySm" weight={600} className="text-[var(--toast-text)] leading-tight">
+        <Typography
+          as="h5"
+          variant="bodySm"
+          weight={600}
+          className="text-[var(--toast-text)] leading-tight"
+        >
           {toast.title}
         </Typography>
-        <Typography as="p" variant="legal" className="text-[var(--toast-text)] opacity-90 mt-0.5 leading-snug break-words">
+        <Typography
+          as="p"
+          variant="legal"
+          className="text-[var(--toast-text)] opacity-90 mt-0.5 leading-snug break-words"
+        >
           {toast.message}
         </Typography>
       </div>

@@ -38,7 +38,10 @@
       (var(--max-content-min) * 1px) +
         (
           (var(--max-content-delta) * 1px) *
-            ((100vw - (var(--fluid-screen-min) * 1rem)) / ((var(--fluid-screen-max) - var(--fluid-screen-min)) * 1rem))
+            (
+              (100vw - (var(--fluid-screen-min) * 1rem)) /
+                ((var(--fluid-screen-max) - var(--fluid-screen-min)) * 1rem)
+            )
         )
     ),
     calc(var(--max-content-max) * 1px)
@@ -53,40 +56,236 @@
   --space-3xl: 48px;
   --space-4xl: 96px;
 
-  --fluid-xs-sm: clamp(var(--space-xs), calc(var(--space-xs) + (var(--space-sm) - var(--space-xs)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-sm));
-  --fluid-xs-md: clamp(var(--space-xs), calc(var(--space-xs) + (var(--space-md) - var(--space-xs)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-md));
-  --fluid-xs-lg: clamp(var(--space-xs), calc(var(--space-xs) + (var(--space-lg) - var(--space-xs)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-lg));
-  --fluid-xs-xl: clamp(var(--space-xs), calc(var(--space-xs) + (var(--space-xl) - var(--space-xs)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-xl));
-  --fluid-xs-2xl: clamp(var(--space-xs), calc(var(--space-xs) + (var(--space-2xl) - var(--space-xs)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-2xl));
-  --fluid-xs-3xl: clamp(var(--space-xs), calc(var(--space-xs) + (var(--space-3xl) - var(--space-xs)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-3xl));
-  --fluid-xs-4xl: clamp(var(--space-xs), calc(var(--space-xs) + (var(--space-4xl) - var(--space-xs)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-4xl));
+  --fluid-xs-sm: clamp(
+    var(--space-xs),
+    calc(
+      var(--space-xs) + (var(--space-sm) - var(--space-xs)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-sm)
+  );
+  --fluid-xs-md: clamp(
+    var(--space-xs),
+    calc(
+      var(--space-xs) + (var(--space-md) - var(--space-xs)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-md)
+  );
+  --fluid-xs-lg: clamp(
+    var(--space-xs),
+    calc(
+      var(--space-xs) + (var(--space-lg) - var(--space-xs)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-lg)
+  );
+  --fluid-xs-xl: clamp(
+    var(--space-xs),
+    calc(
+      var(--space-xs) + (var(--space-xl) - var(--space-xs)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-xl)
+  );
+  --fluid-xs-2xl: clamp(
+    var(--space-xs),
+    calc(
+      var(--space-xs) + (var(--space-2xl) - var(--space-xs)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-2xl)
+  );
+  --fluid-xs-3xl: clamp(
+    var(--space-xs),
+    calc(
+      var(--space-xs) + (var(--space-3xl) - var(--space-xs)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-3xl)
+  );
+  --fluid-xs-4xl: clamp(
+    var(--space-xs),
+    calc(
+      var(--space-xs) + (var(--space-4xl) - var(--space-xs)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-4xl)
+  );
 
-  --fluid-sm-md: clamp(var(--space-sm), calc(var(--space-sm) + (var(--space-md) - var(--space-sm)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-md));
-  --fluid-sm-lg: clamp(var(--space-sm), calc(var(--space-sm) + (var(--space-lg) - var(--space-sm)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-lg));
-  --fluid-sm-xl: clamp(var(--space-sm), calc(var(--space-sm) + (var(--space-xl) - var(--space-sm)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-xl));
-  --fluid-sm-2xl: clamp(var(--space-sm), calc(var(--space-sm) + (var(--space-2xl) - var(--space-sm)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-2xl));
-  --fluid-sm-3xl: clamp(var(--space-sm), calc(var(--space-sm) + (var(--space-3xl) - var(--space-sm)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-3xl));
-  --fluid-sm-4xl: clamp(var(--space-sm), calc(var(--space-sm) + (var(--space-4xl) - var(--space-sm)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-4xl));
+  --fluid-sm-md: clamp(
+    var(--space-sm),
+    calc(
+      var(--space-sm) + (var(--space-md) - var(--space-sm)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-md)
+  );
+  --fluid-sm-lg: clamp(
+    var(--space-sm),
+    calc(
+      var(--space-sm) + (var(--space-lg) - var(--space-sm)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-lg)
+  );
+  --fluid-sm-xl: clamp(
+    var(--space-sm),
+    calc(
+      var(--space-sm) + (var(--space-xl) - var(--space-sm)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-xl)
+  );
+  --fluid-sm-2xl: clamp(
+    var(--space-sm),
+    calc(
+      var(--space-sm) + (var(--space-2xl) - var(--space-sm)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-2xl)
+  );
+  --fluid-sm-3xl: clamp(
+    var(--space-sm),
+    calc(
+      var(--space-sm) + (var(--space-3xl) - var(--space-sm)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-3xl)
+  );
+  --fluid-sm-4xl: clamp(
+    var(--space-sm),
+    calc(
+      var(--space-sm) + (var(--space-4xl) - var(--space-sm)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-4xl)
+  );
 
-  --fluid-md-lg: clamp(var(--space-md), calc(var(--space-md) + (var(--space-lg) - var(--space-md)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-lg));
-  --fluid-md-xl: clamp(var(--space-md), calc(var(--space-md) + (var(--space-xl) - var(--space-md)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-xl));
-  --fluid-md-2xl: clamp(var(--space-md), calc(var(--space-md) + (var(--space-2xl) - var(--space-md)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-2xl));
-  --fluid-md-3xl: clamp(var(--space-md), calc(var(--space-md) + (var(--space-3xl) - var(--space-md)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-3xl));
-  --fluid-md-4xl: clamp(var(--space-md), calc(var(--space-md) + (var(--space-4xl) - var(--space-md)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-4xl));
+  --fluid-md-lg: clamp(
+    var(--space-md),
+    calc(
+      var(--space-md) + (var(--space-lg) - var(--space-md)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-lg)
+  );
+  --fluid-md-xl: clamp(
+    var(--space-md),
+    calc(
+      var(--space-md) + (var(--space-xl) - var(--space-md)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-xl)
+  );
+  --fluid-md-2xl: clamp(
+    var(--space-md),
+    calc(
+      var(--space-md) + (var(--space-2xl) - var(--space-md)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-2xl)
+  );
+  --fluid-md-3xl: clamp(
+    var(--space-md),
+    calc(
+      var(--space-md) + (var(--space-3xl) - var(--space-md)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-3xl)
+  );
+  --fluid-md-4xl: clamp(
+    var(--space-md),
+    calc(
+      var(--space-md) + (var(--space-4xl) - var(--space-md)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-4xl)
+  );
 
-  --fluid-lg-xl: clamp(var(--space-lg), calc(var(--space-lg) + (var(--space-xl) - var(--space-lg)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-xl));
-  --fluid-lg-2xl: clamp(var(--space-lg), calc(var(--space-lg) + (var(--space-2xl) - var(--space-lg)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-2xl));
-  --fluid-lg-3xl: clamp(var(--space-lg), calc(var(--space-lg) + (var(--space-3xl) - var(--space-lg)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-3xl));
-  --fluid-lg-4xl: clamp(var(--space-lg), calc(var(--space-lg) + (var(--space-4xl) - var(--space-lg)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-4xl));
+  --fluid-lg-xl: clamp(
+    var(--space-lg),
+    calc(
+      var(--space-lg) + (var(--space-xl) - var(--space-lg)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-xl)
+  );
+  --fluid-lg-2xl: clamp(
+    var(--space-lg),
+    calc(
+      var(--space-lg) + (var(--space-2xl) - var(--space-lg)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-2xl)
+  );
+  --fluid-lg-3xl: clamp(
+    var(--space-lg),
+    calc(
+      var(--space-lg) + (var(--space-3xl) - var(--space-lg)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-3xl)
+  );
+  --fluid-lg-4xl: clamp(
+    var(--space-lg),
+    calc(
+      var(--space-lg) + (var(--space-4xl) - var(--space-lg)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-4xl)
+  );
 
-  --fluid-xl-2xl: clamp(var(--space-xl), calc(var(--space-xl) + (var(--space-2xl) - var(--space-xl)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-2xl));
-  --fluid-xl-3xl: clamp(var(--space-xl), calc(var(--space-xl) + (var(--space-3xl) - var(--space-xl)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-3xl));
-  --fluid-xl-4xl: clamp(var(--space-xl), calc(var(--space-xl) + (var(--space-4xl) - var(--space-xl)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-4xl));
+  --fluid-xl-2xl: clamp(
+    var(--space-xl),
+    calc(
+      var(--space-xl) + (var(--space-2xl) - var(--space-xl)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-2xl)
+  );
+  --fluid-xl-3xl: clamp(
+    var(--space-xl),
+    calc(
+      var(--space-xl) + (var(--space-3xl) - var(--space-xl)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-3xl)
+  );
+  --fluid-xl-4xl: clamp(
+    var(--space-xl),
+    calc(
+      var(--space-xl) + (var(--space-4xl) - var(--space-xl)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-4xl)
+  );
 
-  --fluid-2xl-3xl: clamp(var(--space-2xl), calc(var(--space-2xl) + (var(--space-3xl) - var(--space-2xl)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-3xl));
-  --fluid-2xl-4xl: clamp(var(--space-2xl), calc(var(--space-2xl) + (var(--space-4xl) - var(--space-2xl)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-4xl));
+  --fluid-2xl-3xl: clamp(
+    var(--space-2xl),
+    calc(
+      var(--space-2xl) + (var(--space-3xl) - var(--space-2xl)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-3xl)
+  );
+  --fluid-2xl-4xl: clamp(
+    var(--space-2xl),
+    calc(
+      var(--space-2xl) + (var(--space-4xl) - var(--space-2xl)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-4xl)
+  );
 
-  --fluid-3xl-4xl: clamp(var(--space-3xl), calc(var(--space-3xl) + (var(--space-4xl) - var(--space-3xl)) * ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))), var(--space-4xl));
+  --fluid-3xl-4xl: clamp(
+    var(--space-3xl),
+    calc(
+      var(--space-3xl) + (var(--space-4xl) - var(--space-3xl)) *
+        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
+    ),
+    var(--space-4xl)
+  );
 
   --accent-primary: #0973dc;
   --accent-secondary: #f0f8ff;
@@ -149,7 +348,9 @@
   --f-max-rem: calc(var(--max) * 0.1rem);
   --f-min: calc(var(--min) * 0.1);
   --f-max: calc(var(--max) * 0.1);
-  --slope: calc((var(--f-max) - var(--f-min)) / (var(--fluid-screen-max) - var(--fluid-screen-min)));
+  --slope: calc(
+    (var(--f-max) - var(--f-min)) / (var(--fluid-screen-max) - var(--fluid-screen-min))
+  );
   --y-axis-intersection: calc((var(--fluid-screen-min) * -1) * var(--slope) + var(--f-min));
   --preferred-value: calc((var(--y-axis-intersection) * 1rem) + (var(--slope) * 100vw));
 

@@ -119,7 +119,9 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
           {isExporting ? (
             <>
               <Loader2 className="size-4 animate-spin shrink-0" />
-              <span className="hidden sm:inline">{exportProgress?.status || "Bundling ZIP..."}</span>
+              <span className="hidden sm:inline">
+                {exportProgress?.status || "Bundling ZIP..."}
+              </span>
               <span className="sm:hidden">
                 {exportProgress?.percent ? `${exportProgress.percent}%` : "Bundling..."}
               </span>
