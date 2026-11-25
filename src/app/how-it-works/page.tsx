@@ -21,7 +21,8 @@ export default function HowItWorksPage() {
         {/* Hero */}
         <section className="w-full">
           <Typography as="h1" variant="hero">
-            Framelet extracts crisp still frames from your videos directly in your browser, so your files never leave your device.
+            Framelet extracts crisp still frames from your videos directly in your browser, so your
+            files never leave your device.
           </Typography>
         </section>
 
@@ -40,7 +41,8 @@ export default function HowItWorksPage() {
                   Drop your video.
                 </Typography>
                 <Typography variant="body" muted>
-                  The app reads your video directly in your browser. File bytes are never uploaded or sent to any remote server.
+                  The app reads your video directly in your browser. File bytes are never uploaded
+                  or sent to any remote server.
                 </Typography>
               </div>
             </div>
@@ -54,7 +56,8 @@ export default function HowItWorksPage() {
                   Choose your capture interval &amp; format.
                 </Typography>
                 <Typography variant="body" muted>
-                  Pick a capture rate by seconds or FPS, and choose JPEG, PNG, or WebP output at your source video&apos;s native resolution.
+                  Pick a capture rate by seconds or FPS, and choose JPEG, PNG, or WebP output at
+                  your source video&apos;s native resolution.
                 </Typography>
               </div>
             </div>
@@ -68,7 +71,8 @@ export default function HowItWorksPage() {
                   Select and download frames.
                 </Typography>
                 <Typography variant="body" muted>
-                  Double-click any frame to inspect it in full size, save individual images, or export your selected stills into a flat ZIP archive.
+                  Double-click any frame to inspect it in full size, save individual images, or
+                  export your selected stills into a flat ZIP archive.
                 </Typography>
               </div>
             </div>
@@ -136,7 +140,8 @@ export default function HowItWorksPage() {
                 Are my videos uploaded to a server?
               </Typography>
               <Typography variant="body" muted>
-                No. All video decoding and frame rendering happen locally inside your browser using HTML5 video and canvas APIs. Your files never leave your device.
+                No. All video decoding and frame rendering happen locally inside your browser using
+                HTML5 video and canvas APIs. Your files never leave your device.
               </Typography>
             </div>
 
@@ -145,7 +150,8 @@ export default function HowItWorksPage() {
                 Are frames saved in their original resolution?
               </Typography>
               <Typography variant="body" muted>
-                Yes. Every extracted frame preserves the exact pixel width and height of your source video without cropping.
+                Yes. Every extracted frame preserves the exact pixel width and height of your source
+                video without cropping.
               </Typography>
             </div>
           </div>

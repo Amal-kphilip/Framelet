@@ -150,7 +150,10 @@ export default function Home() {
       );
     } catch (err: unknown) {
       if (runId !== extractionRunIdRef.current) return;
-      const error = err instanceof Error ? err : new Error("An unexpected error occurred during frame extraction.");
+      const error =
+        err instanceof Error
+          ? err
+          : new Error("An unexpected error occurred during frame extraction.");
       if (controller.signal.aborted || error.name === "AbortError") {
         addToast("info", "Extraction cancelled", "The current extraction was stopped.");
       } else {
@@ -189,7 +192,8 @@ export default function Home() {
         {/* Hero Statement */}
         <section className="w-full">
           <Typography variant="hero" as="h1">
-            This app extracts crisp still frames from videos directly in your browser, so your files stay on your device and never get uploaded.
+            This app extracts crisp still frames from videos directly in your browser, so your files
+            stay on your device and never get uploaded.
           </Typography>
         </section>
 
@@ -254,7 +258,7 @@ export default function Home() {
       />
 
       <FramePreviewModal
-        frame={previewFrame ? frames.find((frame) => frame.id === previewFrame.id) ?? null : null}
+        frame={previewFrame ? (frames.find((frame) => frame.id === previewFrame.id) ?? null) : null}
         videoName={videoMetadata?.name || "frame"}
         onClose={() => setPreviewFrame(null)}
         onToggleSelect={handleToggleSelect}

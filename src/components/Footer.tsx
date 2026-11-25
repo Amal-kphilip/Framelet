@@ -58,7 +58,11 @@ export const SideNav: React.FC = () => {
 
           <nav className="flex flex-col items-start gap-[var(--space-md)]">
             {visibleLinks.map((link) => (
-              <Link key={link.label} href={link.href} className="text-muted-foreground hover:text-foreground">
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <Typography as="span" variant="sidenav">
                   {link.label}
                 </Typography>
@@ -87,7 +91,11 @@ export const SideNav: React.FC = () => {
         </div>
         <div className="flex items-start gap-[var(--space-lg)]">
           {visibleLinks.map((link) => (
-            <Link key={link.label} href={link.href} className="text-muted-foreground hover:text-foreground">
+            <Link
+              key={link.label}
+              href={link.href}
+              className="text-muted-foreground hover:text-foreground"
+            >
               <Typography as="span" variant="sidenav">
                 {link.label}
               </Typography>

@@ -1,7 +1,14 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import type { ExtractedFrame, ExtractionSettings, VideoMetadata } from "@/types";
-import { buildFrameTimestamps, estimateOutputBytes, formatBytes, formatDuration, MAX_ESTIMATED_OUTPUT_BYTES, MAX_EXTRACTED_FRAMES } from "./videoUtils";
+import {
+  buildFrameTimestamps,
+  estimateOutputBytes,
+  formatBytes,
+  formatDuration,
+  MAX_ESTIMATED_OUTPUT_BYTES,
+  MAX_EXTRACTED_FRAMES,
+} from "./videoUtils";
 
 let ffmpegInstance: FFmpeg | null = null;
 let ffmpegLoadPromise: Promise<FFmpeg> | null = null;
@@ -45,20 +52,37 @@ export async function extractFramesViaFFmpeg(
   // Keep fallback behavior explicit; callers can use Canvas if the WASM engine is unavailable.
   throwIfAborted(signal);
   if (settings.mode === "custom_count") {
-    throw new Error("The optional FFmpeg helper does not support exact custom-count extraction. Use the Canvas engine for custom frame counts.");
+    throw new Error(
+      "The optional FFmpeg helper does not support exact custom-count extraction. Use the Canvas engine for custom frame counts."
+    );
   }
   const timestamps = buildFrameTimestamps(metadata.duration, settings);
   if (!timestamps.length || timestamps.length > MAX_EXTRACTED_FRAMES) {
-    throw new Error(`Choose a configuration that extracts between 1 and ${MAX_EXTRACTED_FRAMES} frames.`);
+    throw new Error(
+      `Choose a configuration that extracts between 1 and ${MAX_EXTRACTED_FRAMES} frames.`
+    );
   }
-  const estimatedBytes = estimateOutputBytes(timestamps.length, metadata.width, metadata.height, settings);
-  if (estimatedBytes > MAX_ESTIMATED_OUTPUT_BYTES) throw new Error(`Estimated output (${formatBytes(estimatedBytes)}) exceeds the 512 MiB safety guardrail.`);
+  const estimatedBytes = estimateOutputBytes(
+    timestamps.length,
+    metadata.width,
+    metadata.height,
+    settings
+  );
+  if (estimatedBytes > MAX_ESTIMATED_OUTPUT_BYTES)
+    throw new Error(
+      `Estimated output (${formatBytes(estimatedBytes)}) exceeds the 512 MiB safety guardrail.`
+    );
 
   const ffmpeg = await getFFmpeg();
   throwIfAborted(signal);
-  const extension = metadata.file.name.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "mp4";
+  const extension =
+    metadata.file.name
+      .split(".")
+      .pop()
+      ?.replace(/[^a-z0-9]/gi, "") || "mp4";
   const inputFileName = `input_video.${extension}`;
-  const outputExtension = settings.format === "image/png" ? "png" : settings.format === "image/webp" ? "webp" : "jpg";
+  const outputExtension =
+    settings.format === "image/png" ? "png" : settings.format === "image/webp" ? "webp" : "jpg";
   const outputPattern = `frame_%04d.${outputExtension}`;
   const outputFiles: string[] = [];
   const frames: ExtractedFrame[] = [];
@@ -80,8 +104,10 @@ export async function extractFramesViaFFmpeg(
     const interval = settings.mode === "fps" ? 1 / Math.max(0.1, settings.fps) : settings.interval;
     const filters = `fps=${1 / Math.max(0.1, interval)}`;
     const args = ["-i", inputFileName, "-vf", filters];
-    if (outputExtension === "jpg") args.push("-q:v", String(Math.max(2, Math.round((1 - settings.quality) * 31))));
-    if (outputExtension === "webp") args.push("-quality", String(Math.round(settings.quality * 100)));
+    if (outputExtension === "jpg")
+      args.push("-q:v", String(Math.max(2, Math.round((1 - settings.quality) * 31))));
+    if (outputExtension === "webp")
+      args.push("-quality", String(Math.round(settings.quality * 100)));
     args.push(outputPattern);
 
     onStatusUpdate?.("Extracting frames in WebAssembly...");
@@ -90,14 +116,19 @@ export async function extractFramesViaFFmpeg(
 
     const listing = await ffmpeg.listDir("/");
     const outputPatternRegex = new RegExp(`^frame_\\d+\\.${outputExtension}$`);
-    const output = listing.filter((entry) => outputPatternRegex.test(entry.name)).sort((a, b) => a.name.localeCompare(b.name));
+    const output = listing
+      .filter((entry) => outputPatternRegex.test(entry.name))
+      .sort((a, b) => a.name.localeCompare(b.name));
     outputFiles.push(...output.map((entry) => entry.name));
     if (!output.length) throw new Error("FFmpeg completed without producing any frame images.");
 
     for (let index = 0; index < output.length; index += 1) {
       throwIfAborted(signal);
       const data = await ffmpeg.readFile(output[index].name);
-      const bytes = data instanceof Uint8Array ? new Uint8Array(data) : new Uint8Array(data as unknown as ArrayBuffer);
+      const bytes =
+        data instanceof Uint8Array
+          ? new Uint8Array(data)
+          : new Uint8Array(data as unknown as ArrayBuffer);
       const blob = new Blob([bytes], { type: settings.format });
       const timestamp = Math.min(metadata.duration, index * interval);
       frames.push({
@@ -122,6 +153,9 @@ export async function extractFramesViaFFmpeg(
   } finally {
     signal?.removeEventListener("abort", onAbort);
     ffmpeg.off("progress", onFfmpegProgress);
-    await Promise.allSettled([ffmpeg.deleteFile(inputFileName), ...outputFiles.map((file) => ffmpeg.deleteFile(file))]);
+    await Promise.allSettled([
+      ffmpeg.deleteFile(inputFileName),
+      ...outputFiles.map((file) => ffmpeg.deleteFile(file)),
+    ]);
   }
 }

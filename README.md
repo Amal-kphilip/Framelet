@@ -1,72 +1,180 @@
-# Framelet — Video Frame Extractor
+# Framelet
 
-Framelet is a Next.js, React, and TypeScript web application for extracting still frames from short videos in the browser. It uses a full-bleed editorial layout with a cinematic orange-red hero, a matte-black workspace, and warm accent details while focusing on reliable extraction, accurate file naming, bounded gallery rendering, and accessible controls.
+> Extract high-quality still frames from short videos directly in your browser.
+
+[![License: MIT](https://img.shields.io/github/license/Amal-kphilip/Framelet)](LICENSE)
+[![CI](https://github.com/Amal-kphilip/Framelet/actions/workflows/ci.yml/badge.svg)](https://github.com/Amal-kphilip/Framelet/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/Amal-kphilip/Framelet)](https://github.com/Amal-kphilip/Framelet/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/Amal-kphilip/Framelet)](https://github.com/Amal-kphilip/Framelet/commits/main)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+<!-- TODO: Add live demo URL once deployed -->
+
+**Live Demo:** _Coming soon (TODO: add deployment link)_
+
+<!-- TODO: Add screenshot or demo GIF of Framelet in action -->
+<!-- ![Framelet Demo](docs/assets/demo.gif) -->
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Scripts](#scripts)
+- [Project Structure](#project-structure)
+- [Configuration & Guardrails](#configuration--guardrails)
+- [Testing](#testing)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+
+---
 
 ## Features
 
-- Browser-native Canvas frame extraction; the active workflow does not upload the selected video to an application server.
-- MP4, WebM, MOV, MKV, and AVI file selection, with actual compatibility determined by the browser's installed media decoders.
-- A 90-second source-video limit and a 500-frame-per-extraction safety limit and a 512 MiB approximate-output / ZIP-export guardrail to reduce browser memory spikes.
-- Interval and FPS capture-rate modes, common presets, and synchronized frame-count estimates.
-- JPEG, PNG, and WebP output when the browser supports the requested canvas encoding. If a format is unsupported, extraction reports an error rather than silently saving a differently encoded image with a misleading extension.
-- Individual frame downloads and ZIP exports whose file extensions match the actual image MIME type.
-- ZIP `metadata.json` manifest with original video name, image type, timestamps, dimensions, byte sizes, and selected/exported counts.
-- Extraction cancellation, timeouts for browser media events, stale-result protection, and object-URL cleanup.
-- Search by frame number or timestamp, filter by selection state, sort by timestamp or file size, and paginated gallery rendering (48 frames per page).
-- Keyboard focus styles, accessible labels, modal focus management, Escape-to-close, reduced-motion support, and lighter glass blur on mobile.
-- Security-related response headers via `next.config.mjs`.
+- **Client-side Canvas extraction**: Processes video frames in browser memory without uploading video files to an application server.
+- **Multiple video containers**: Accepts MP4, WebM, MOV, MKV, and AVI files (actual playback/decoding depends on your browser's installed codecs).
+- **Flexible capture modes**: Extract by time interval, frames per second (FPS), or custom frame count with presets and synchronized frame-count estimates.
+- **Format & quality control**: Export JPEG, PNG, or WebP images when supported by the browser's Canvas `toBlob()` encoder; reports an error instead of silently falling back to a mismatched MIME type.
+- **Individual & ZIP exports**: Download individual frames or export selected/all frames as a ZIP archive with a `metadata.json` manifest (source filename, MIME type, timestamps, dimensions, byte sizes, and counts).
+- **Paginated gallery**: Search by frame number or timestamp, filter by selection state, sort by timestamp or file size, and browse 48 frames per page.
+- **Reliability & safety guardrails**: Enforces a 90-second source-video limit, a 500-frame extraction cap, a 512 MiB approximate output guardrail, extraction cancellation, media-event timeouts, and object-URL cleanup.
+- **Accessible editorial UI**: Keyboard focus styles, modal focus management, Escape-to-close, `prefers-reduced-motion` support, and security response headers via `next.config.mjs`.
 
-## Requirements
+> **Note on FFmpeg.wasm**: An optional `ffmpeg.ts` helper exists in `src/lib/` separate from the active UI workflow. If explicitly invoked by a developer, it loads FFmpeg core from a CDN; the default UI path uses the browser-native Canvas engine only.
 
-- Node.js 18.17+ (Node.js 20 LTS or newer is recommended).
-- A modern browser with support for the selected video codec and Canvas `toBlob()` encoding for the chosen image format.
+---
 
-File extensions alone do not guarantee that a video can be decoded. Compatibility varies by operating system, browser, and codec profile.
+## Tech Stack
 
-## Getting started
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router) & [React 19](https://react.dev/)
+- **Language**: [TypeScript 5](https://www.typescriptlang.org/)
+- **Styling & Motion**: [Tailwind CSS](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/), [Lucide React](https://lucide.dev/)
+- **Client-side Export**: [JSZip](https://stuk.github.io/jszip/), [FileSaver.js](https://github.com/eligrey/FileSaver.js)
+- **Tooling & Testing**: [Vitest](https://vitest.dev/), [ESLint](https://eslint.org/), [Prettier](https://prettier.io/), [Husky](https://typicode.github.io/husky/), [commitlint](https://commitlint.js.org/)
 
-Install dependencies:
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js 22+** (see [`.nvmrc`](.nvmrc))
+- **npm** (included with Node.js)
+- A modern browser with HTML5 video decoding and Canvas `toBlob()` support
+
+### Installation
 
 ```bash
+git clone https://github.com/Amal-kphilip/Framelet.git
+cd Framelet
 npm install
 ```
 
-Start the development server:
+### Development
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Run the automated checks:
+---
+
+## Scripts
+
+| Command                | Description                                                  |
+| ---------------------- | ------------------------------------------------------------ |
+| `npm run dev`          | Start the Next.js development server (Webpack)               |
+| `npm run build`        | Build the production application (Webpack)                   |
+| `npm run start`        | Serve the production build                                   |
+| `npm run lint`         | Run ESLint across the repository                             |
+| `npm run format`       | Format files with Prettier                                   |
+| `npm run format:check` | Check formatting with Prettier                               |
+| `npm run typecheck`    | Run TypeScript compiler checks (`tsc --noEmit`)              |
+| `npm test`             | Run unit tests once with Vitest                              |
+| `npm run test:watch`   | Run Vitest in watch mode                                     |
+| `npm run check`        | Run `lint`, `format:check`, `typecheck`, `test`, and `build` |
+
+---
+
+## Project Structure
+
+```text
+.
+├── .github/                  # Issue/PR templates, CODEOWNERS, Dependabot, workflows
+├── docs/                     # Design and engineering notes
+├── public/                   # Static assets, icons, and fonts
+├── src/
+│   ├── app/                  # Next.js App Router pages, layout, global styles
+│   ├── components/           # UI components (upload zone, controls, gallery, modal)
+│   ├── lib/                  # Frame extraction, timestamp math, ZIP export, tests
+│   └── types/                # Shared TypeScript interfaces
+├── next.config.mjs           # Next.js config and security headers
+├── eslint.config.mjs         # ESLint 9 flat configuration
+├── vitest.config.mjs         # Vitest configuration
+└── package.json              # Dependencies, scripts, and lint-staged config
+```
+
+---
+
+## Configuration & Guardrails
+
+Framelet requires no environment variables to run locally or in production.
+
+Key application guardrails defined in [`src/lib/videoUtils.ts`](src/lib/videoUtils.ts):
+
+- `MAX_ALLOWED_DURATION_SECONDS = 90` — maximum source video duration
+- `MAX_EXTRACTED_FRAMES = 500` — maximum frames per extraction run
+- `MAX_ESTIMATED_OUTPUT_BYTES = 512 MiB` — soft approximate output/export guardrail
+- `VIDEO_METADATA_TIMEOUT_MS = 20000` — timeout for browser metadata loading
+
+Security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) are configured in [`next.config.mjs`](next.config.mjs).
+
+---
+
+## Testing
+
+Unit tests use [Vitest](https://vitest.dev/) and live alongside the utilities in `src/lib/__tests__/`:
+
+```bash
+npm test
+```
+
+Run the full CI-equivalent verification locally:
 
 ```bash
 npm run check
 ```
 
-This executes the frame-timestamp utility tests, TypeScript type checking, and ESLint. You can also run individual checks with `npm test`, `npm run typecheck`, and `npm run lint`.
+---
 
-Create and run a production build:
+## Roadmap
 
-```bash
-npm run build
-npm run start
-```
+- [ ] Add live deployment URL and visual demo GIF
+- [ ] Expand unit test coverage for ZIP metadata manifest generation
+- [ ] Optional end-to-end browser tests for extraction and export flows
 
-## Extraction and privacy notes
+---
 
-The normal UI uses the browser-native Canvas engine. Video files and generated frames remain in browser memory unless the user chooses to download an image or ZIP. The UI does not send video content to an application upload endpoint. Browser assets and npm dependencies are still loaded as normal web resources.
+## Contributing
 
-The optional FFmpeg.wasm helper remains separate from the active UI workflow. It loads its FFmpeg core from the configured CDN if a developer explicitly uses that helper; the default path does not initialize it. The default engine is not described as guaranteed hardware-accelerated or zero-lag because performance depends on browser, device, codec, and video resolution.
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md), follow the [Code of Conduct](CODE_OF_CONDUCT.md), and report security issues privately via [SECURITY.md](SECURITY.md).
 
-Output-size estimates are approximate and can differ materially with image content and compression settings. The 500-frame limit and 512 MiB rough-output/selected-image guardrail reduce the chance of excessive browser memory use. Estimates are not exact; actual encoded sizes depend on frame content. Users can increase the interval, lower FPS, choose a more compact format, or export selected frames in smaller batches.
+---
 
-## Tech stack
+## License
 
-- Next.js 16 App Router and React 19
-- TypeScript and Tailwind CSS
-- Framer Motion and Lucide React
-- Browser Canvas / HTML video decoding
-- JSZip and FileSaver.js for client-side export
-- Node.js built-in test runner for utility regression tests
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Acknowledgements
+
+- [Next.js](https://nextjs.org/) and [React](https://react.dev/)
+- [JSZip](https://stuk.github.io/jszip/) and [FileSaver.js](https://github.com/eligrey/FileSaver.js)
+- [Lucide Icons](https://lucide.dev/) and [Framer Motion](https://www.framer.com/motion/)

@@ -105,7 +105,11 @@ export const Header: React.FC<HeaderProps> = ({ onReset, hasVideo }) => {
             title="Toggle theme"
             className="inline-flex items-center justify-center size-9 sm:size-10 rounded-corner hover:bg-accent text-foreground transition-colors shrink-0"
           >
-            {theme === "dark" ? <Sun className="size-4 sm:size-5" /> : <Moon className="size-4 sm:size-5" />}
+            {theme === "dark" ? (
+              <Sun className="size-4 sm:size-5" />
+            ) : (
+              <Moon className="size-4 sm:size-5" />
+            )}
           </button>
         </div>
       </nav>

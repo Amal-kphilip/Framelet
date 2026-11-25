@@ -90,7 +90,10 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
   };
 
   return (
-    <section aria-labelledby="frame-gallery-heading" className="w-full flex flex-col gap-[var(--space-lg)]">
+    <section
+      aria-labelledby="frame-gallery-heading"
+      className="w-full flex flex-col gap-[var(--space-lg)]"
+    >
       {/* Toolbar */}
       <div className="border-2 border-foreground rounded-corner bg-background p-4 sm:p-[var(--space-xl)] flex flex-col gap-4 sm:gap-[var(--space-lg)] overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[var(--space-md)]">
@@ -99,7 +102,8 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               Extracted frames
             </Typography>
             <Typography as="p" variant="bodySm" muted>
-              {selectedCount} of {frames.length} selected · {filteredFrames.length} shown · Double-click a frame to expand
+              {selectedCount} of {frames.length} selected · {filteredFrames.length} shown ·
+              Double-click a frame to expand
             </Typography>
           </div>
 
@@ -258,11 +262,22 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               {/* Card Footer */}
               <div className="p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-t-2 border-foreground bg-background">
                 <div className="min-w-0">
-                  <Typography as="span" variant="legal" weight={600} className="font-mono block leading-tight">
+                  <Typography
+                    as="span"
+                    variant="legal"
+                    weight={600}
+                    className="font-mono block leading-tight"
+                  >
                     {frame.formattedTime}
                   </Typography>
-                  <Typography as="span" variant="legal" muted className="font-mono block leading-tight truncate">
-                    {frame.width}×{frame.height} · {(frame.sizeBytes / 1024).toFixed(frame.sizeBytes < 1024 * 100 ? 1 : 0)} KB
+                  <Typography
+                    as="span"
+                    variant="legal"
+                    muted
+                    className="font-mono block leading-tight truncate"
+                  >
+                    {frame.width}×{frame.height} ·{" "}
+                    {(frame.sizeBytes / 1024).toFixed(frame.sizeBytes < 1024 * 100 ? 1 : 0)} KB
                   </Typography>
                 </div>
 
@@ -314,7 +329,10 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
 
       {/* Pagination */}
       {pageCount > 1 && (
-        <nav aria-label="Frame gallery pages" className="flex items-center justify-center gap-[var(--space-md)] pt-2">
+        <nav
+          aria-label="Frame gallery pages"
+          className="flex items-center justify-center gap-[var(--space-md)] pt-2"
+        >
           <button
             type="button"
             onClick={() => setCurrentPage(Math.max(1, safePage - 1))}

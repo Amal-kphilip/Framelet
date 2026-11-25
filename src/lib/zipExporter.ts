@@ -12,20 +12,26 @@ export interface ZipExportProgress {
 }
 
 function safeBaseName(name: string): string {
-  return name
-    .replace(/\.[^/.]+$/, "")
-    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")
-    .replace(/[. ]+$/g, "")
-    .trim() || "frames";
+  return (
+    name
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")
+      .replace(/[. ]+$/g, "")
+      .trim() || "frames"
+  );
 }
 
 export function getImageExtension(blob: Blob): string {
   switch (blob.type.toLowerCase()) {
     case "image/jpeg":
-    case "image/jpg": return "jpg";
-    case "image/png": return "png";
-    case "image/webp": return "webp";
-    default: return "img";
+    case "image/jpg":
+      return "jpg";
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    default:
+      return "img";
   }
 }
 
@@ -45,7 +51,9 @@ export async function exportFramesToZip(
 
   const selectedImageBytes = frames.reduce((totalBytes, frame) => totalBytes + frame.blob.size, 0);
   if (selectedImageBytes > MAX_ZIP_EXPORT_BYTES) {
-    throw new Error(`The selected images total ${Math.round(selectedImageBytes / (1024 * 1024))} MiB, above the 512 MiB ZIP-export safety limit. Deselect some frames and export in smaller batches.`);
+    throw new Error(
+      `The selected images total ${Math.round(selectedImageBytes / (1024 * 1024))} MiB, above the 512 MiB ZIP-export safety limit. Deselect some frames and export in smaller batches.`
+    );
   }
 
   const zip = new JSZip();
@@ -59,37 +67,50 @@ export async function exportFramesToZip(
     zip.file(getFrameFilename(baseName, frame), frame.blob, { compression: "STORE" });
     if ((index + 1) % 5 === 0 || index === total - 1) {
       const percent = 5 + Math.round(((index + 1) / total) * 65);
-      onProgress?.({ percent, current: index + 1, total, status: `Adding image ${index + 1} of ${total}…` });
+      onProgress?.({
+        percent,
+        current: index + 1,
+        total,
+        status: `Adding image ${index + 1} of ${total}…`,
+      });
       // Yield periodically so the UI can render progress for large exports.
-      if ((index + 1) % 20 === 0) await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+      if ((index + 1) % 20 === 0)
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
     }
   }
 
-  zip.file("metadata.json", JSON.stringify({
-    app: "Framelet",
-    schemaVersion: 1,
-    originalVideo: videoName,
-    exportedAt: new Date().toISOString(),
-    totalFramesExtracted: totalExtractedFrames,
-    totalFramesExported: frames.length,
-    selectedFramesCount: frames.length,
-    resolution: `${frames[0]?.width || 0}x${frames[0]?.height || 0}`,
-    frames: sortedFrames.map((frame) => ({
-      index: frame.index,
-      timestampSeconds: frame.timestamp,
-      formattedTime: frame.formattedTime,
-      width: frame.width,
-      height: frame.height,
-      mimeType: frame.blob.type || "application/octet-stream",
-      fileName: getFrameFilename(baseName, frame),
-      sizeBytes: frame.sizeBytes,
-    })),
-  }, null, 2), { compression: "DEFLATE", compressionOptions: { level: 6 } });
+  zip.file(
+    "metadata.json",
+    JSON.stringify(
+      {
+        app: "Framelet",
+        schemaVersion: 1,
+        originalVideo: videoName,
+        exportedAt: new Date().toISOString(),
+        totalFramesExtracted: totalExtractedFrames,
+        totalFramesExported: frames.length,
+        selectedFramesCount: frames.length,
+        resolution: `${frames[0]?.width || 0}x${frames[0]?.height || 0}`,
+        frames: sortedFrames.map((frame) => ({
+          index: frame.index,
+          timestampSeconds: frame.timestamp,
+          formattedTime: frame.formattedTime,
+          width: frame.width,
+          height: frame.height,
+          mimeType: frame.blob.type || "application/octet-stream",
+          fileName: getFrameFilename(baseName, frame),
+          sizeBytes: frame.sizeBytes,
+        })),
+      },
+      null,
+      2
+    ),
+    { compression: "DEFLATE", compressionOptions: { level: 6 } }
+  );
 
   onProgress?.({ percent: 72, current: total, total, status: "Creating ZIP archive…" });
-  const zipBlob = await zip.generateAsync(
-    { type: "blob", compression: "STORE" },
-    (metadata) => onProgress?.({
+  const zipBlob = await zip.generateAsync({ type: "blob", compression: "STORE" }, (metadata) =>
+    onProgress?.({
       percent: Math.min(99, 72 + Math.round(metadata.percent * 0.27)),
       current: total,
       total,
