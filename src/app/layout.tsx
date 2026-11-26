@@ -1,34 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Syne, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ScrollProgressBar } from "@/components/ScrollProgressBar";
 
-const avenirNext = localFont({
-  variable: "--font-avenir",
+const displayFont = Syne({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["700", "800"],
   display: "swap",
-  src: [
-    {
-      path: "../../public/fonts/avenir-next-regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/avenir-next-medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/avenir-next-demibold.woff2",
-      weight: "600",
-      style: "normal",
-    },
-  ],
+});
+
+const sansFont = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ffffff",
+  themeColor: "#0b0b0d",
 };
 
 export const metadata: Metadata = {
@@ -66,17 +59,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${displayFont.variable} ${sansFont.variable}`}
+    >
       <body
         suppressHydrationWarning
-        className={`antialiased min-h-screen flex flex-col ${avenirNext.variable} font-avenir bg-background text-foreground`}
+        className="antialiased min-h-screen flex flex-col font-sans bg-background text-foreground"
       >
         <ThemeProvider>
-          <div className="flex flex-col flex-1 items-center w-full overflow-x-hidden">
-            <div className="max-w-[var(--max-content-width)] flex flex-col flex-1 w-full h-full px-4 sm:px-[var(--space-xl)]">
-              {children}
-            </div>
-          </div>
+          <ScrollProgressBar />
+          <div className="flex flex-col flex-1 w-full overflow-x-hidden">{children}</div>
         </ThemeProvider>
       </body>
     </html>
