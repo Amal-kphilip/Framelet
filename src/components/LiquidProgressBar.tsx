@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Loader2, X } from "lucide-react";
-import Typography from "./Typography";
 
 interface LiquidProgressBarProps {
   progress: number;
@@ -24,20 +23,25 @@ export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
   return (
     <section
       aria-labelledby="framelet-progress-title"
-      className="w-full border-2 border-foreground rounded-corner bg-background p-[var(--space-xl)] flex flex-col gap-[var(--space-md)]"
+      className="glass w-full border border-brand-border rounded-3xl p-5 sm:p-6 flex flex-col gap-3.5"
     >
-      <div className="flex items-center justify-between gap-[var(--space-md)]">
-        <div className="flex items-center gap-[var(--space-md)]">
-          <Loader2 className="size-5 animate-spin text-foreground shrink-0" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="size-9 rounded-xl bg-brand-accent/15 border border-brand-accent/30 flex items-center justify-center shrink-0">
+            <Loader2
+              className="size-4 animate-spin motion-reduce:animate-none text-brand-accentText"
+              aria-hidden="true"
+            />
+          </div>
           <div>
-            <Typography as="h3" id="framelet-progress-title" variant="label" weight={600}>
+            <h3 id="framelet-progress-title" className="text-sm font-semibold text-foreground">
               {statusText}
-            </Typography>
-            <Typography as="p" variant="legal" muted>
+            </h3>
+            <p className="text-xs text-muted-foreground font-mono">
               {totalFrames > 0
                 ? `${Math.min(currentFrame, totalFrames).toLocaleString()} of ${totalFrames.toLocaleString()} frames (${roundedProgress}%)`
                 : `${roundedProgress}% complete`}
-            </Typography>
+            </p>
           </div>
         </div>
 
@@ -46,7 +50,7 @@ export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
             type="button"
             onClick={onCancel}
             aria-label="Cancel frame extraction"
-            className="type-fluid type-button inline-flex items-center gap-1.5 h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-xs font-semibold text-foreground transition-colors"
           >
             <X className="size-4" />
             <span>Cancel</span>
@@ -54,7 +58,7 @@ export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
         )}
       </div>
 
-      {/* Crisp flat progress bar */}
+      {/* Accent progress bar */}
       <div
         role="progressbar"
         aria-label="Frame extraction progress"
@@ -62,10 +66,10 @@ export const LiquidProgressBar: React.FC<LiquidProgressBarProps> = ({
         aria-valuemax={100}
         aria-valuenow={roundedProgress}
         aria-valuetext={`${roundedProgress}% complete`}
-        className="w-full h-4 border-2 border-foreground rounded-corner bg-secondary overflow-hidden"
+        className="w-full h-3 border border-brand-border rounded-full bg-secondary overflow-hidden"
       >
         <div
-          className="h-full bg-foreground transition-[width] duration-150 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-[#ff6a2b] to-[#ff8547] transition-[width] duration-150 ease-out motion-reduce:transition-none"
           style={{ width: `${roundedProgress}%` }}
         />
       </div>
