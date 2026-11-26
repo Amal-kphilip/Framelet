@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_FILENAME_TEMPLATE,
   MAX_EXTRACTED_FRAMES,
   buildFrameTimestamps,
+  calculateScaledDimensions,
   estimateOutputBytes,
   formatBytes,
   formatDuration,
   formatDurationSimple,
+  formatFrameFilename,
   getAspectRatio,
+  hasDuplicateTimestamp,
 } from "../videoUtils";
 import type { ExtractionSettings } from "@/types";
 
@@ -55,6 +59,20 @@ describe("buildFrameTimestamps", () => {
     expect(buildFrameTimestamps(0, baseSettings)).toEqual([]);
     expect(buildFrameTimestamps(Number.NaN, baseSettings)).toEqual([]);
   });
+
+  it("respects trimStart and trimEnd range and handles edge cases", () => {
+    const ranged = buildFrameTimestamps(10, { ...baseSettings, trimStart: 2, trimEnd: 5 });
+    expect(ranged[0]).toBe(2);
+    expect(ranged.every((t) => t >= 2 && t < 5)).toBe(true);
+    expect(ranged[ranged.length - 1]).toBeGreaterThan(4.9);
+
+    expect(buildFrameTimestamps(10, { ...baseSettings, trimStart: 5, trimEnd: 5 })).toEqual([]);
+    expect(buildFrameTimestamps(10, { ...baseSettings, trimStart: 6, trimEnd: 4 })).toEqual([]);
+
+    const clamped = buildFrameTimestamps(8, { ...baseSettings, trimStart: -2, trimEnd: 15 });
+    expect(clamped[0]).toBe(0);
+    expect(clamped.every((t) => t >= 0 && t < 8)).toBe(true);
+  });
 });
 
 describe("formatDuration", () => {
@@ -100,5 +118,52 @@ describe("estimateOutputBytes", () => {
     expect(jpegBytes).toBeGreaterThan(0);
     expect(pngBytes).toBeGreaterThan(jpegBytes);
     expect(estimateOutputBytes(0, 1920, 1080, baseSettings)).toBe(0);
+  });
+});
+
+describe("calculateScaledDimensions", () => {
+  it("preserves aspect ratio when downscaling and never upscales", () => {
+    expect(calculateScaledDimensions(3840, 2160, "original")).toEqual({
+      width: 3840,
+      height: 2160,
+    });
+    expect(calculateScaledDimensions(3840, 2160, "1080p")).toEqual({ width: 1920, height: 1080 });
+    expect(calculateScaledDimensions(3840, 2160, "720p")).toEqual({ width: 1280, height: 720 });
+    expect(calculateScaledDimensions(1280, 720, "1080p")).toEqual({ width: 1280, height: 720 });
+    expect(calculateScaledDimensions(640, 480, "720p")).toEqual({ width: 640, height: 480 });
+    expect(calculateScaledDimensions(1080, 1920, "1080p")).toEqual({ width: 608, height: 1080 });
+  });
+});
+
+describe("formatFrameFilename", () => {
+  it("renders default and custom templates and sanitizes illegal characters", () => {
+    const defaultName = formatFrameFilename(DEFAULT_FILENAME_TEMPLATE, {
+      baseName: "my:video*clip.mp4",
+      index: 3,
+      formattedTime: "00:01.25",
+      width: 1920,
+      height: 1080,
+      extension: "jpg",
+    });
+    expect(defaultName).toBe("my_video_clip_frame_0003_00m01s25.jpg");
+
+    const customName = formatFrameFilename("{name}/{width}x{height}_{index}_{timestamp}", {
+      baseName: "demo.mov",
+      index: 12,
+      formattedTime: "01:05.00",
+      width: 1280,
+      height: 720,
+      extension: "png",
+    });
+    expect(customName).toBe("demo_1280x720_0012_01m05s00.png");
+  });
+});
+
+describe("hasDuplicateTimestamp", () => {
+  it("detects duplicate timestamps within epsilon tolerance", () => {
+    const frames = [{ timestamp: 1.0 }, { timestamp: 2.5 }];
+    expect(hasDuplicateTimestamp(frames, 1.0)).toBe(true);
+    expect(hasDuplicateTimestamp(frames, 1.005)).toBe(true);
+    expect(hasDuplicateTimestamp(frames, 1.5)).toBe(false);
   });
 });
