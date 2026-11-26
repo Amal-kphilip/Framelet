@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Play, Pause, FileVideo, Loader2, X, Camera, RotateCcw } from "lucide-react";
+import { Play, Pause, FileVideo, Loader2, X, Camera, RotateCcw, Upload } from "lucide-react";
 import { VideoMetadata } from "@/types";
 import {
   formatBytes,
@@ -9,7 +9,6 @@ import {
   loadVideoMetadata,
   MAX_ALLOWED_DURATION_SECONDS,
 } from "@/lib/videoUtils";
-import Typography from "./Typography";
 
 interface VideoUploadZoneProps {
   videoMetadata: VideoMetadata | null;
@@ -23,6 +22,7 @@ interface VideoUploadZoneProps {
   trimEnd?: number;
   onTrimChange?: (start: number, end: number) => void;
   onResetTrim?: () => void;
+  frameTimestamps?: number[];
 }
 
 const ACCEPTED_EXTENSIONS_LABEL = `MP4 · WEBM · MOV · MKV · AVI · UP TO ${MAX_ALLOWED_DURATION_SECONDS}S`;
@@ -39,6 +39,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   trimEnd,
   onTrimChange,
   onResetTrim,
+  frameTimestamps = [],
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
@@ -168,6 +169,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
   const minGap = Math.min(0.25, duration * 0.05);
   const isTrimmed =
     duration > 0 && (effectiveTrimStart > 0.01 || effectiveTrimEnd < duration - 0.01);
+  const seekPercent = duration > 0 ? Math.min(100, (previewTime / duration) * 100) : 0;
 
   const clampTrimRange = (nextStart: number, nextEnd: number): [number, number] => {
     const s = Math.max(0, Math.min(duration - minGap, nextStart));
@@ -238,8 +240,10 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
     }
   };
 
+  const useDensityShading = frameTimestamps.length > 120;
+
   return (
-    <div className="w-full flex flex-col gap-[var(--space-md)]">
+    <div className="w-full flex flex-col gap-2.5">
       <input
         ref={fileInputRef}
         type="file"
@@ -249,9 +253,9 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
         className="hidden"
       />
 
-      <Typography variant="legal" muted className="hidden sm:inline">
+      <span className="hidden sm:inline text-xs font-mono tracking-wider text-muted-foreground">
         {ACCEPTED_EXTENSIONS_LABEL}
-      </Typography>
+      </span>
 
       {!videoMetadata ? (
         <div
@@ -264,72 +268,60 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`relative flex flex-col items-center justify-center w-full min-h-64 sm:min-h-80 md:min-h-96 p-6 sm:p-[var(--space-3xl)] gap-[var(--space-lg)] border-3 border-dashed rounded-corner transition-colors ${
+          className={`glass relative flex flex-col items-center justify-center w-full min-h-64 sm:min-h-80 md:min-h-96 p-6 sm:p-12 gap-5 rounded-3xl border-2 border-dashed transition-all duration-200 ${
             isDragging
-              ? "border-[var(--accent-primary)] bg-[var(--accent-secondary)]"
-              : "border-foreground"
+              ? "border-brand-accent bg-brand-accent/15 shadow-accent-strong scale-[1.005]"
+              : "border-brand-borderHover hover:border-brand-accent/50"
           } ${isLoadingFile || isProcessing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
         >
           <div className="flex flex-col items-center gap-4 text-foreground">
             {isLoadingFile ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="size-5 animate-spin text-muted-foreground" />
-                <Typography as="p" variant="label">
-                  Reading video file...
-                </Typography>
+              <div className="flex items-center gap-2.5">
+                <Loader2 className="size-6 animate-spin text-brand-accent" />
+                <p className="text-sm font-medium">Reading video file...</p>
               </div>
             ) : (
-              <div className="flex flex-col items-center text-center leading-tight">
-                <Typography as="p" variant="label" className="leading-tight">
-                  Drag & drop video
-                </Typography>
-                <Typography as="p" variant="label" className="leading-tight">
-                  or{" "}
-                  <Typography
-                    as="span"
-                    variant="label"
-                    weight={600}
-                    className="hover:underline text-[var(--accent-primary)]"
-                  >
-                    click to add
-                  </Typography>
-                </Typography>
-              </div>
+              <>
+                <div className="animate-float size-14 rounded-2xl bg-brand-accent/15 border border-brand-accent/30 flex items-center justify-center text-brand-accentText shadow-accent">
+                  <Upload className="size-6" aria-hidden="true" />
+                </div>
+                <div className="flex flex-col items-center text-center gap-1">
+                  <p className="font-display font-700 text-base sm:text-lg text-foreground">
+                    Drag &amp; drop a video here
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    or{" "}
+                    <span className="font-semibold text-brand-accentText hover:underline">
+                      click to browse
+                    </span>
+                  </p>
+                </div>
+              </>
             )}
           </div>
 
-          <Typography
-            as="p"
-            variant="bodySm"
-            weight={500}
-            muted
-            className="absolute right-4 sm:right-[var(--space-xl)] bottom-3 sm:bottom-[var(--space-md)]"
-          >
+          <p className="absolute right-5 sm:right-8 bottom-4 text-xs font-medium text-muted-foreground">
             {`Max ${MAX_ALLOWED_DURATION_SECONDS}s · Local processing`}
-          </Typography>
+          </p>
         </div>
       ) : (
-        <div className="w-full border-2 border-foreground rounded-corner bg-background p-4 sm:p-[var(--space-xl)] flex flex-col gap-4 sm:gap-[var(--space-lg)] overflow-hidden">
+        <div className="glass w-full border border-brand-border rounded-3xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 overflow-hidden">
           {/* File header row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-[var(--space-md)] border-b-2 border-border">
-            <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
-              <FileVideo
-                className="shrink-0 size-5 text-foreground mt-0.5 sm:mt-0"
-                strokeWidth={2}
-              />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-brand-border">
+            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+              <div className="size-9 rounded-xl bg-brand-accent/15 border border-brand-accent/30 flex items-center justify-center text-brand-accentText shrink-0">
+                <FileVideo className="size-4" strokeWidth={2} aria-hidden="true" />
+              </div>
               <div className="min-w-0 flex-1">
-                <Typography
-                  as="h3"
-                  variant="label"
-                  weight={600}
-                  className="truncate"
+                <h3
+                  className="text-sm font-semibold text-foreground truncate"
                   title={videoMetadata.name}
                 >
                   {videoMetadata.name}
-                </Typography>
-                <Typography as="p" variant="legal" muted className="leading-snug mt-0.5">
+                </h3>
+                <p className="text-xs text-muted-foreground font-mono leading-snug mt-0.5">
                   {`${videoMetadata.width} × ${videoMetadata.height} (${videoMetadata.aspectRatio}) · ${videoMetadata.formattedDuration} · ${formatBytes(videoMetadata.size)}`}
-                </Typography>
+                </p>
               </div>
             </div>
 
@@ -338,7 +330,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                 type="button"
                 disabled={isProcessing}
                 onClick={openFilePicker}
-                className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-50 whitespace-nowrap"
+                className="h-9 px-3.5 rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-xs font-semibold text-foreground transition-colors disabled:opacity-50 whitespace-nowrap"
               >
                 Replace
               </button>
@@ -348,7 +340,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                   disabled={isProcessing}
                   onClick={onReset}
                   aria-label={`Remove ${videoMetadata.name}`}
-                  className="size-9 shrink-0 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-50"
+                  className="size-9 shrink-0 inline-flex items-center justify-center rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-foreground transition-colors disabled:opacity-50"
                 >
                   <X className="size-4" />
                 </button>
@@ -363,7 +355,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
             aria-label="Video player controls. Press C to capture current frame."
             onKeyDown={handlePlayerKeyDown}
           >
-            <div className="relative w-full aspect-video max-h-[50vh] bg-black border-2 border-foreground rounded-corner overflow-hidden flex items-center justify-center">
+            <div className="relative w-full aspect-video max-h-[50vh] bg-black border border-brand-border rounded-2xl overflow-hidden flex items-center justify-center">
               <video
                 ref={videoRef}
                 src={videoMetadata.url}
@@ -377,28 +369,59 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
               />
             </div>
 
-            {/* Playback & scrub controls — constrained with min-w-0 so range slider never overflows mobile screen */}
+            {/* Playback & scrub controls with tick marks */}
             <div className="flex items-center gap-2 sm:gap-3 w-full min-w-0">
               <button
                 type="button"
                 onClick={togglePlay}
                 aria-label={isPlaying ? "Pause video preview" : "Play video preview"}
-                className="size-9 shrink-0 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+                className="size-9 shrink-0 inline-flex items-center justify-center rounded-xl border border-brand-border bg-brand-card/80 hover:border-brand-accent/40 text-foreground transition-colors"
               >
                 {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
               </button>
 
-              <input
-                type="range"
-                min={0}
-                max={Math.max(videoMetadata.duration, 0.01)}
-                step={0.05}
-                value={Math.min(previewTime, videoMetadata.duration)}
-                onChange={seekPreview}
-                aria-label="Seek video preview"
-                aria-valuetext={`${formatPreviewTime(previewTime)} of ${videoMetadata.formattedDuration}`}
-                className="flex-1 min-w-0 w-full"
-              />
+              <div className="relative flex-1 min-w-0 flex flex-col justify-center">
+                <input
+                  type="range"
+                  min={0}
+                  max={Math.max(videoMetadata.duration, 0.01)}
+                  step={0.05}
+                  value={Math.min(previewTime, videoMetadata.duration)}
+                  onChange={seekPreview}
+                  aria-label="Seek video preview"
+                  aria-valuetext={`${formatPreviewTime(previewTime)} of ${videoMetadata.formattedDuration}`}
+                  style={{
+                    background: `linear-gradient(to right, var(--slider-accent) 0%, var(--slider-accent) ${seekPercent}%, var(--slider-track) ${seekPercent}%, var(--slider-track) 100%)`,
+                  }}
+                  className="accent-slider w-full relative z-10"
+                />
+
+                {/* Display-only scrubber tick marks from buildFrameTimestamps */}
+                {duration > 0 && frameTimestamps.length > 0 && (
+                  <div
+                    aria-hidden="true"
+                    className="relative w-full h-2 mt-1 pointer-events-none overflow-hidden rounded-full"
+                  >
+                    {useDensityShading ? (
+                      <div
+                        className="absolute inset-y-0 rounded-full bg-brand-accent/35"
+                        style={{
+                          left: `${(effectiveTrimStart / duration) * 100}%`,
+                          width: `${((effectiveTrimEnd - effectiveTrimStart) / duration) * 100}%`,
+                        }}
+                      />
+                    ) : (
+                      frameTimestamps.map((t, idx) => (
+                        <span
+                          key={idx}
+                          className="absolute top-0 bottom-0 w-px bg-brand-accent/65"
+                          style={{ left: `${Math.min(100, (t / duration) * 100)}%` }}
+                        />
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
 
               <span className="text-xs font-mono font-semibold text-foreground shrink-0 tabular-nums whitespace-nowrap">
                 {formatPreviewTime(previewTime)}/{videoMetadata.formattedDuration}
@@ -411,7 +434,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                   onClick={() => videoRef.current && onCaptureFrame(videoRef.current)}
                   title="Capture current frame (C)"
                   aria-label="Capture current frame (shortcut C)"
-                  className="h-9 px-2.5 sm:px-3 shrink-0 inline-flex items-center justify-center gap-1.5 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground text-xs font-semibold transition-colors disabled:opacity-50 whitespace-nowrap"
+                  className="h-9 px-2.5 sm:px-3.5 shrink-0 inline-flex items-center justify-center gap-1.5 rounded-xl border border-brand-border bg-brand-card/80 hover:border-brand-accent/50 hover:text-brand-accentText text-foreground text-xs font-semibold transition-colors disabled:opacity-50 whitespace-nowrap"
                 >
                   {isCapturing ? (
                     <Loader2 className="size-4 animate-spin" />
@@ -435,7 +458,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                       type="button"
                       disabled={isProcessing}
                       onClick={onResetTrim}
-                      className="text-xs font-semibold text-foreground hover:underline inline-flex items-center gap-1 disabled:opacity-50"
+                      className="text-xs font-semibold text-brand-accentText hover:underline inline-flex items-center gap-1 disabled:opacity-50"
                     >
                       <RotateCcw className="size-3" />
                       <span>Reset range</span>
@@ -458,9 +481,9 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                     draggingHandleRef.current = null;
                   }}
                 >
-                  <div className="w-full h-2 rounded-corner border-2 border-foreground bg-secondary relative overflow-hidden">
+                  <div className="w-full h-2 rounded-full border border-brand-border bg-secondary relative overflow-hidden">
                     <div
-                      className="absolute inset-y-0 bg-[var(--accent-primary)]/40"
+                      className="absolute inset-y-0 bg-brand-accent/45"
                       style={{
                         left: `${(effectiveTrimStart / duration) * 100}%`,
                         width: `${((effectiveTrimEnd - effectiveTrimStart) / duration) * 100}%`,
@@ -485,7 +508,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                       updateTrimFromPointer(e.clientX, "start");
                     }}
                     style={{ left: `${(effectiveTrimStart / duration) * 100}%` }}
-                    className="absolute -translate-x-1/2 size-4 rounded-corner border-2 border-foreground bg-background hover:bg-muted cursor-ew-resize shadow-sm"
+                    className="absolute -translate-x-1/2 size-4 rounded-full border-2 border-brand-accent bg-background hover:scale-110 cursor-ew-resize shadow-accent transition-transform"
                   />
 
                   {/* End Handle */}
@@ -505,7 +528,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
                       updateTrimFromPointer(e.clientX, "end");
                     }}
                     style={{ left: `${(effectiveTrimEnd / duration) * 100}%` }}
-                    className="absolute -translate-x-1/2 size-4 rounded-corner border-2 border-foreground bg-foreground cursor-ew-resize shadow-sm"
+                    className="absolute -translate-x-1/2 size-4 rounded-full border-2 border-white bg-brand-accent hover:scale-110 cursor-ew-resize shadow-accent transition-transform"
                   />
                 </div>
               </div>
