@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1](https://github.com/Amal-kphilip/Framelet/compare/v1.0.0...v1.0.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **deps:** regenerate package-lock.json ([#12](https://github.com/Amal-kphilip/Framelet/issues/12)) ([c3ebc2b](https://github.com/Amal-kphilip/Framelet/commit/c3ebc2badc491da66612a31af3938a82465b0aab))
+
 ## 1.0.0 (2026-11-25)
 
 
