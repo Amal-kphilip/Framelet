@@ -142,7 +142,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
           type="button"
           disabled={isExporting}
           onClick={handleDownloadZip}
-          className="text-xs sm:text-sm font-semibold h-9 sm:h-10 px-3 sm:px-5 rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 sm:gap-2 disabled:opacity-50 whitespace-nowrap shrink-0"
+          className="text-xs sm:text-sm font-semibold h-10 sm:h-11 px-4 sm:px-6 rounded-corner border-2 border-foreground bg-[var(--brand-red)] text-white hover:opacity-90 transition-opacity inline-flex items-center gap-2 disabled:opacity-50 whitespace-nowrap shrink-0"
         >
           {isExporting ? (
             <>
@@ -157,7 +157,9 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
           ) : (
             <>
               <Archive className="size-4 shrink-0" />
-              <span>ZIP ({selectedCount})</span>
+              <span>
+                Download ZIP ({selectedCount}) · {formatBytes(selectedBytes)}
+              </span>
             </>
           )}
         </button>

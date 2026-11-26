@@ -293,7 +293,7 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
           type="button"
           disabled={isProcessing || blockedBySafetyLimit}
           onClick={onStartExtraction}
-          className="type-fluid type-button-lg w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-6 rounded-corner bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="type-fluid type-button-lg w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-6 rounded-corner border-2 border-foreground bg-[var(--brand-red)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {isProcessing && <Loader2 className="size-4 animate-spin" />}
           <span>

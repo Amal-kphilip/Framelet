@@ -263,7 +263,7 @@ export const VideoUploadZone: React.FC<VideoUploadZoneProps> = ({
 
           {/* Crisp video preview monitor */}
           <div className="flex flex-col gap-3 w-full">
-            <div className="relative w-full aspect-video max-h-72 sm:max-h-80 bg-black border-2 border-foreground rounded-corner overflow-hidden flex items-center justify-center">
+            <div className="relative w-full aspect-video max-h-[50vh] bg-black border-2 border-foreground rounded-corner overflow-hidden flex items-center justify-center">
               <video
                 ref={videoRef}
                 src={videoMetadata.url}
