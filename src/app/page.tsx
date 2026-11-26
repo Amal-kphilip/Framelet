@@ -75,10 +75,18 @@ export default function Home() {
     };
   }, []);
 
-  const addToast = useCallback((type: ToastMessage["type"], title: string, message: string) => {
-    const id = `toast_${Date.now()}_${Math.random()}`;
-    setToasts((prev) => [...prev, { id, type, title, message }]);
-  }, []);
+  const addToast = useCallback(
+    (type: ToastMessage["type"], title: string, message: string, fileName?: string) => {
+      const id = `toast_${Date.now()}_${Math.random()}`;
+      setToasts((prev) => {
+        const filtered = prev.filter(
+          (t) => !(t.type === type && t.title === title && t.message === message)
+        );
+        return [...filtered, { id, type, title, message, fileName }].slice(-3);
+      });
+    },
+    []
+  );
 
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -108,8 +116,9 @@ export default function Home() {
       setProgressDetails({ current: 0, total: 0, status: "" });
       addToast(
         "success",
-        "Video queued",
-        `Loaded "${metadata.name}" (${metadata.formattedDuration}, ${metadata.width}×${metadata.height}).`
+        "Video loaded",
+        `${metadata.formattedDuration} · ${metadata.width}×${metadata.height}`,
+        metadata.name
       );
     },
     [addToast, releaseFrameUrls]
@@ -172,7 +181,12 @@ export default function Home() {
       setFrames(extractedFrames);
       setPreviewFrame(null);
       setIsSettingsCollapsed(true);
-      addToast("success", "Extraction complete", `Captured ${extractedFrames.length} frames.`);
+      addToast(
+        "success",
+        "Extraction complete",
+        `Extracted ${extractedFrames.length} ${extractedFrames.length === 1 ? "frame" : "frames"}.`,
+        videoMetadata.name
+      );
       window.requestAnimationFrame(() => {
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         gallerySectionRef.current?.scrollIntoView({
@@ -187,7 +201,7 @@ export default function Home() {
           ? err
           : new Error("An unexpected error occurred during frame extraction.");
       if (controller.signal.aborted || error.name === "AbortError") {
-        addToast("info", "Extraction cancelled", "The current extraction was stopped.");
+        addToast("info", "Extraction cancelled", "Frame extraction was stopped before completion.");
       } else {
         addToast("error", "Extraction failed", error.message);
       }
@@ -207,7 +221,7 @@ export default function Home() {
         addToast(
           "warning",
           "Frame limit reached",
-          `Cannot capture more than ${MAX_EXTRACTED_FRAMES} frames in a single gallery.`
+          `Gallery is capped at ${MAX_EXTRACTED_FRAMES} frames per session.`
         );
         return;
       }
@@ -216,8 +230,8 @@ export default function Home() {
       if (hasDuplicateTimestamp(frames, timestamp)) {
         addToast(
           "info",
-          "Already captured",
-          "A frame at this timestamp is already in the gallery."
+          "Frame already captured",
+          "A frame at this timestamp is already in your gallery."
         );
         return;
       }
