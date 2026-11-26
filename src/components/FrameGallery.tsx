@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { ExtractedFrame } from "@/types";
 import { downloadSingleFrame } from "@/lib/zipExporter";
-import Typography from "./Typography";
 
 interface FrameGalleryProps {
   frames: ExtractedFrame[];
@@ -113,27 +112,27 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
   };
 
   return (
-    <section
-      aria-labelledby="frame-gallery-heading"
-      className="w-full flex flex-col gap-[var(--space-lg)]"
-    >
-      {/* Toolbar */}
-      <div className="border-2 border-foreground rounded-corner bg-background p-4 sm:p-[var(--space-xl)] flex flex-col gap-4 sm:gap-[var(--space-lg)] overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[var(--space-md)]">
+    <section aria-labelledby="frame-gallery-heading" className="w-full flex flex-col gap-5">
+      {/* Glass Toolbar */}
+      <div className="glass rounded-3xl border border-brand-border p-4 sm:p-6 flex flex-col gap-4 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <Typography as="h2" id="frame-gallery-heading" variant="label" weight={600}>
+            <h2
+              id="frame-gallery-heading"
+              className="font-display font-700 text-base sm:text-lg text-foreground"
+            >
               Extracted frames
-            </Typography>
-            <Typography as="p" variant="bodySm" muted>
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {selectedCount} of {frames.length} selected · {filteredFrames.length} shown
-            </Typography>
+            </p>
           </div>
 
-          <div className="flex items-center flex-wrap gap-[var(--space-sm)]">
+          <div className="flex items-center flex-wrap gap-2">
             <button
               type="button"
               onClick={isAllSelected ? onDeselectAll : onSelectAll}
-              className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-1.5 transition-colors"
+              className="h-9 px-3 rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-xs font-semibold text-foreground inline-flex items-center gap-1.5 transition-colors"
             >
               {isAllSelected ? <Square className="size-4" /> : <CheckSquare className="size-4" />}
               <span>{isAllSelected ? "Deselect all" : "Select all"}</span>
@@ -141,7 +140,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
             <button
               type="button"
               onClick={onInvertSelection}
-              className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-1.5 transition-colors"
+              className="h-9 px-3 rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-xs font-semibold text-foreground inline-flex items-center gap-1.5 transition-colors"
             >
               <RefreshCw className="size-4" />
               <span>Invert</span>
@@ -150,9 +149,9 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
             <div
               role="group"
               aria-label="Select every Nth frame"
-              className="inline-flex items-center rounded-corner border-2 border-foreground overflow-hidden bg-background"
+              className="inline-flex items-center rounded-xl border border-brand-border overflow-hidden bg-brand-card/70"
             >
-              <span className="px-2 text-xs text-muted-foreground font-semibold whitespace-nowrap">
+              <span className="px-2.5 text-xs text-muted-foreground font-semibold whitespace-nowrap">
                 Every
               </span>
               {[2, 3, 5, 10].map((n) => (
@@ -162,7 +161,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                   onClick={() => onSelectEveryNth(n)}
                   title={`Select every ${n} frames`}
                   aria-label={`Select every ${n} frames`}
-                  className="h-9 px-2.5 text-xs font-mono font-semibold border-l-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+                  className="h-9 px-2.5 text-xs font-mono font-semibold border-l border-brand-border hover:bg-brand-accent/15 hover:text-brand-accentText text-foreground transition-colors"
                 >
                   {n}
                 </button>
@@ -172,7 +171,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
         </div>
 
         {/* Search, Filter, Sort */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-[var(--space-md)]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
             <label htmlFor="frame-search" className="sr-only">
@@ -187,7 +186,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 setCurrentPage(1);
               }}
               placeholder="Search frame or time"
-              className="type-fluid type-button w-full h-10 rounded-corner border-2 border-foreground bg-background pl-9 pr-3 text-foreground placeholder:text-muted-foreground"
+              className="w-full h-10 rounded-xl border border-brand-border bg-brand-surface/80 pl-9 pr-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:border-brand-accent focus:outline-none"
             />
           </div>
 
@@ -202,14 +201,14 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 setFilter(event.target.value as FilterMode);
                 setCurrentPage(1);
               }}
-              className="type-fluid type-button appearance-none w-full h-10 rounded-corner border-2 border-foreground bg-background hover:bg-muted pl-3 pr-9 text-foreground cursor-pointer transition-colors"
+              className="appearance-none w-full h-10 rounded-xl border border-brand-border bg-brand-surface/80 hover:border-brand-accent/40 pl-3 pr-9 text-xs sm:text-sm font-medium text-foreground cursor-pointer transition-colors focus:border-brand-accent focus:outline-none"
             >
               <option value="all">All frames</option>
               <option value="selected">Selected only</option>
               <option value="unselected">Unselected only</option>
             </select>
             <ChevronDown
-              className="size-4 text-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+              className="size-4 text-muted-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
               aria-hidden="true"
             />
           </div>
@@ -225,45 +224,45 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 setSort(event.target.value as SortMode);
                 setCurrentPage(1);
               }}
-              className="type-fluid type-button appearance-none w-full h-10 rounded-corner border-2 border-foreground bg-background hover:bg-muted pl-3 pr-9 text-foreground cursor-pointer transition-colors"
+              className="appearance-none w-full h-10 rounded-xl border border-brand-border bg-brand-surface/80 hover:border-brand-accent/40 pl-3 pr-9 text-xs sm:text-sm font-medium text-foreground cursor-pointer transition-colors focus:border-brand-accent focus:outline-none"
             >
               <option value="time-asc">Oldest timestamp first</option>
               <option value="time-desc">Newest timestamp first</option>
               <option value="size-desc">Largest file first</option>
             </select>
             <ChevronDown
-              className="size-4 text-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+              className="size-4 text-muted-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
               aria-hidden="true"
             />
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <Typography as="span" variant="legal" muted>
+          <span className="text-xs text-muted-foreground">
             {filteredFrames.length
               ? `Showing ${firstVisible}–${lastVisible} of ${filteredFrames.length}`
               : "No frames match these filters"}
-          </Typography>
-          <Typography as="span" variant="legal" muted className="hidden sm:inline">
+          </span>
+          <span className="hidden sm:inline text-xs text-muted-foreground">
             Click to select · Double-click to expand
-          </Typography>
+          </span>
         </div>
       </div>
 
-      {/* Zero-Lag Crisp Frame Grid */}
+      {/* Frame Grid */}
       {visibleFrames.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-[var(--space-md)] items-start">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 items-start">
           {visibleFrames.map((frame) => (
             <article
               key={frame.id}
-              className={`group relative rounded-corner border-2 overflow-hidden bg-background transition-all ${
+              className={`group relative glass rounded-2xl border overflow-hidden transition-all duration-200 hover:-translate-y-0.5 ${
                 frame.selected
-                  ? "border-foreground outline outline-1 outline-[var(--accent-primary)]"
-                  : "border-foreground opacity-75 hover:opacity-100"
+                  ? "border-brand-accent ring-1 ring-brand-accent shadow-accent"
+                  : "border-brand-border opacity-75 hover:opacity-100"
               }`}
             >
               <div
-                className="relative w-full overflow-hidden bg-secondary flex items-center justify-center cursor-pointer"
+                className="relative w-full overflow-hidden bg-brand-surface flex items-center justify-center cursor-pointer"
                 style={{ aspectRatio: `${frame.width} / ${frame.height}` }}
                 onClick={(e) => handleCardClick(e, frame)}
                 onDoubleClick={(e) => {
@@ -293,17 +292,17 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 />
 
                 {/* Frame Index Badge */}
-                <div className="absolute top-2 left-2 z-10 px-1.5 py-0.5 rounded-corner border border-foreground bg-background text-foreground text-xs font-mono font-semibold pointer-events-none">
+                <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md border border-brand-border bg-brand-surface/85 backdrop-blur-sm text-foreground text-xs font-mono font-semibold pointer-events-none">
                   #{frame.index}
                 </div>
 
                 {/* Selection Checkbox Badge */}
                 <div className="absolute top-2 right-2 z-10 pointer-events-none">
                   <span
-                    className={`size-6 rounded-corner border-2 flex items-center justify-center transition-colors ${
+                    className={`size-6 rounded-lg border flex items-center justify-center transition-colors ${
                       frame.selected
-                        ? "border-foreground bg-[var(--accent-primary)] text-white"
-                        : "border-foreground bg-background text-transparent"
+                        ? "border-brand-accent bg-brand-accent text-[#0b0b0d]"
+                        : "border-brand-border bg-brand-surface/80 text-transparent"
                     }`}
                   >
                     <Check className="size-4 stroke-[2.5]" aria-hidden="true" />
@@ -312,16 +311,11 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               </div>
 
               {/* Card Footer */}
-              <div className="p-2 flex flex-col gap-1 border-t-2 border-foreground bg-background">
+              <div className="p-2.5 flex flex-col gap-1 border-t border-brand-border bg-brand-card/60">
                 <div className="flex items-center justify-between gap-1.5 min-w-0">
-                  <Typography
-                    as="span"
-                    variant="legal"
-                    weight={600}
-                    className="font-mono leading-tight"
-                  >
+                  <span className="text-xs font-mono font-semibold text-foreground leading-tight">
                     {frame.formattedTime}
-                  </Typography>
+                  </span>
 
                   <div className="flex items-center gap-1 shrink-0">
                     <button
@@ -329,7 +323,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                       aria-label={`Preview frame ${frame.index}`}
                       title="Expand preview"
                       onClick={() => onPreviewFrame(frame)}
-                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-lg border border-brand-border bg-brand-surface/80 hover:border-brand-accent/40 text-foreground transition-colors"
                     >
                       <ZoomIn className="size-3.5" />
                     </button>
@@ -338,34 +332,27 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                       aria-label={`Download frame ${frame.index}`}
                       title="Download frame"
                       onClick={() => downloadSingleFrame(frame, videoName, filenameTemplate)}
-                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-lg bg-brand-accent text-[#0b0b0d] hover:brightness-105 transition-all"
                     >
                       <Download className="size-3.5" />
                     </button>
                   </div>
                 </div>
 
-                <Typography
-                  as="span"
-                  variant="legal"
-                  muted
-                  className="font-mono block leading-tight break-words"
-                >
+                <span className="text-xs text-muted-foreground font-mono block leading-tight break-words">
                   {frame.width}×{frame.height} ·{" "}
                   {(frame.sizeBytes / 1024).toFixed(frame.sizeBytes < 1024 * 100 ? 1 : 0)} KB
-                </Typography>
+                </span>
               </div>
             </article>
           ))}
         </div>
       ) : (
-        <div className="border-2 border-foreground rounded-corner bg-background p-[var(--space-2xl)] flex flex-col items-center text-center gap-[var(--space-sm)]">
-          <Typography as="p" variant="label" weight={600}>
-            No matching frames
-          </Typography>
-          <Typography as="p" variant="bodySm" muted>
+        <div className="glass rounded-3xl border border-brand-border p-8 flex flex-col items-center text-center gap-2">
+          <p className="text-sm font-semibold text-foreground">No matching frames</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Change the timestamp search or selection filter to see results.
-          </Typography>
+          </p>
           <button
             type="button"
             onClick={() => {
@@ -373,7 +360,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               setFilter("all");
               setCurrentPage(1);
             }}
-            className="mt-2 type-fluid type-button h-9 px-4 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+            className="mt-2 h-9 px-4 rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-xs font-semibold text-foreground transition-colors"
           >
             Clear filters
           </button>
@@ -384,25 +371,25 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
       {pageCount > 1 && (
         <nav
           aria-label="Frame gallery pages"
-          className="flex items-center justify-center gap-[var(--space-md)] pt-2"
+          className="flex items-center justify-center gap-3 pt-2"
         >
           <button
             type="button"
             onClick={() => setCurrentPage(Math.max(1, safePage - 1))}
             disabled={safePage === 1}
-            className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-1 disabled:opacity-40 transition-colors"
+            className="h-9 px-3 rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-xs font-semibold text-foreground inline-flex items-center gap-1 disabled:opacity-40 transition-colors"
           >
             <ChevronLeft className="size-4" />
             <span>Previous</span>
           </button>
-          <Typography as="span" variant="bodySm" weight={600} className="font-mono">
+          <span className="text-xs sm:text-sm font-semibold font-mono text-foreground">
             Page {safePage} of {pageCount}
-          </Typography>
+          </span>
           <button
             type="button"
             onClick={() => setCurrentPage(Math.min(pageCount, safePage + 1))}
             disabled={safePage === pageCount}
-            className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-1 disabled:opacity-40 transition-colors"
+            className="h-9 px-3 rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-xs font-semibold text-foreground inline-flex items-center gap-1 disabled:opacity-40 transition-colors"
           >
             <span>Next</span>
             <ChevronRight className="size-4" />
@@ -422,20 +409,17 @@ export const FrameGallerySkeleton: React.FC<{
     <section
       aria-label="Extracting frames"
       aria-busy="true"
-      className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-[var(--space-md)]"
+      className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4"
     >
       {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="rounded-corner border-2 border-foreground overflow-hidden bg-background"
-        >
+        <div key={index} className="glass rounded-2xl border border-brand-border overflow-hidden">
           <div
-            className="w-full bg-secondary animate-pulse motion-reduce:animate-none"
+            className="w-full bg-brand-card animate-pulse motion-reduce:animate-none"
             style={{ aspectRatio: `${width} / ${height}` }}
           />
-          <div className="p-2 border-t-2 border-foreground flex flex-col gap-1.5">
-            <div className="h-3.5 w-16 rounded-corner bg-secondary animate-pulse motion-reduce:animate-none" />
-            <div className="h-3 w-28 max-w-full rounded-corner bg-secondary animate-pulse motion-reduce:animate-none" />
+          <div className="p-2.5 border-t border-brand-border flex flex-col gap-1.5">
+            <div className="h-3.5 w-16 rounded-md bg-brand-card animate-pulse motion-reduce:animate-none" />
+            <div className="h-3 w-28 max-w-full rounded-md bg-brand-card animate-pulse motion-reduce:animate-none" />
           </div>
         </div>
       ))}
