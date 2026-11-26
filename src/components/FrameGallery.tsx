@@ -11,6 +11,7 @@ import {
   ZoomIn,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Search,
 } from "lucide-react";
 import { ExtractedFrame } from "@/types";
@@ -102,8 +103,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               Extracted frames
             </Typography>
             <Typography as="p" variant="bodySm" muted>
-              {selectedCount} of {frames.length} selected · {filteredFrames.length} shown ·
-              Double-click a frame to expand
+              {selectedCount} of {frames.length} selected · {filteredFrames.length} shown
             </Typography>
           </div>
 
@@ -142,12 +142,12 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 setQuery(event.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search frame # or timestamp..."
+              placeholder="Search frame or time"
               className="type-fluid type-button w-full h-10 rounded-corner border-2 border-foreground bg-background pl-9 pr-3 text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="frame-filter" className="sr-only">
               Filter frame selection
             </label>
@@ -158,15 +158,19 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 setFilter(event.target.value as FilterMode);
                 setCurrentPage(1);
               }}
-              className="type-fluid type-button w-full h-10 rounded-corner border-2 border-foreground bg-background px-3 text-foreground"
+              className="type-fluid type-button appearance-none w-full h-10 rounded-corner border-2 border-foreground bg-background hover:bg-muted pl-3 pr-9 text-foreground cursor-pointer transition-colors"
             >
               <option value="all">All frames</option>
               <option value="selected">Selected only</option>
               <option value="unselected">Unselected only</option>
             </select>
+            <ChevronDown
+              className="size-4 text-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+              aria-hidden="true"
+            />
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="frame-sort" className="sr-only">
               Sort frames
             </label>
@@ -177,12 +181,16 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 setSort(event.target.value as SortMode);
                 setCurrentPage(1);
               }}
-              className="type-fluid type-button w-full h-10 rounded-corner border-2 border-foreground bg-background px-3 text-foreground"
+              className="type-fluid type-button appearance-none w-full h-10 rounded-corner border-2 border-foreground bg-background hover:bg-muted pl-3 pr-9 text-foreground cursor-pointer transition-colors"
             >
               <option value="time-asc">Oldest timestamp first</option>
               <option value="time-desc">Newest timestamp first</option>
               <option value="size-desc">Largest file first</option>
             </select>
+            <ChevronDown
+              className="size-4 text-foreground pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+              aria-hidden="true"
+            />
           </div>
         </div>
 
@@ -204,10 +212,10 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
           {visibleFrames.map((frame) => (
             <article
               key={frame.id}
-              className={`group relative rounded-corner border-2 overflow-hidden bg-background transition-colors ${
+              className={`group relative rounded-corner border-2 overflow-hidden bg-background transition-all ${
                 frame.selected
-                  ? "border-[var(--accent-primary)] ring-2 ring-[var(--accent-primary)]"
-                  : "border-foreground"
+                  ? "border-foreground outline outline-1 outline-[var(--accent-primary)]"
+                  : "border-foreground opacity-75 hover:opacity-100"
               }`}
             >
               <div
@@ -241,7 +249,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 />
 
                 {/* Frame Index Badge */}
-                <div className="absolute top-2 left-2 z-10 px-1.5 py-0.5 rounded-corner border border-foreground bg-background text-foreground text-[11px] font-mono font-semibold pointer-events-none">
+                <div className="absolute top-2 left-2 z-10 px-1.5 py-0.5 rounded-corner border border-foreground bg-background text-foreground text-xs font-mono font-semibold pointer-events-none">
                   #{frame.index}
                 </div>
 
@@ -260,47 +268,48 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               </div>
 
               {/* Card Footer */}
-              <div className="p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-t-2 border-foreground bg-background">
-                <div className="min-w-0">
+              <div className="p-2 flex flex-col gap-1 border-t-2 border-foreground bg-background">
+                <div className="flex items-center justify-between gap-1.5 min-w-0">
                   <Typography
                     as="span"
                     variant="legal"
                     weight={600}
-                    className="font-mono block leading-tight"
+                    className="font-mono leading-tight"
                   >
                     {frame.formattedTime}
                   </Typography>
-                  <Typography
-                    as="span"
-                    variant="legal"
-                    muted
-                    className="font-mono block leading-tight truncate"
-                  >
-                    {frame.width}×{frame.height} ·{" "}
-                    {(frame.sizeBytes / 1024).toFixed(frame.sizeBytes < 1024 * 100 ? 1 : 0)} KB
-                  </Typography>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      aria-label={`Preview frame ${frame.index}`}
+                      title="Expand preview"
+                      onClick={() => onPreviewFrame(frame)}
+                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+                    >
+                      <ZoomIn className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Download frame ${frame.index}`}
+                      title="Download frame"
+                      onClick={() => downloadSingleFrame(frame, videoName)}
+                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                    >
+                      <Download className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    aria-label={`Preview frame ${frame.index}`}
-                    title="Expand preview"
-                    onClick={() => onPreviewFrame(frame)}
-                    className="size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
-                  >
-                    <ZoomIn className="size-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Download frame ${frame.index}`}
-                    title="Download frame"
-                    onClick={() => downloadSingleFrame(frame, videoName)}
-                    className="size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-                  >
-                    <Download className="size-3.5" />
-                  </button>
-                </div>
+                <Typography
+                  as="span"
+                  variant="legal"
+                  muted
+                  className="font-mono block leading-tight break-words"
+                >
+                  {frame.width}×{frame.height} ·{" "}
+                  {(frame.sizeBytes / 1024).toFixed(frame.sizeBytes < 1024 * 100 ? 1 : 0)} KB
+                </Typography>
               </div>
             </article>
           ))}
@@ -356,6 +365,36 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
           </button>
         </nav>
       )}
+    </section>
+  );
+};
+
+export const FrameGallerySkeleton: React.FC<{
+  width?: number;
+  height?: number;
+  count?: number;
+}> = ({ width = 16, height = 9, count = 8 }) => {
+  return (
+    <section
+      aria-label="Extracting frames"
+      aria-busy="true"
+      className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-[var(--space-md)]"
+    >
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className="rounded-corner border-2 border-foreground overflow-hidden bg-background"
+        >
+          <div
+            className="w-full bg-secondary animate-pulse motion-reduce:animate-none"
+            style={{ aspectRatio: `${width} / ${height}` }}
+          />
+          <div className="p-2 border-t-2 border-foreground flex flex-col gap-1.5">
+            <div className="h-3.5 w-16 rounded-corner bg-secondary animate-pulse motion-reduce:animate-none" />
+            <div className="h-3 w-28 max-w-full rounded-corner bg-secondary animate-pulse motion-reduce:animate-none" />
+          </div>
+        </div>
+      ))}
     </section>
   );
 };

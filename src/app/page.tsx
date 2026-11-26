@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import { FileVideo, SlidersHorizontal } from "lucide-react";
 import { Header } from "@/components/Header";
 import { VideoUploadZone } from "@/components/VideoUploadZone";
 import { ExtractionControls } from "@/components/ExtractionControls";
 import { LiquidProgressBar } from "@/components/LiquidProgressBar";
-import { FrameGallery } from "@/components/FrameGallery";
+import { FrameGallery, FrameGallerySkeleton } from "@/components/FrameGallery";
 import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { FramePreviewModal } from "@/components/FramePreviewModal";
 import { ToastContainer } from "@/components/Toast";
@@ -31,11 +32,14 @@ export default function Home() {
   const [frames, setFrames] = useState<ExtractedFrame[]>([]);
   const [previewFrame, setPreviewFrame] = useState<ExtractedFrame | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [floatingBarHeight, setFloatingBarHeight] = useState(0);
+  const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(false);
 
   const extractionControllerRef = useRef<AbortController | null>(null);
   const extractionRunIdRef = useRef(0);
   const videoUrlRef = useRef<string | null>(null);
   const frameUrlsRef = useRef<Set<string>>(new Set());
+  const gallerySectionRef = useRef<HTMLDivElement | null>(null);
 
   const releaseFrameUrls = useCallback(() => {
     frameUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
@@ -77,6 +81,7 @@ export default function Home() {
       setFrames([]);
       setPreviewFrame(null);
       setIsProcessing(false);
+      setIsSettingsCollapsed(false);
       setProgress(0);
       setProgressDetails({ current: 0, total: 0, status: "" });
       addToast(
@@ -98,6 +103,7 @@ export default function Home() {
     setVideoMetadata(null);
     setFrames([]);
     setIsProcessing(false);
+    setIsSettingsCollapsed(false);
     setProgress(0);
     setProgressDetails({ current: 0, total: 0, status: "" });
     setPreviewFrame(null);
@@ -143,11 +149,19 @@ export default function Home() {
       frameUrlsRef.current = new Set(extractedFrames.map((frame) => frame.dataUrl));
       setFrames(extractedFrames);
       setPreviewFrame(null);
+      setIsSettingsCollapsed(true);
       addToast(
         "success",
         "Extraction complete",
         `Captured ${extractedFrames.length} frames at ${videoMetadata.width}×${videoMetadata.height}.`
       );
+      window.requestAnimationFrame(() => {
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        gallerySectionRef.current?.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start",
+        });
+      });
     } catch (err: unknown) {
       if (runId !== extractionRunIdRef.current) return;
       const error =
@@ -184,11 +198,14 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col flex-1 w-full">
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+    <div
+      className="flex flex-col flex-1 w-full"
+      style={floatingBarHeight > 0 ? { paddingBottom: `${floatingBarHeight}px` } : undefined}
+    >
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} bottomOffset={floatingBarHeight} />
       <Header onReset={handleReset} hasVideo={!!videoMetadata} />
 
-      <main className="flex-1 w-full flex flex-col gap-[var(--fluid-xl-3xl)] py-[var(--fluid-md-2xl)]">
+      <main className="flex-1 w-full flex flex-col gap-[var(--fluid-lg-2xl)] py-[var(--fluid-md-xl)]">
         {/* Hero Statement */}
         <section className="w-full">
           <Typography variant="hero" as="h1">
@@ -199,22 +216,62 @@ export default function Home() {
 
         {/* Dropzone + Workspace */}
         <div className="w-full flex flex-col gap-[var(--fluid-lg-xl)]">
-          <VideoUploadZone
-            videoMetadata={videoMetadata}
-            onVideoSelected={handleVideoSelected}
-            onReset={handleReset}
-            onError={(title, msg) => addToast("error", title, msg)}
-            isProcessing={isProcessing}
-          />
+          {videoMetadata && isSettingsCollapsed && !isProcessing ? (
+            <section
+              aria-label="Extraction summary"
+              className="w-full border-2 border-foreground rounded-corner bg-background px-4 py-3 sm:px-[var(--space-xl)] sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+            >
+              <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+                <FileVideo className="size-5 shrink-0 text-foreground mt-0.5 sm:mt-0" />
+                <div className="min-w-0">
+                  <Typography as="p" variant="label" weight={600} className="truncate">
+                    {videoMetadata.name}
+                  </Typography>
+                  <Typography as="p" variant="bodySm" muted className="font-mono">
+                    {frames.length.toLocaleString()} {frames.length === 1 ? "frame" : "frames"}{" "}
+                    &middot;{" "}
+                    {settings.format === "image/jpeg"
+                      ? "JPEG"
+                      : settings.format === "image/png"
+                        ? "PNG"
+                        : "WebP"}{" "}
+                    &middot;{" "}
+                    {settings.format === "image/png"
+                      ? "Lossless"
+                      : `${Math.round(settings.quality * 100)}%`}
+                  </Typography>
+                </div>
+              </div>
 
-          {videoMetadata && (
-            <ExtractionControls
-              metadata={videoMetadata}
-              settings={settings}
-              onSettingsChange={setSettings}
-              onStartExtraction={handleStartExtraction}
-              isProcessing={isProcessing}
-            />
+              <button
+                type="button"
+                onClick={() => setIsSettingsCollapsed(false)}
+                className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center justify-center gap-1.5 transition-colors shrink-0 self-start sm:self-auto"
+              >
+                <SlidersHorizontal className="size-4" />
+                <span>Edit settings</span>
+              </button>
+            </section>
+          ) : (
+            <>
+              <VideoUploadZone
+                videoMetadata={videoMetadata}
+                onVideoSelected={handleVideoSelected}
+                onReset={handleReset}
+                onError={(title, msg) => addToast("error", title, msg)}
+                isProcessing={isProcessing}
+              />
+
+              {videoMetadata && (
+                <ExtractionControls
+                  metadata={videoMetadata}
+                  settings={settings}
+                  onSettingsChange={setSettings}
+                  onStartExtraction={handleStartExtraction}
+                  isProcessing={isProcessing}
+                />
+              )}
+            </>
           )}
 
           {isProcessing && (
@@ -227,17 +284,23 @@ export default function Home() {
             />
           )}
 
-          {frames.length > 0 && (
-            <FrameGallery
-              frames={frames}
-              videoName={videoMetadata?.name || "extracted_video"}
-              onToggleSelect={handleToggleSelect}
-              onSelectAll={handleSelectAll}
-              onDeselectAll={handleDeselectAll}
-              onInvertSelection={handleInvertSelection}
-              onPreviewFrame={setPreviewFrame}
-            />
-          )}
+          <div ref={gallerySectionRef}>
+            {isProcessing ? (
+              <FrameGallerySkeleton width={videoMetadata?.width} height={videoMetadata?.height} />
+            ) : (
+              frames.length > 0 && (
+                <FrameGallery
+                  frames={frames}
+                  videoName={videoMetadata?.name || "extracted_video"}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
+                  onInvertSelection={handleInvertSelection}
+                  onPreviewFrame={setPreviewFrame}
+                />
+              )
+            )}
+          </div>
         </div>
 
         <div className="h-[3px] w-full bg-foreground" />
@@ -255,6 +318,7 @@ export default function Home() {
         onDeselectAll={handleDeselectAll}
         onError={(title, msg) => addToast("error", title, msg)}
         onSuccess={(title, msg) => addToast("success", title, msg)}
+        onHeightChange={setFloatingBarHeight}
       />
 
       <FramePreviewModal

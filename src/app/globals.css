@@ -290,6 +290,7 @@
   --accent-primary: #0973dc;
   --accent-secondary: #f0f8ff;
   --red: #e52828;
+  --brand-red: #d42222;
   --toast-text: oklch(0.145 0 0);
   --toast-border: oklch(0.145 0 0);
   --toast-neutral: #ffffff;
@@ -370,10 +371,10 @@
 }
 
 .type-hero {
-  --min: 18;
-  --max: 26;
+  --min: 15;
+  --max: 20;
   --weight: 500;
-  --line-height: 1.25;
+  --line-height: 1.3;
   --tracking: -0.01em;
 }
 
@@ -435,7 +436,7 @@
 }
 
 .type-legal {
-  --min: 11;
+  --min: 12;
   --max: 12;
   --weight: 500;
   --line-height: 1.35;

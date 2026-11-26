@@ -25,7 +25,7 @@ const presets = [
   { label: "Detail", detail: "0.5s", interval: 0.5, fps: 2 },
   { label: "Standard", detail: "1.0s", interval: 1, fps: 1 },
   { label: "Sparse", detail: "2.0s", interval: 2, fps: 0.5 },
-  { label: "Keyframes", detail: "5.0s", interval: 5, fps: 0.2 },
+  { label: "Every 5s", detail: "5.0s", interval: 5, fps: 0.2 },
 ];
 
 export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
@@ -86,7 +86,7 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
             Estimated frames
           </Typography>
           <Typography as="span" variant="label" weight={600} className="font-mono">
-            {estimatedCount.toLocaleString()} frames (~{formatBytes(estimatedBytes)})
+            {estimatedCount.toLocaleString()} frames (up to ~{formatBytes(estimatedBytes)})
           </Typography>
         </div>
       </div>
@@ -193,7 +193,11 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                     <span className="text-xs font-semibold truncate max-w-full">
                       {preset.label}
                     </span>
-                    <span className="text-[11px] opacity-75 font-mono">{preset.detail}</span>
+                    <span
+                      className={`text-xs font-mono ${active ? "text-background/90" : "text-muted-foreground"}`}
+                    >
+                      {preset.detail}
+                    </span>
                   </button>
                 );
               })}
@@ -232,7 +236,11 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                   }`}
                 >
                   <span className="text-xs sm:text-sm font-semibold">{label}</span>
-                  <span className="text-[11px] opacity-75 truncate max-w-full">{desc}</span>
+                  <span
+                    className={`text-xs truncate max-w-full ${selected ? "text-background/90" : "text-muted-foreground"}`}
+                  >
+                    {desc}
+                  </span>
                 </button>
               );
             })}
@@ -293,7 +301,7 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
           type="button"
           disabled={isProcessing || blockedBySafetyLimit}
           onClick={onStartExtraction}
-          className="type-fluid type-button-lg w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-6 rounded-corner bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="type-fluid type-button-lg w-full sm:w-auto inline-flex items-center justify-center gap-2 h-11 px-6 rounded-corner border-2 border-foreground bg-[var(--brand-red)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {isProcessing && <Loader2 className="size-4 animate-spin" />}
           <span>
