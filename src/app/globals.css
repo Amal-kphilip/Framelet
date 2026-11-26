@@ -8,29 +8,62 @@
   --fluid-vp-min: 450px;
   --fluid-vp-max: 1680px;
   --fluid-vp-range: calc(var(--fluid-vp-max) - var(--fluid-vp-min));
-  --radius: 0.625rem;
-  --corner-radius: 4px;
-  --background: oklch(0.9702 0 0);
-  --foreground: oklch(0.1776 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: #eaeaea;
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.4423 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+  --corner-radius: 12px;
+
+  /* Pixora-inspired dark theme (default) */
+  --background: #0b0b0d;
+  --foreground: #f7f6f3;
+  --brand-bg: #0b0b0d;
+  --brand-surface: #070709;
+  --brand-accent: #ff6a2b;
+  --brand-accent-text: #ff7f47;
+  --brand-accent-glow: rgba(255, 106, 43, 0.15);
+  --brand-card: #121216;
+  --brand-card-hover: #181820;
+  --brand-muted: rgba(255, 255, 255, 0.68);
+  --brand-border: rgba(255, 255, 255, 0.08);
+  --brand-border-hover: rgba(255, 255, 255, 0.16);
+
+  --card: #121216;
+  --card-foreground: #f7f6f3;
+  --popover: #121216;
+  --popover-foreground: #f7f6f3;
+  --primary: #ff6a2b;
+  --primary-foreground: #0b0b0d;
+  --secondary: #181820;
+  --secondary-foreground: #f7f6f3;
+  --muted: #181820;
+  --muted-foreground: rgba(255, 255, 255, 0.68);
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #f7f6f3;
+  --destructive: #ef4444;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #ff6a2b;
+  --accent-primary: #ff6a2b;
+  --accent-secondary: rgba(255, 106, 43, 0.12);
+  --red: #e52828;
+  --brand-red: #ff6a2b;
+
+  --glass-bg: rgba(18, 18, 22, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-navbar-bg: rgba(11, 11, 13, 0.78);
+  --glass-navbar-border: rgba(255, 255, 255, 0.08);
+  --scrollbar-track: #0b0b0d;
+  --scrollbar-thumb: #252529;
+  --outline-stroke: rgba(255, 255, 255, 0.2);
+
+  --toast-text: #0b0b0d;
+  --toast-border: #0b0b0d;
+  --toast-neutral: #ffffff;
+  --toast-info: #ffffff;
+  --toast-success: #86efac;
+  --toast-warning: #fcd34d;
+  --toast-error: #fca5a5;
 
   --max-content-min: 860;
-  --max-content-max: 1080;
+  --max-content-max: 1120;
   --max-content-delta: calc(var(--max-content-max) - var(--max-content-min));
   --max-content-width: clamp(
     calc(var(--max-content-min) * 1px),
@@ -56,116 +89,10 @@
   --space-3xl: 48px;
   --space-4xl: 96px;
 
-  --fluid-xs-sm: clamp(
-    var(--space-xs),
-    calc(
-      var(--space-xs) + (var(--space-sm) - var(--space-xs)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-sm)
-  );
-  --fluid-xs-md: clamp(
-    var(--space-xs),
-    calc(
-      var(--space-xs) + (var(--space-md) - var(--space-xs)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-md)
-  );
-  --fluid-xs-lg: clamp(
-    var(--space-xs),
-    calc(
-      var(--space-xs) + (var(--space-lg) - var(--space-xs)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-lg)
-  );
-  --fluid-xs-xl: clamp(
-    var(--space-xs),
-    calc(
-      var(--space-xs) + (var(--space-xl) - var(--space-xs)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-xl)
-  );
-  --fluid-xs-2xl: clamp(
-    var(--space-xs),
-    calc(
-      var(--space-xs) + (var(--space-2xl) - var(--space-xs)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-2xl)
-  );
-  --fluid-xs-3xl: clamp(
-    var(--space-xs),
-    calc(
-      var(--space-xs) + (var(--space-3xl) - var(--space-xs)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-3xl)
-  );
-  --fluid-xs-4xl: clamp(
-    var(--space-xs),
-    calc(
-      var(--space-xs) + (var(--space-4xl) - var(--space-xs)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-4xl)
-  );
-
-  --fluid-sm-md: clamp(
-    var(--space-sm),
-    calc(
-      var(--space-sm) + (var(--space-md) - var(--space-sm)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-md)
-  );
   --fluid-sm-lg: clamp(
     var(--space-sm),
     calc(
       var(--space-sm) + (var(--space-lg) - var(--space-sm)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-lg)
-  );
-  --fluid-sm-xl: clamp(
-    var(--space-sm),
-    calc(
-      var(--space-sm) + (var(--space-xl) - var(--space-sm)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-xl)
-  );
-  --fluid-sm-2xl: clamp(
-    var(--space-sm),
-    calc(
-      var(--space-sm) + (var(--space-2xl) - var(--space-sm)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-2xl)
-  );
-  --fluid-sm-3xl: clamp(
-    var(--space-sm),
-    calc(
-      var(--space-sm) + (var(--space-3xl) - var(--space-sm)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-3xl)
-  );
-  --fluid-sm-4xl: clamp(
-    var(--space-sm),
-    calc(
-      var(--space-sm) + (var(--space-4xl) - var(--space-sm)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-4xl)
-  );
-
-  --fluid-md-lg: clamp(
-    var(--space-md),
-    calc(
-      var(--space-md) + (var(--space-lg) - var(--space-md)) *
         ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
     ),
     var(--space-lg)
@@ -178,31 +105,6 @@
     ),
     var(--space-xl)
   );
-  --fluid-md-2xl: clamp(
-    var(--space-md),
-    calc(
-      var(--space-md) + (var(--space-2xl) - var(--space-md)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-2xl)
-  );
-  --fluid-md-3xl: clamp(
-    var(--space-md),
-    calc(
-      var(--space-md) + (var(--space-3xl) - var(--space-md)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-3xl)
-  );
-  --fluid-md-4xl: clamp(
-    var(--space-md),
-    calc(
-      var(--space-md) + (var(--space-4xl) - var(--space-md)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-4xl)
-  );
-
   --fluid-lg-xl: clamp(
     var(--space-lg),
     calc(
@@ -227,40 +129,6 @@
     ),
     var(--space-3xl)
   );
-  --fluid-lg-4xl: clamp(
-    var(--space-lg),
-    calc(
-      var(--space-lg) + (var(--space-4xl) - var(--space-lg)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-4xl)
-  );
-
-  --fluid-xl-2xl: clamp(
-    var(--space-xl),
-    calc(
-      var(--space-xl) + (var(--space-2xl) - var(--space-xl)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-2xl)
-  );
-  --fluid-xl-3xl: clamp(
-    var(--space-xl),
-    calc(
-      var(--space-xl) + (var(--space-3xl) - var(--space-xl)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-3xl)
-  );
-  --fluid-xl-4xl: clamp(
-    var(--space-xl),
-    calc(
-      var(--space-xl) + (var(--space-4xl) - var(--space-xl)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-4xl)
-  );
-
   --fluid-2xl-3xl: clamp(
     var(--space-2xl),
     calc(
@@ -269,58 +137,48 @@
     ),
     var(--space-3xl)
   );
-  --fluid-2xl-4xl: clamp(
-    var(--space-2xl),
-    calc(
-      var(--space-2xl) + (var(--space-4xl) - var(--space-2xl)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-4xl)
-  );
-
-  --fluid-3xl-4xl: clamp(
-    var(--space-3xl),
-    calc(
-      var(--space-3xl) + (var(--space-4xl) - var(--space-3xl)) *
-        ((100vw - var(--fluid-vp-min)) / var(--fluid-vp-range))
-    ),
-    var(--space-4xl)
-  );
-
-  --accent-primary: #0973dc;
-  --accent-secondary: #f0f8ff;
-  --red: #e52828;
-  --brand-red: #d42222;
-  --toast-text: oklch(0.145 0 0);
-  --toast-border: oklch(0.145 0 0);
-  --toast-neutral: #ffffff;
-  --toast-info: #ffffff;
-  --toast-success: #86efac;
-  --toast-warning: #fcd34d;
-  --toast-error: #fca5a5;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --accent-primary: #5896f3;
-  --accent-secondary: #000d1f;
+.light {
+  --background: #f7f6f3;
+  --foreground: #141418;
+  --brand-bg: #f7f6f3;
+  --brand-surface: #eeece6;
+  --brand-accent: #ff6a2b;
+  --brand-accent-text: #c2410c;
+  --brand-accent-glow: rgba(255, 106, 43, 0.14);
+  --brand-card: rgba(255, 255, 255, 0.85);
+  --brand-card-hover: #ffffff;
+  --brand-muted: #52525b;
+  --brand-border: rgba(20, 20, 24, 0.12);
+  --brand-border-hover: rgba(20, 20, 24, 0.22);
+
+  --card: #ffffff;
+  --card-foreground: #141418;
+  --popover: #ffffff;
+  --popover-foreground: #141418;
+  --primary: #141418;
+  --primary-foreground: #f7f6f3;
+  --secondary: #e7e5df;
+  --secondary-foreground: #141418;
+  --muted: #eceae4;
+  --muted-foreground: #52525b;
+  --accent: rgba(20, 20, 24, 0.06);
+  --accent-foreground: #141418;
+  --destructive: #dc2626;
+  --border: rgba(20, 20, 24, 0.14);
+  --input: rgba(20, 20, 24, 0.16);
+  --ring: #c2410c;
+  --accent-primary: #c2410c;
+  --accent-secondary: rgba(255, 106, 43, 0.12);
+
+  --glass-bg: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(20, 20, 24, 0.1);
+  --glass-navbar-bg: rgba(247, 246, 243, 0.85);
+  --glass-navbar-border: rgba(20, 20, 24, 0.1);
+  --scrollbar-track: #f7f6f3;
+  --scrollbar-thumb: #c4c2bc;
+  --outline-stroke: rgba(20, 20, 24, 0.24);
 }
 
 @layer base {
@@ -333,7 +191,7 @@
     margin: 0;
   }
   body {
-    @apply bg-background text-foreground font-avenir;
+    @apply bg-background text-foreground font-sans;
     width: 100%;
     margin: 0;
     min-height: 100vh;
@@ -341,9 +199,66 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-accent);
+  }
 }
 
-/* Fluid Typography System matching PrivMeta */
+/* Custom selection styling */
+::selection {
+  background-color: var(--brand-accent);
+  color: #0b0b0d;
+}
+
+/* Glassmorphism utilities (lighter blur on <=768px mobile) */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-navbar {
+  background: var(--glass-navbar-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-navbar-border);
+}
+
+@media (min-width: 769px) {
+  .glass {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .glass-navbar {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+}
+
+.text-outline {
+  -webkit-text-stroke: 1px var(--outline-stroke);
+  color: transparent;
+}
+
+.text-outline:hover {
+  -webkit-text-stroke: 1px var(--brand-accent);
+}
+
+/* Fluid Typography System */
 .type-fluid {
   --f-min-rem: calc(var(--min) * 0.1rem);
   --f-max-rem: calc(var(--max) * 0.1rem);
@@ -356,7 +271,6 @@
   --preferred-value: calc((var(--y-axis-intersection) * 1rem) + (var(--slope) * 100vw));
 
   font-size: clamp(var(--f-min-rem), var(--preferred-value), var(--f-max-rem));
-  font-variation-settings: "wght" var(--weight, 400);
   font-weight: var(--weight, 400);
   line-height: var(--line-height, 1.2);
   letter-spacing: var(--tracking, 0);
@@ -365,7 +279,7 @@
 .type-display {
   --min: 32;
   --max: 56;
-  --weight: 600;
+  --weight: 700;
   --line-height: 1.05;
   --tracking: -0.02em;
 }
@@ -381,7 +295,7 @@
 .type-h1 {
   --min: 24;
   --max: 38;
-  --weight: 600;
+  --weight: 700;
   --line-height: 1.1;
   --tracking: -0.015em;
 }
@@ -389,7 +303,7 @@
 .type-h2 {
   --min: 20;
   --max: 28;
-  --weight: 600;
+  --weight: 700;
   --line-height: 1.15;
 }
 
@@ -458,21 +372,13 @@
   --tracking: -0.01em;
 }
 
-.type-button-feature {
-  --min: 13;
-  --max: 15;
-  --weight: 600;
-  --line-height: 1.05;
-  --tracking: -0.012em;
-}
-
 /* Crisp, zero-lag range input */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: var(--secondary);
   border: 2px solid var(--foreground);
-  border-radius: var(--corner-radius);
+  border-radius: 9999px;
   height: 10px;
   outline: none;
   cursor: pointer;
@@ -483,8 +389,8 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 20px;
   height: 20px;
-  border-radius: var(--corner-radius);
-  background: var(--foreground);
+  border-radius: 9999px;
+  background: var(--brand-accent);
   border: 2px solid var(--background);
   cursor: pointer;
 }
@@ -492,14 +398,14 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]::-moz-range-thumb {
   width: 18px;
   height: 18px;
-  border-radius: var(--corner-radius);
-  background: var(--foreground);
+  border-radius: 9999px;
+  background: var(--brand-accent);
   border: 2px solid var(--background);
   cursor: pointer;
 }
 
-:where(button, input, select, textarea, a, [role="button"]):focus-visible {
-  outline: 2px solid var(--accent-primary);
+:where(button, input, select, textarea, a, [role="button"], [role="slider"]):focus-visible {
+  outline: 2px solid var(--brand-accent);
   outline-offset: 2px;
 }
 

@@ -10,11 +10,24 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        avenir: ["var(--font-avenir)", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        brand: {
+          bg: "var(--brand-bg)",
+          surface: "var(--brand-surface)",
+          accent: "var(--brand-accent)",
+          accentText: "var(--brand-accent-text)",
+          accentGlow: "var(--brand-accent-glow)",
+          card: "var(--brand-card)",
+          cardHover: "var(--brand-card-hover)",
+          muted: "var(--brand-muted)",
+          border: "var(--brand-border)",
+          borderHover: "var(--brand-border-hover)",
+        },
         card: {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
@@ -48,6 +61,16 @@ const config: Config = {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+      },
+      boxShadow: {
+        accent: "0 0 20px rgba(255, 106, 43, 0.22)",
+        "accent-strong": "0 0 35px rgba(255, 106, 43, 0.4)",
+      },
+      transitionTimingFunction: {
+        "expo-out": "cubic-bezier(0.16, 1, 0.3, 1)",
       },
       borderRadius: {
         corner: "var(--corner-radius)",
