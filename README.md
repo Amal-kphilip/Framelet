@@ -11,7 +11,7 @@
 
 <!-- TODO: Add live demo URL once deployed -->
 
-**Live Demo:** _Coming soon (TODO: add deployment link)_
+**Live Demo: https://framelet.vercel.app/
 
 <!-- TODO: Add screenshot or demo GIF of Framelet in action -->
 <!-- ![Framelet Demo](docs/assets/demo.gif) -->
