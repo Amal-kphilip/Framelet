@@ -6,7 +6,6 @@ import { X, Download, Check, Copy, ChevronLeft, ChevronRight } from "lucide-reac
 import { ExtractedFrame } from "@/types";
 import { downloadSingleFrame } from "@/lib/zipExporter";
 import { formatBytes } from "@/lib/videoUtils";
-import Typography from "./Typography";
 
 interface FramePreviewModalProps {
   frame: ExtractedFrame | null;
@@ -120,7 +119,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
@@ -130,17 +129,20 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
         aria-labelledby="frame-preview-title"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative max-w-4xl w-full max-h-[92dvh] overflow-y-auto border-2 border-foreground rounded-corner bg-background shadow-none p-4 sm:p-[var(--space-xl)] flex flex-col gap-4 sm:gap-[var(--space-lg)] outline-none"
+        className="glass relative max-w-4xl w-full max-h-[92dvh] overflow-y-auto border border-brand-border rounded-3xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 outline-none"
       >
         {/* Modal Header */}
-        <div className="flex items-start justify-between gap-[var(--space-md)] pb-[var(--space-md)] border-b-2 border-border">
-          <div className="flex flex-col gap-[var(--space-xs)]">
-            <Typography as="h2" id="frame-preview-title" variant="label" weight={600}>
+        <div className="flex items-start justify-between gap-3 pb-3 border-b border-brand-border">
+          <div className="flex flex-col gap-0.5">
+            <h2
+              id="frame-preview-title"
+              className="font-display font-700 text-base sm:text-lg text-foreground"
+            >
               Frame #{frame.index}
-            </Typography>
-            <Typography as="p" variant="bodySm" muted className="font-mono">
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground font-mono">
               {`${frame.formattedTime} · ${frame.width} × ${frame.height} · ${formatBytes(frame.sizeBytes)}`}
-            </Typography>
+            </p>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -152,7 +154,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
                   disabled={!hasPrev}
                   aria-label="Previous frame"
                   title="Previous frame (Left arrow)"
-                  className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-40"
+                  className="size-9 inline-flex items-center justify-center rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-foreground transition-colors disabled:opacity-40"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
@@ -162,7 +164,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
                   disabled={!hasNext}
                   aria-label="Next frame"
                   title="Next frame (Right arrow)"
-                  className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-40"
+                  className="size-9 inline-flex items-center justify-center rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-foreground transition-colors disabled:opacity-40"
                 >
                   <ChevronRight className="size-4" />
                 </button>
@@ -173,7 +175,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
               type="button"
               onClick={onClose}
               aria-label="Close frame preview"
-              className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+              className="size-9 inline-flex items-center justify-center rounded-xl border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-foreground transition-colors"
             >
               <X className="size-4" />
             </button>
@@ -181,7 +183,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
         </div>
 
         {/* Original Aspect Image Container */}
-        <div className="relative rounded-corner border-2 border-foreground bg-secondary overflow-hidden max-h-[65vh] flex items-center justify-center">
+        <div className="relative rounded-2xl border border-brand-border bg-brand-surface overflow-hidden max-h-[65vh] flex items-center justify-center">
           <Image
             src={frame.dataUrl}
             alt={`Video frame ${frame.index} at ${frame.formattedTime}`}
@@ -193,14 +195,14 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
           <button
             type="button"
             onClick={() => onToggleSelect(frame.id)}
-            className={`text-xs sm:text-sm font-semibold h-10 px-4 w-full sm:w-auto rounded-corner border-2 border-foreground inline-flex items-center justify-center gap-2 transition-colors ${
+            className={`text-xs sm:text-sm font-semibold h-10 px-4 w-full sm:w-auto rounded-full border inline-flex items-center justify-center gap-2 transition-colors ${
               frame.selected
-                ? "bg-foreground text-background"
-                : "bg-background text-foreground hover:bg-muted"
+                ? "bg-brand-accent/15 border-brand-accent text-brand-accentText"
+                : "border-brand-border bg-brand-card/70 text-foreground hover:border-brand-accent/40"
             }`}
           >
             <Check className="size-4 shrink-0" />
@@ -211,10 +213,10 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
             <button
               type="button"
               onClick={handleCopy}
-              className="text-xs sm:text-sm font-semibold h-10 px-3 sm:px-4 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+              className="text-xs sm:text-sm font-semibold h-10 px-4 rounded-full border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-foreground inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
             >
               {copied ? (
-                <Check className="size-4 shrink-0" />
+                <Check className="size-4 shrink-0 text-brand-accentText" />
               ) : (
                 <Copy className="size-4 shrink-0" />
               )}
@@ -224,7 +226,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
             <button
               type="button"
               onClick={() => downloadSingleFrame(frame, videoName, filenameTemplate)}
-              className="text-xs sm:text-sm font-semibold h-10 px-3 sm:px-5 rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
+              className="text-xs sm:text-sm font-semibold h-10 px-5 rounded-full bg-gradient-to-r from-[#ff6a2b] to-[#ff8547] text-[#0b0b0d] shadow-accent hover:shadow-accent-strong hover:brightness-105 transition-all inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
               <Download className="size-4 shrink-0" />
               <span>Save frame</span>
@@ -233,9 +235,9 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
         </div>
 
         {copyError && (
-          <Typography as="p" variant="legal" muted className="text-right">
+          <p className="text-xs text-muted-foreground text-right">
             Image clipboard access is not supported here. Use “Save frame” instead.
-          </Typography>
+          </p>
         )}
       </div>
     </div>
