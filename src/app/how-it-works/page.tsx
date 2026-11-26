@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Header } from "@/components/Header";
-import { Footer, SideNav } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import Typography from "@/components/Typography";
 
 export const metadata: Metadata = {
@@ -16,8 +16,8 @@ const Divider = () => <div className="h-[3px] w-full bg-foreground" />;
 export default function HowItWorksPage() {
   return (
     <div className="flex flex-col flex-1 w-full">
-      <Header />
-      <main className="flex-1 w-full flex flex-col gap-[var(--fluid-xl-3xl)] py-[var(--fluid-lg-3xl)]">
+      <Navbar />
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full flex flex-col gap-[var(--fluid-lg-3xl)] pt-24 sm:pt-28 pb-16">
         {/* Hero */}
         <section className="w-full">
           <Typography as="h1" variant="hero">
@@ -115,13 +115,13 @@ export default function HowItWorksPage() {
         </section>
 
         {/* CTA */}
-        <section className="w-full rounded-corner border-2 border-foreground bg-foreground p-[var(--space-3xl)] flex flex-col items-center gap-[var(--space-lg)] text-center">
-          <Typography as="p" variant="hero" className="text-background">
+        <section className="w-full rounded-3xl glass p-8 sm:p-12 flex flex-col items-center gap-[var(--space-lg)] text-center">
+          <Typography as="p" variant="hero" className="text-foreground font-display">
             Try it now. No sign-up, no upload, no catch.
           </Typography>
           <Link
-            href="/"
-            className="type-fluid type-button-lg h-11 px-6 rounded-corner bg-background text-foreground hover:opacity-90 inline-flex items-center gap-2 transition-opacity"
+            href="/#tool"
+            className="px-6 py-3 rounded-full bg-brand-accent text-[#0b0b0d] text-sm font-semibold tracking-wide shadow-accent hover:shadow-accent-strong inline-flex items-center gap-2 transition-all duration-300"
           >
             <span>Extract frames</span>
             <ArrowRight className="size-4" />
@@ -158,7 +158,6 @@ export default function HowItWorksPage() {
         </section>
       </main>
       <Footer />
-      <SideNav />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { FileVideo, SlidersHorizontal } from "lucide-react";
-import { Header } from "@/components/Header";
+import { Navbar } from "@/components/Navbar";
 import { VideoUploadZone } from "@/components/VideoUploadZone";
 import { ExtractionControls } from "@/components/ExtractionControls";
 import { LiquidProgressBar } from "@/components/LiquidProgressBar";
@@ -11,7 +11,7 @@ import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { FramePreviewModal } from "@/components/FramePreviewModal";
 import { ToastContainer } from "@/components/Toast";
 import { ShareFunctions } from "@/components/ShareFunctions";
-import { Footer, SideNav } from "@/components/Footer";
+import { Footer } from "@/components/Footer";
 import Typography from "@/components/Typography";
 import { ExtractedFrame, ExtractionSettings, ToastMessage, VideoMetadata } from "@/types";
 import { captureSingleFrameViaCanvas, extractFramesViaCanvas } from "@/lib/canvasExtractor";
@@ -301,9 +301,9 @@ export default function Home() {
       style={floatingBarHeight > 0 ? { paddingBottom: `${floatingBarHeight}px` } : undefined}
     >
       <ToastContainer toasts={toasts} onDismiss={dismissToast} bottomOffset={floatingBarHeight} />
-      <Header onReset={handleReset} hasVideo={!!videoMetadata} />
+      <Navbar onReset={handleReset} hasVideo={!!videoMetadata} />
 
-      <main className="flex-1 w-full flex flex-col gap-[var(--fluid-lg-2xl)] py-[var(--fluid-md-xl)]">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full flex flex-col gap-[var(--fluid-lg-2xl)] pt-24 sm:pt-28 pb-12">
         {/* Hero Statement */}
         <section className="w-full">
           <Typography variant="hero" as="h1">
@@ -425,7 +425,6 @@ export default function Home() {
       </main>
 
       <Footer />
-      <SideNav />
 
       <FloatingActionBar
         frames={frames}
