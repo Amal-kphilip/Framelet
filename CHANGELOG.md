@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/Amal-kphilip/Framelet/compare/v1.2.0...v1.3.0) (2026-11-26)
+
+
+### Features
+
+* **landing:** add hero, marquee, features, how-it-works, and FAQ sections ([#25](https://github.com/Amal-kphilip/Framelet/issues/25)) ([859b4bb](https://github.com/Amal-kphilip/Framelet/commit/859b4bbffbb5110639baf40c3e0ba8ceec4afd7e))
+
 ## [1.2.0](https://github.com/Amal-kphilip/Framelet/compare/v1.1.0...v1.2.0) (2026-11-26)
 
 
