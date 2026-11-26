@@ -436,7 +436,7 @@
 }
 
 .type-legal {
-  --min: 11;
+  --min: 12;
   --max: 12;
   --weight: 500;
   --line-height: 1.35;

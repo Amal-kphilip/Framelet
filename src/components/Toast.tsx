@@ -8,13 +8,17 @@ import Typography from "./Typography";
 interface ToastProps {
   toasts: ToastMessage[];
   onDismiss: (id: string) => void;
+  bottomOffset?: number;
 }
 
-export const ToastContainer: React.FC<ToastProps> = ({ toasts, onDismiss }) => {
+export const ToastContainer: React.FC<ToastProps> = ({ toasts, onDismiss, bottomOffset = 0 }) => {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 inset-x-3 sm:inset-x-auto sm:right-6 z-50 flex flex-col gap-2 max-w-full sm:max-w-sm pointer-events-none">
+    <div
+      className="fixed bottom-4 inset-x-3 sm:inset-x-auto sm:right-6 z-50 flex flex-col gap-2 max-w-full sm:max-w-sm pointer-events-none"
+      style={bottomOffset > 0 ? { bottom: `${bottomOffset + 8}px` } : undefined}
+    >
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
       ))}

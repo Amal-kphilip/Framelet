@@ -193,7 +193,11 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                     <span className="text-xs font-semibold truncate max-w-full">
                       {preset.label}
                     </span>
-                    <span className="text-[11px] opacity-75 font-mono">{preset.detail}</span>
+                    <span
+                      className={`text-xs font-mono ${active ? "text-background/90" : "text-muted-foreground"}`}
+                    >
+                      {preset.detail}
+                    </span>
                   </button>
                 );
               })}
@@ -232,7 +236,11 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
                   }`}
                 >
                   <span className="text-xs sm:text-sm font-semibold">{label}</span>
-                  <span className="text-[11px] opacity-75 truncate max-w-full">{desc}</span>
+                  <span
+                    className={`text-xs truncate max-w-full ${selected ? "text-background/90" : "text-muted-foreground"}`}
+                  >
+                    {desc}
+                  </span>
                 </button>
               );
             })}

@@ -6,7 +6,7 @@ import { Header } from "@/components/Header";
 import { VideoUploadZone } from "@/components/VideoUploadZone";
 import { ExtractionControls } from "@/components/ExtractionControls";
 import { LiquidProgressBar } from "@/components/LiquidProgressBar";
-import { FrameGallery } from "@/components/FrameGallery";
+import { FrameGallery, FrameGallerySkeleton } from "@/components/FrameGallery";
 import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { FramePreviewModal } from "@/components/FramePreviewModal";
 import { ToastContainer } from "@/components/Toast";
@@ -202,7 +202,7 @@ export default function Home() {
       className="flex flex-col flex-1 w-full"
       style={floatingBarHeight > 0 ? { paddingBottom: `${floatingBarHeight}px` } : undefined}
     >
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} bottomOffset={floatingBarHeight} />
       <Header onReset={handleReset} hasVideo={!!videoMetadata} />
 
       <main className="flex-1 w-full flex flex-col gap-[var(--fluid-lg-2xl)] py-[var(--fluid-md-xl)]">
@@ -285,16 +285,20 @@ export default function Home() {
           )}
 
           <div ref={gallerySectionRef}>
-            {frames.length > 0 && (
-              <FrameGallery
-                frames={frames}
-                videoName={videoMetadata?.name || "extracted_video"}
-                onToggleSelect={handleToggleSelect}
-                onSelectAll={handleSelectAll}
-                onDeselectAll={handleDeselectAll}
-                onInvertSelection={handleInvertSelection}
-                onPreviewFrame={setPreviewFrame}
-              />
+            {isProcessing ? (
+              <FrameGallerySkeleton width={videoMetadata?.width} height={videoMetadata?.height} />
+            ) : (
+              frames.length > 0 && (
+                <FrameGallery
+                  frames={frames}
+                  videoName={videoMetadata?.name || "extracted_video"}
+                  onToggleSelect={handleToggleSelect}
+                  onSelectAll={handleSelectAll}
+                  onDeselectAll={handleDeselectAll}
+                  onInvertSelection={handleInvertSelection}
+                  onPreviewFrame={setPreviewFrame}
+                />
+              )
             )}
           </div>
         </div>
