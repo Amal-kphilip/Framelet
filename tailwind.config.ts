@@ -72,6 +72,15 @@ const config: Config = {
       transitionTimingFunction: {
         "expo-out": "cubic-bezier(0.16, 1, 0.3, 1)",
       },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+      },
+      animation: {
+        float: "float 3s ease-in-out infinite",
+      },
       borderRadius: {
         corner: "var(--corner-radius)",
         lg: "var(--radius)",

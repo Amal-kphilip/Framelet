@@ -19,11 +19,22 @@
   --brand-accent: #ff6a2b;
   --brand-accent-text: #ff7f47;
   --brand-accent-glow: rgba(255, 106, 43, 0.15);
+  --brand-accent-15: rgba(255, 106, 43, 0.15);
   --brand-card: #121216;
   --brand-card-hover: #181820;
   --brand-muted: rgba(255, 255, 255, 0.68);
   --brand-border: rgba(255, 255, 255, 0.08);
   --brand-border-hover: rgba(255, 255, 255, 0.16);
+
+  /* Slider accent gradient (left side filled in accent color) */
+  --slider-accent: #ff6a2b;
+  --slider-track: #252529;
+
+  /* Toast duration progress */
+  --toast-duration-info: 3500ms;
+  --toast-duration-success: 4000ms;
+  --toast-duration-warning: 6000ms;
+  --toast-duration-error: 8000ms;
 
   --card: #121216;
   --card-foreground: #f7f6f3;
@@ -152,6 +163,14 @@
   --brand-muted: #52525b;
   --brand-border: rgba(20, 20, 24, 0.12);
   --brand-border-hover: rgba(20, 20, 24, 0.22);
+
+  --slider-accent: #c2410c;
+  --slider-track: #d4d2cc;
+
+  --toast-duration-info: 3500ms;
+  --toast-duration-success: 4000ms;
+  --toast-duration-warning: 6000ms;
+  --toast-duration-error: 8000ms;
 
   --card: #ffffff;
   --card-foreground: #141418;
