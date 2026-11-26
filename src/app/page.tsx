@@ -353,10 +353,10 @@ export default function Home() {
               {videoMetadata && isSettingsCollapsed && !isProcessing ? (
                 <section
                   aria-label="Extraction summary"
-                  className="w-full border border-brand-border rounded-2xl bg-brand-card px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="glass w-full border border-brand-border rounded-2xl px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex items-start sm:items-center gap-2.5 min-w-0">
-                    <FileVideo className="size-5 shrink-0 text-brand-accent mt-0.5 sm:mt-0" />
+                    <FileVideo className="size-5 shrink-0 text-brand-accentText mt-0.5 sm:mt-0" />
                     <div className="min-w-0">
                       <Typography as="p" variant="label" weight={600} className="truncate">
                         {videoMetadata.name}
