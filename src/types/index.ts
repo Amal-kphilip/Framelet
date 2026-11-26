@@ -24,6 +24,8 @@ export interface VideoMetadata {
   url: string;
 }
 
+export type ResolutionScale = "original" | "1080p" | "720p";
+
 export interface ExtractionSettings {
   mode: "fps" | "interval" | "custom_count";
   fps: number; // frames per second (e.g., 1, 2, 5, 10)
@@ -31,6 +33,10 @@ export interface ExtractionSettings {
   format: "image/jpeg" | "image/png" | "image/webp";
   quality: number; // 0.1 to 1.0
   maxFrames?: number;
+  scale?: ResolutionScale;
+  trimStart?: number;
+  trimEnd?: number;
+  filenameTemplate?: string;
 }
 
 export type ExtractionStatus = "idle" | "loading_engine" | "extracting" | "completed" | "error";

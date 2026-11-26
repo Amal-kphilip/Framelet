@@ -1,6 +1,7 @@
 import type { ExtractedFrame, ExtractionSettings, VideoMetadata } from "@/types";
 import {
   buildFrameTimestamps,
+  calculateScaledDimensions,
   estimateOutputBytes,
   formatDuration,
   MAX_ESTIMATED_OUTPUT_BYTES,
@@ -148,15 +149,16 @@ export async function extractFramesViaCanvas(
       `This configuration would create ${timestamps.length} frames. The current safety limit is ${MAX_EXTRACTED_FRAMES} frames per extraction. Increase the interval or lower the frame rate.`
     );
   }
-  if (metadata.width * metadata.height > MAX_CANVAS_PIXELS) {
+  const targetDims = calculateScaledDimensions(metadata.width, metadata.height, settings.scale);
+  if (targetDims.width * targetDims.height > MAX_CANVAS_PIXELS) {
     throw new Error(
       "This video's resolution is too large for safe browser Canvas processing. Try a lower-resolution clip."
     );
   }
   const estimatedOutputBytes = estimateOutputBytes(
     timestamps.length,
-    metadata.width,
-    metadata.height,
+    targetDims.width,
+    targetDims.height,
     settings
   );
   if (estimatedOutputBytes > MAX_ESTIMATED_OUTPUT_BYTES) {
@@ -172,8 +174,8 @@ export async function extractFramesViaCanvas(
   video.muted = true;
   video.playsInline = true;
   video.src = metadata.url;
-  canvas.width = metadata.width;
-  canvas.height = metadata.height;
+  canvas.width = targetDims.width;
+  canvas.height = targetDims.height;
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) {
     video.removeAttribute("src");
@@ -196,7 +198,7 @@ export async function extractFramesViaCanvas(
       const timestamp = timestamps[index];
       await seekToTime(video, timestamp, signal);
       throwIfAborted(signal);
-      context.drawImage(video, 0, 0, metadata.width, metadata.height);
+      context.drawImage(video, 0, 0, targetDims.width, targetDims.height);
       const blob = await canvasToBlob(
         canvas,
         settings.format || "image/jpeg",
@@ -211,8 +213,8 @@ export async function extractFramesViaCanvas(
         formattedTime: formatDuration(timestamp),
         blob,
         dataUrl,
-        width: metadata.width,
-        height: metadata.height,
+        width: targetDims.width,
+        height: targetDims.height,
         selected: true,
         sizeBytes: blob.size,
       });
@@ -226,6 +228,60 @@ export async function extractFramesViaCanvas(
     video.pause();
     video.removeAttribute("src");
     video.load();
+    canvas.width = 0;
+    canvas.height = 0;
+  }
+}
+
+/** Capture a single frame from a live video element at its current playhead using the same encoding path. */
+export async function captureSingleFrameViaCanvas(
+  video: HTMLVideoElement,
+  metadata: VideoMetadata,
+  settings: ExtractionSettings,
+  index: number
+): Promise<ExtractedFrame> {
+  if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+    throw new Error("Video frame is not ready yet. Wait for the preview to load and try again.");
+  }
+  const targetDims = calculateScaledDimensions(metadata.width, metadata.height, settings.scale);
+  if (targetDims.width * targetDims.height > MAX_CANVAS_PIXELS) {
+    throw new Error(
+      "This video's resolution is too large for safe browser Canvas processing. Try a lower-resolution clip."
+    );
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = targetDims.width;
+  canvas.height = targetDims.height;
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) {
+    canvas.width = 0;
+    canvas.height = 0;
+    throw new Error("Unable to create a Canvas 2D rendering context in this browser.");
+  }
+
+  try {
+    context.drawImage(video, 0, 0, targetDims.width, targetDims.height);
+    const blob = await canvasToBlob(
+      canvas,
+      settings.format || "image/jpeg",
+      settings.quality ?? 0.92
+    );
+    const timestamp = Number(Math.max(0, video.currentTime).toFixed(4));
+    const dataUrl = URL.createObjectURL(blob);
+    return {
+      id: `capture_${Date.now()}_${timestamp.toFixed(3).replace(".", "_")}`,
+      index,
+      timestamp,
+      formattedTime: formatDuration(timestamp),
+      blob,
+      dataUrl,
+      width: targetDims.width,
+      height: targetDims.height,
+      selected: true,
+      sizeBytes: blob.size,
+    };
+  } finally {
     canvas.width = 0;
     canvas.height = 0;
   }

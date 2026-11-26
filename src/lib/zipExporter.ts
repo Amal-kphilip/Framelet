@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import type { ExtractedFrame } from "@/types";
+import { formatFrameFilename, sanitizeFilename } from "./videoUtils";
 
 export const MAX_ZIP_EXPORT_BYTES = 512 * 1024 * 1024;
 
@@ -12,13 +13,7 @@ export interface ZipExportProgress {
 }
 
 function safeBaseName(name: string): string {
-  return (
-    name
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")
-      .replace(/[. ]+$/g, "")
-      .trim() || "frames"
-  );
+  return sanitizeFilename(name.replace(/\.[^/.]+$/, "")) || "frames";
 }
 
 export function getImageExtension(blob: Blob): string {
@@ -35,17 +30,50 @@ export function getImageExtension(blob: Blob): string {
   }
 }
 
-function getFrameFilename(baseName: string, frame: ExtractedFrame): string {
-  const index = String(frame.index).padStart(4, "0");
-  const safeTime = frame.formattedTime.replace(/:/g, "m").replace(/\./g, "s");
-  return `${baseName}_frame_${index}_${safeTime}.${getImageExtension(frame.blob)}`;
+function getFrameFilename(
+  baseName: string,
+  frame: ExtractedFrame,
+  filenameTemplate?: string
+): string {
+  return formatFrameFilename(filenameTemplate, {
+    baseName,
+    index: frame.index,
+    formattedTime: frame.formattedTime,
+    width: frame.width,
+    height: frame.height,
+    extension: getImageExtension(frame.blob),
+  });
+}
+
+function getUniqueFrameFilename(
+  baseName: string,
+  frame: ExtractedFrame,
+  usedNames: Set<string>,
+  filenameTemplate?: string
+): string {
+  const candidate = getFrameFilename(baseName, frame, filenameTemplate);
+  if (!usedNames.has(candidate)) {
+    usedNames.add(candidate);
+    return candidate;
+  }
+  const dotIndex = candidate.lastIndexOf(".");
+  const stem = dotIndex >= 0 ? candidate.slice(0, dotIndex) : candidate;
+  const ext = dotIndex >= 0 ? candidate.slice(dotIndex) : "";
+  let suffix = 2;
+  while (usedNames.has(`${stem}_${suffix}${ext}`)) {
+    suffix += 1;
+  }
+  const unique = `${stem}_${suffix}${ext}`;
+  usedNames.add(unique);
+  return unique;
 }
 
 export async function exportFramesToZip(
   frames: ExtractedFrame[],
   videoName: string,
   onProgress?: (progress: ZipExportProgress) => void,
-  totalExtractedFrames = frames.length
+  totalExtractedFrames = frames.length,
+  filenameTemplate?: string
 ): Promise<void> {
   if (frames.length === 0) throw new Error("No frames selected for export.");
 
@@ -60,11 +88,15 @@ export async function exportFramesToZip(
   const baseName = safeBaseName(videoName);
   const total = frames.length;
   const sortedFrames = [...frames].sort((a, b) => a.index - b.index);
+  const usedNames = new Set<string>();
+  const resolvedNames = new Map<string, string>();
 
   onProgress?.({ percent: 2, current: 0, total, status: "Preparing selected images…" });
   for (let index = 0; index < sortedFrames.length; index += 1) {
     const frame = sortedFrames[index];
-    zip.file(getFrameFilename(baseName, frame), frame.blob, { compression: "STORE" });
+    const fileName = getUniqueFrameFilename(baseName, frame, usedNames, filenameTemplate);
+    resolvedNames.set(frame.id, fileName);
+    zip.file(fileName, frame.blob, { compression: "STORE" });
     if ((index + 1) % 5 === 0 || index === total - 1) {
       const percent = 5 + Math.round(((index + 1) / total) * 65);
       onProgress?.({
@@ -98,7 +130,8 @@ export async function exportFramesToZip(
           width: frame.width,
           height: frame.height,
           mimeType: frame.blob.type || "application/octet-stream",
-          fileName: getFrameFilename(baseName, frame),
+          fileName:
+            resolvedNames.get(frame.id) ?? getFrameFilename(baseName, frame, filenameTemplate),
           sizeBytes: frame.sizeBytes,
         })),
       },
@@ -123,7 +156,11 @@ export async function exportFramesToZip(
   onProgress?.({ percent: 100, current: total, total, status: "Download started." });
 }
 
-export function downloadSingleFrame(frame: ExtractedFrame, videoName: string): void {
+export function downloadSingleFrame(
+  frame: ExtractedFrame,
+  videoName: string,
+  filenameTemplate?: string
+): void {
   const baseName = safeBaseName(videoName);
-  saveAs(frame.blob, getFrameFilename(baseName, frame));
+  saveAs(frame.blob, getFrameFilename(baseName, frame, filenameTemplate));
 }
