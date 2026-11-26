@@ -25,7 +25,7 @@ const presets = [
   { label: "Detail", detail: "0.5s", interval: 0.5, fps: 2 },
   { label: "Standard", detail: "1.0s", interval: 1, fps: 1 },
   { label: "Sparse", detail: "2.0s", interval: 2, fps: 0.5 },
-  { label: "Keyframes", detail: "5.0s", interval: 5, fps: 0.2 },
+  { label: "Every 5s", detail: "5.0s", interval: 5, fps: 0.2 },
 ];
 
 export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
@@ -86,7 +86,7 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
             Estimated frames
           </Typography>
           <Typography as="span" variant="label" weight={600} className="font-mono">
-            {estimatedCount.toLocaleString()} frames (~{formatBytes(estimatedBytes)})
+            {estimatedCount.toLocaleString()} frames (up to ~{formatBytes(estimatedBytes)})
           </Typography>
         </div>
       </div>

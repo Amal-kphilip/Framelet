@@ -31,6 +31,7 @@ export default function Home() {
   const [frames, setFrames] = useState<ExtractedFrame[]>([]);
   const [previewFrame, setPreviewFrame] = useState<ExtractedFrame | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [floatingBarHeight, setFloatingBarHeight] = useState(0);
 
   const extractionControllerRef = useRef<AbortController | null>(null);
   const extractionRunIdRef = useRef(0);
@@ -184,7 +185,10 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col flex-1 w-full">
+    <div
+      className="flex flex-col flex-1 w-full"
+      style={floatingBarHeight > 0 ? { paddingBottom: `${floatingBarHeight}px` } : undefined}
+    >
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       <Header onReset={handleReset} hasVideo={!!videoMetadata} />
 
@@ -255,6 +259,7 @@ export default function Home() {
         onDeselectAll={handleDeselectAll}
         onError={(title, msg) => addToast("error", title, msg)}
         onSuccess={(title, msg) => addToast("success", title, msg)}
+        onHeightChange={setFloatingBarHeight}
       />
 
       <FramePreviewModal

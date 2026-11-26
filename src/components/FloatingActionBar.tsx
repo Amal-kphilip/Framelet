@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Archive, Loader2, CheckCheck, X } from "lucide-react";
 import { ExtractedFrame } from "@/types";
 import { exportFramesToZip, ZipExportProgress } from "@/lib/zipExporter";
@@ -14,6 +14,7 @@ interface FloatingActionBarProps {
   onDeselectAll: () => void;
   onError: (title: string, message: string) => void;
   onSuccess: (title: string, message: string) => void;
+  onHeightChange?: (height: number) => void;
 }
 
 export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
@@ -23,13 +24,37 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
   onDeselectAll,
   onError,
   onSuccess,
+  onHeightChange,
 }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState<ZipExportProgress | null>(null);
+  const barRef = useRef<HTMLDivElement | null>(null);
 
   const selectedFrames = frames.filter((f) => f.selected);
   const selectedCount = selectedFrames.length;
   const selectedBytes = selectedFrames.reduce((total, frame) => total + frame.sizeBytes, 0);
+
+  useEffect(() => {
+    if (!onHeightChange) return;
+    if (selectedCount === 0 || !barRef.current) {
+      onHeightChange(0);
+      return;
+    }
+
+    const updateHeight = () => {
+      if (!barRef.current) return;
+      const rect = barRef.current.getBoundingClientRect();
+      onHeightChange(Math.ceil(rect.height + 24));
+    };
+
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(barRef.current);
+    return () => {
+      observer.disconnect();
+      onHeightChange(0);
+    };
+  }, [onHeightChange, selectedCount]);
 
   if (selectedCount === 0) return null;
 
@@ -68,7 +93,10 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
   };
 
   return (
-    <div className="fixed bottom-4 sm:bottom-6 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none pb-[env(safe-area-inset-bottom,0px)]">
+    <div
+      ref={barRef}
+      className="fixed bottom-4 sm:bottom-6 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none pb-[env(safe-area-inset-bottom,0px)]"
+    >
       <div className="pointer-events-auto rounded-corner border-2 border-foreground bg-background p-2 sm:px-4 sm:py-3 flex items-center justify-between gap-2 sm:gap-6 max-w-2xl w-full sm:w-auto">
         {/* Selected Count Info */}
         <div className="flex items-center gap-2">

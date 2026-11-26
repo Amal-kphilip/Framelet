@@ -142,7 +142,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                 setQuery(event.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search frame # or timestamp..."
+              placeholder="Search frame or time"
               className="type-fluid type-button w-full h-10 rounded-corner border-2 border-foreground bg-background pl-9 pr-3 text-foreground placeholder:text-muted-foreground"
             />
           </div>
@@ -260,47 +260,48 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               </div>
 
               {/* Card Footer */}
-              <div className="p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-t-2 border-foreground bg-background">
-                <div className="min-w-0">
+              <div className="p-2 flex flex-col gap-1 border-t-2 border-foreground bg-background">
+                <div className="flex items-center justify-between gap-1.5 min-w-0">
                   <Typography
                     as="span"
                     variant="legal"
                     weight={600}
-                    className="font-mono block leading-tight"
+                    className="font-mono leading-tight"
                   >
                     {frame.formattedTime}
                   </Typography>
-                  <Typography
-                    as="span"
-                    variant="legal"
-                    muted
-                    className="font-mono block leading-tight truncate"
-                  >
-                    {frame.width}×{frame.height} ·{" "}
-                    {(frame.sizeBytes / 1024).toFixed(frame.sizeBytes < 1024 * 100 ? 1 : 0)} KB
-                  </Typography>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      aria-label={`Preview frame ${frame.index}`}
+                      title="Expand preview"
+                      onClick={() => onPreviewFrame(frame)}
+                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+                    >
+                      <ZoomIn className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Download frame ${frame.index}`}
+                      title="Download frame"
+                      onClick={() => downloadSingleFrame(frame, videoName)}
+                      className="size-7 sm:size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                    >
+                      <Download className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    aria-label={`Preview frame ${frame.index}`}
-                    title="Expand preview"
-                    onClick={() => onPreviewFrame(frame)}
-                    className="size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
-                  >
-                    <ZoomIn className="size-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Download frame ${frame.index}`}
-                    title="Download frame"
-                    onClick={() => downloadSingleFrame(frame, videoName)}
-                    className="size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-                  >
-                    <Download className="size-3.5" />
-                  </button>
-                </div>
+                <Typography
+                  as="span"
+                  variant="legal"
+                  muted
+                  className="font-mono block leading-tight break-words"
+                >
+                  {frame.width}×{frame.height} ·{" "}
+                  {(frame.sizeBytes / 1024).toFixed(frame.sizeBytes < 1024 * 100 ? 1 : 0)} KB
+                </Typography>
               </div>
             </article>
           ))}
