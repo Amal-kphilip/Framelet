@@ -21,6 +21,7 @@ import { FAQSection } from "@/components/FAQSection";
 import { ExtractedFrame, ExtractionSettings, ToastMessage, VideoMetadata } from "@/types";
 import { captureSingleFrameViaCanvas, extractFramesViaCanvas } from "@/lib/canvasExtractor";
 import {
+  buildFrameTimestamps,
   calculateScaledDimensions,
   DEFAULT_FILENAME_TEMPLATE,
   estimateOutputBytes,
@@ -74,10 +75,18 @@ export default function Home() {
     };
   }, []);
 
-  const addToast = useCallback((type: ToastMessage["type"], title: string, message: string) => {
-    const id = `toast_${Date.now()}_${Math.random()}`;
-    setToasts((prev) => [...prev, { id, type, title, message }]);
-  }, []);
+  const addToast = useCallback(
+    (type: ToastMessage["type"], title: string, message: string, fileName?: string) => {
+      const id = `toast_${Date.now()}_${Math.random()}`;
+      setToasts((prev) => {
+        const filtered = prev.filter(
+          (t) => !(t.type === type && t.title === title && t.message === message)
+        );
+        return [...filtered, { id, type, title, message, fileName }].slice(-3);
+      });
+    },
+    []
+  );
 
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -107,8 +116,9 @@ export default function Home() {
       setProgressDetails({ current: 0, total: 0, status: "" });
       addToast(
         "success",
-        "Video queued",
-        `Loaded "${metadata.name}" (${metadata.formattedDuration}, ${metadata.width}×${metadata.height}).`
+        "Video loaded",
+        `${metadata.formattedDuration} · ${metadata.width}×${metadata.height}`,
+        metadata.name
       );
     },
     [addToast, releaseFrameUrls]
@@ -171,7 +181,12 @@ export default function Home() {
       setFrames(extractedFrames);
       setPreviewFrame(null);
       setIsSettingsCollapsed(true);
-      addToast("success", "Extraction complete", `Captured ${extractedFrames.length} frames.`);
+      addToast(
+        "success",
+        "Extraction complete",
+        `Extracted ${extractedFrames.length} ${extractedFrames.length === 1 ? "frame" : "frames"}.`,
+        videoMetadata.name
+      );
       window.requestAnimationFrame(() => {
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         gallerySectionRef.current?.scrollIntoView({
@@ -186,7 +201,7 @@ export default function Home() {
           ? err
           : new Error("An unexpected error occurred during frame extraction.");
       if (controller.signal.aborted || error.name === "AbortError") {
-        addToast("info", "Extraction cancelled", "The current extraction was stopped.");
+        addToast("info", "Extraction cancelled", "Frame extraction was stopped before completion.");
       } else {
         addToast("error", "Extraction failed", error.message);
       }
@@ -206,7 +221,7 @@ export default function Home() {
         addToast(
           "warning",
           "Frame limit reached",
-          `Cannot capture more than ${MAX_EXTRACTED_FRAMES} frames in a single gallery.`
+          `Gallery is capped at ${MAX_EXTRACTED_FRAMES} frames per session.`
         );
         return;
       }
@@ -215,8 +230,8 @@ export default function Home() {
       if (hasDuplicateTimestamp(frames, timestamp)) {
         addToast(
           "info",
-          "Already captured",
-          "A frame at this timestamp is already in the gallery."
+          "Frame already captured",
+          "A frame at this timestamp is already in your gallery."
         );
         return;
       }
@@ -338,10 +353,10 @@ export default function Home() {
               {videoMetadata && isSettingsCollapsed && !isProcessing ? (
                 <section
                   aria-label="Extraction summary"
-                  className="w-full border border-brand-border rounded-2xl bg-brand-card px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="glass w-full border border-brand-border rounded-2xl px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex items-start sm:items-center gap-2.5 min-w-0">
-                    <FileVideo className="size-5 shrink-0 text-brand-accent mt-0.5 sm:mt-0" />
+                    <FileVideo className="size-5 shrink-0 text-brand-accentText mt-0.5 sm:mt-0" />
                     <div className="min-w-0">
                       <Typography as="p" variant="label" weight={600} className="truncate">
                         {videoMetadata.name}
@@ -393,6 +408,9 @@ export default function Home() {
                         trimStart: 0,
                         trimEnd: videoMetadata.duration,
                       }))
+                    }
+                    frameTimestamps={
+                      videoMetadata ? buildFrameTimestamps(videoMetadata.duration, settings) : []
                     }
                   />
 

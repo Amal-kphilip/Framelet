@@ -17,12 +17,12 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         brand: {
-          bg: "var(--brand-bg)",
-          surface: "var(--brand-surface)",
-          accent: "var(--brand-accent)",
+          bg: "rgb(var(--brand-bg-rgb) / <alpha-value>)",
+          surface: "rgb(var(--brand-surface-rgb) / <alpha-value>)",
+          accent: "rgb(var(--brand-accent-rgb) / <alpha-value>)",
           accentText: "var(--brand-accent-text)",
           accentGlow: "var(--brand-accent-glow)",
-          card: "var(--brand-card)",
+          card: "rgb(var(--brand-card-rgb) / <alpha-value>)",
           cardHover: "var(--brand-card-hover)",
           muted: "var(--brand-muted)",
           border: "var(--brand-border)",
@@ -71,6 +71,15 @@ const config: Config = {
       },
       transitionTimingFunction: {
         "expo-out": "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+      },
+      animation: {
+        float: "float 3s ease-in-out infinite",
       },
       borderRadius: {
         corner: "var(--corner-radius)",

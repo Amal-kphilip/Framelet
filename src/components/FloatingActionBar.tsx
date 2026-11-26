@@ -5,7 +5,6 @@ import { Archive, Loader2, CheckCheck, X } from "lucide-react";
 import { ExtractedFrame } from "@/types";
 import { exportFramesToZip, ZipExportProgress } from "@/lib/zipExporter";
 import { formatBytes } from "@/lib/videoUtils";
-import Typography from "./Typography";
 
 interface FloatingActionBarProps {
   frames: ExtractedFrame[];
@@ -100,19 +99,19 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
       ref={barRef}
       className="fixed bottom-4 sm:bottom-6 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none pb-[env(safe-area-inset-bottom,0px)]"
     >
-      <div className="pointer-events-auto rounded-corner border-2 border-foreground bg-background p-2 sm:px-4 sm:py-3 flex items-center justify-between gap-2 sm:gap-6 max-w-2xl w-full sm:w-auto">
+      <div className="pointer-events-auto glass rounded-full border border-brand-border shadow-accent px-3 py-2 sm:px-5 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-5 max-w-2xl w-full sm:w-auto">
         {/* Selected Count Info */}
-        <div className="flex items-center gap-2">
-          <div className="size-8 rounded-corner border-2 border-foreground bg-foreground text-background flex items-center justify-center font-mono font-bold text-xs shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="size-8 rounded-full border border-brand-accent bg-brand-accent/15 text-brand-accentText flex items-center justify-center font-mono font-bold text-xs shrink-0">
             {selectedCount}
           </div>
           <div className="hidden sm:block">
-            <Typography as="span" variant="bodySm" weight={600} className="block leading-tight">
+            <span className="text-xs font-semibold text-foreground block leading-tight">
               {selectedCount} {selectedCount === 1 ? "frame" : "frames"} selected
-            </Typography>
-            <Typography as="span" variant="legal" muted className="block leading-tight font-mono">
+            </span>
+            <span className="text-[11px] text-muted-foreground block leading-tight font-mono">
               {formatBytes(selectedBytes)}
-            </Typography>
+            </span>
           </div>
         </div>
 
@@ -123,7 +122,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
             onClick={onSelectAll}
             disabled={isExporting}
             title="Select all frames"
-            className="text-xs font-semibold h-9 px-2.5 sm:px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            className="text-xs font-semibold h-9 px-3 rounded-full border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-foreground inline-flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
             <CheckCheck className="size-4" />
             <span className="hidden md:inline">All</span>
@@ -134,7 +133,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
             disabled={isExporting}
             title="Clear selection"
             aria-label="Clear selection"
-            className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-50"
+            className="size-9 inline-flex items-center justify-center rounded-full border border-brand-border bg-brand-card/70 hover:border-brand-accent/40 text-foreground transition-colors disabled:opacity-50"
           >
             <X className="size-4" />
           </button>
@@ -145,7 +144,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
           type="button"
           disabled={isExporting}
           onClick={handleDownloadZip}
-          className="text-xs sm:text-sm font-semibold h-10 sm:h-11 px-4 sm:px-6 rounded-corner border-2 border-foreground bg-[var(--brand-red)] text-white hover:opacity-90 transition-opacity inline-flex items-center gap-2 disabled:opacity-50 whitespace-nowrap shrink-0"
+          className="text-xs sm:text-sm font-semibold h-10 sm:h-11 px-4 sm:px-6 rounded-full bg-gradient-to-r from-[#ff6a2b] to-[#ff8547] text-[#0b0b0d] shadow-accent hover:shadow-accent-strong hover:brightness-105 transition-all inline-flex items-center gap-2 disabled:opacity-50 whitespace-nowrap shrink-0"
         >
           {isExporting ? (
             <>

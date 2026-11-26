@@ -46,4 +46,6 @@ export interface ToastMessage {
   type: "error" | "success" | "info" | "warning";
   title: string;
   message: string;
+  fileName?: string;
+  durationMs?: number;
 }

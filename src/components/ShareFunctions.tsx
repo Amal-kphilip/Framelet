@@ -52,7 +52,7 @@ export const ShareFunctions: React.FC<ShareFunctionsProps> = ({ onNotify }) => {
           href="https://github.com/Amal-kphilip/Framelet"
           target="_blank"
           rel="noopener noreferrer"
-          className="h-9 px-3 rounded-corner type-fluid type-button inline-flex items-center gap-2 bg-background hover:bg-muted text-foreground border-foreground border-2 transition-colors"
+          className="h-9 px-3.5 rounded-xl text-xs font-semibold inline-flex items-center gap-2 bg-brand-card/70 hover:border-brand-accent/40 text-foreground border-brand-border border transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -70,16 +70,20 @@ export const ShareFunctions: React.FC<ShareFunctionsProps> = ({ onNotify }) => {
         <button
           type="button"
           onClick={handleCopy}
-          className="h-9 px-3 rounded-corner type-fluid type-button inline-flex items-center gap-2 bg-background hover:bg-muted text-foreground border-foreground border-2 transition-colors"
+          className="h-9 px-3.5 rounded-xl text-xs font-semibold inline-flex items-center gap-2 bg-brand-card/70 hover:border-brand-accent/40 text-foreground border-brand-border border transition-colors"
         >
-          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+          {copied ? (
+            <Check className="size-4 text-brand-accentText" />
+          ) : (
+            <Copy className="size-4" />
+          )}
           <span>{copied ? "Copied" : "Copy link"}</span>
         </button>
 
         <button
           type="button"
           onClick={handleShare}
-          className="h-9 px-3 rounded-corner type-fluid type-button inline-flex items-center gap-2 bg-background hover:bg-muted text-foreground border-foreground border-2 transition-colors"
+          className="h-9 px-3.5 rounded-xl text-xs font-semibold inline-flex items-center gap-2 bg-brand-card/70 hover:border-brand-accent/40 text-foreground border-brand-border border transition-colors"
         >
           <Share2 className="size-4" />
           <span>Share</span>
