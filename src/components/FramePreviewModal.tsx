@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { X, Download, Check, Copy } from "lucide-react";
+import { X, Download, Check, Copy, ChevronLeft, ChevronRight } from "lucide-react";
 import { ExtractedFrame } from "@/types";
 import { downloadSingleFrame } from "@/lib/zipExporter";
 import { formatBytes } from "@/lib/videoUtils";
@@ -11,15 +11,23 @@ import Typography from "./Typography";
 interface FramePreviewModalProps {
   frame: ExtractedFrame | null;
   videoName: string;
+  filenameTemplate?: string;
   onClose: () => void;
   onToggleSelect: (id: string) => void;
+  onNavigate?: (direction: "prev" | "next") => void;
+  hasPrev?: boolean;
+  hasNext?: boolean;
 }
 
 export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
   frame,
   videoName,
+  filenameTemplate,
   onClose,
   onToggleSelect,
+  onNavigate,
+  hasPrev = false,
+  hasNext = false,
 }) => {
   const [copied, setCopied] = React.useState(false);
   const [copyError, setCopyError] = React.useState(false);
@@ -27,10 +35,15 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
   const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const copyTimerRef = React.useRef<number | null>(null);
   const onCloseRef = React.useRef(onClose);
+  const onNavigateRef = React.useRef(onNavigate);
 
   React.useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
+
+  React.useEffect(() => {
+    onNavigateRef.current = onNavigate;
+  }, [onNavigate]);
 
   const isOpen = frame !== null;
 
@@ -46,6 +59,16 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
       if (event.key === "Escape") {
         event.preventDefault();
         onCloseRef.current();
+        return;
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        onNavigateRef.current?.("prev");
+        return;
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        onNavigateRef.current?.("next");
         return;
       }
       if (event.key !== "Tab" || !dialogRef.current) return;
@@ -120,15 +143,41 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
             </Typography>
           </div>
 
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Close frame preview"
-            className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
-          >
-            <X className="size-4" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            {onNavigate && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onNavigate("prev")}
+                  disabled={!hasPrev}
+                  aria-label="Previous frame"
+                  title="Previous frame (Left arrow)"
+                  className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-40"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onNavigate("next")}
+                  disabled={!hasNext}
+                  aria-label="Next frame"
+                  title="Next frame (Right arrow)"
+                  className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors disabled:opacity-40"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+              </>
+            )}
+            <button
+              ref={closeButtonRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close frame preview"
+              className="size-9 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
         </div>
 
         {/* Original Aspect Image Container */}
@@ -174,7 +223,7 @@ export const FramePreviewModal: React.FC<FramePreviewModalProps> = ({
 
             <button
               type="button"
-              onClick={() => downloadSingleFrame(frame, videoName)}
+              onClick={() => downloadSingleFrame(frame, videoName, filenameTemplate)}
               className="text-xs sm:text-sm font-semibold h-10 px-3 sm:px-5 rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
               <Download className="size-4 shrink-0" />

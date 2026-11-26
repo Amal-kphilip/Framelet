@@ -10,6 +10,7 @@ import Typography from "./Typography";
 interface FloatingActionBarProps {
   frames: ExtractedFrame[];
   videoName: string;
+  filenameTemplate?: string;
   onSelectAll: () => void;
   onDeselectAll: () => void;
   onError: (title: string, message: string) => void;
@@ -20,6 +21,7 @@ interface FloatingActionBarProps {
 export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
   frames,
   videoName,
+  filenameTemplate,
   onSelectAll,
   onDeselectAll,
   onError,
@@ -76,7 +78,8 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
         (progress) => {
           setExportProgress(progress);
         },
-        frames.length
+        frames.length,
+        filenameTemplate
       );
 
       onSuccess(
