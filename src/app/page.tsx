@@ -21,6 +21,7 @@ import { FAQSection } from "@/components/FAQSection";
 import { ExtractedFrame, ExtractionSettings, ToastMessage, VideoMetadata } from "@/types";
 import { captureSingleFrameViaCanvas, extractFramesViaCanvas } from "@/lib/canvasExtractor";
 import {
+  buildFrameTimestamps,
   calculateScaledDimensions,
   DEFAULT_FILENAME_TEMPLATE,
   estimateOutputBytes,
@@ -393,6 +394,9 @@ export default function Home() {
                         trimStart: 0,
                         trimEnd: videoMetadata.duration,
                       }))
+                    }
+                    frameTimestamps={
+                      videoMetadata ? buildFrameTimestamps(videoMetadata.duration, settings) : []
                     }
                   />
 
