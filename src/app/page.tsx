@@ -14,7 +14,15 @@ import { ShareFunctions } from "@/components/ShareFunctions";
 import { Footer, SideNav } from "@/components/Footer";
 import Typography from "@/components/Typography";
 import { ExtractedFrame, ExtractionSettings, ToastMessage, VideoMetadata } from "@/types";
-import { extractFramesViaCanvas } from "@/lib/canvasExtractor";
+import { captureSingleFrameViaCanvas, extractFramesViaCanvas } from "@/lib/canvasExtractor";
+import {
+  calculateScaledDimensions,
+  DEFAULT_FILENAME_TEMPLATE,
+  estimateOutputBytes,
+  hasDuplicateTimestamp,
+  MAX_ESTIMATED_OUTPUT_BYTES,
+  MAX_EXTRACTED_FRAMES,
+} from "@/lib/videoUtils";
 
 export default function Home() {
   const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
@@ -24,9 +32,12 @@ export default function Home() {
     interval: 1.0,
     format: "image/jpeg",
     quality: 0.95,
+    scale: "original",
+    filenameTemplate: DEFAULT_FILENAME_TEMPLATE,
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressDetails, setProgressDetails] = useState({ current: 0, total: 0, status: "" });
   const [frames, setFrames] = useState<ExtractedFrame[]>([]);
@@ -78,6 +89,11 @@ export default function Home() {
       releaseFrameUrls();
       videoUrlRef.current = metadata.url;
       setVideoMetadata(metadata);
+      setSettings((prev) => ({
+        ...prev,
+        trimStart: 0,
+        trimEnd: metadata.duration,
+      }));
       setFrames([]);
       setPreviewFrame(null);
       setIsProcessing(false);
@@ -150,11 +166,7 @@ export default function Home() {
       setFrames(extractedFrames);
       setPreviewFrame(null);
       setIsSettingsCollapsed(true);
-      addToast(
-        "success",
-        "Extraction complete",
-        `Captured ${extractedFrames.length} frames at ${videoMetadata.width}×${videoMetadata.height}.`
-      );
+      addToast("success", "Extraction complete", `Captured ${extractedFrames.length} frames.`);
       window.requestAnimationFrame(() => {
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         gallerySectionRef.current?.scrollIntoView({
@@ -181,8 +193,81 @@ export default function Home() {
     }
   }, [addToast, isProcessing, releaseFrameUrls, settings, videoMetadata]);
 
+  const handleCaptureFrame = useCallback(
+    async (videoEl: HTMLVideoElement) => {
+      if (!videoMetadata || isProcessing || isCapturing) return;
+
+      if (frames.length >= MAX_EXTRACTED_FRAMES) {
+        addToast(
+          "warning",
+          "Frame limit reached",
+          `Cannot capture more than ${MAX_EXTRACTED_FRAMES} frames in a single gallery.`
+        );
+        return;
+      }
+
+      const timestamp = Number(Math.max(0, videoEl.currentTime).toFixed(4));
+      if (hasDuplicateTimestamp(frames, timestamp)) {
+        addToast(
+          "info",
+          "Already captured",
+          "A frame at this timestamp is already in the gallery."
+        );
+        return;
+      }
+
+      const scaled = calculateScaledDimensions(
+        videoMetadata.width,
+        videoMetadata.height,
+        settings.scale
+      );
+      const currentBytes = frames.reduce((sum, f) => sum + f.sizeBytes, 0);
+      const nextFrameEstimate = estimateOutputBytes(1, scaled.width, scaled.height, settings);
+      if (currentBytes + nextFrameEstimate > MAX_ESTIMATED_OUTPUT_BYTES) {
+        addToast(
+          "warning",
+          "Output limit reached",
+          "Capturing another frame would exceed the 512 MiB output safety guardrail."
+        );
+        return;
+      }
+
+      setIsCapturing(true);
+      try {
+        const captured = await captureSingleFrameViaCanvas(
+          videoEl,
+          videoMetadata,
+          settings,
+          frames.length + 1
+        );
+        frameUrlsRef.current.add(captured.dataUrl);
+        setFrames((prev) => [...prev, captured]);
+        addToast(
+          "success",
+          "Frame captured",
+          `Captured frame at ${captured.formattedTime} (${captured.width}×${captured.height}).`
+        );
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Could not capture the current frame.";
+        addToast("error", "Capture failed", msg);
+      } finally {
+        setIsCapturing(false);
+      }
+    },
+    [addToast, frames, isCapturing, isProcessing, settings, videoMetadata]
+  );
+
   const handleToggleSelect = (id: string) => {
     setFrames((prev) => prev.map((f) => (f.id === id ? { ...f, selected: !f.selected } : f)));
+  };
+
+  const handleSelectRange = (ids: string[], selected: boolean) => {
+    const idSet = new Set(ids);
+    setFrames((prev) => prev.map((f) => (idSet.has(f.id) ? { ...f, selected } : f)));
+  };
+
+  const handleSelectEveryNth = (n: number) => {
+    setFrames((prev) => prev.map((f, idx) => ({ ...f, selected: idx % n === 0 })));
   };
 
   const handleSelectAll = () => {
@@ -195,6 +280,19 @@ export default function Home() {
 
   const handleInvertSelection = () => {
     setFrames((prev) => prev.map((f) => ({ ...f, selected: !f.selected })));
+  };
+
+  const activePreviewIndex = previewFrame
+    ? frames.findIndex((frame) => frame.id === previewFrame.id)
+    : -1;
+  const activePreviewFrame = activePreviewIndex >= 0 ? frames[activePreviewIndex] : null;
+
+  const handleNavigatePreview = (direction: "prev" | "next") => {
+    if (activePreviewIndex < 0) return;
+    const nextIndex = direction === "prev" ? activePreviewIndex - 1 : activePreviewIndex + 1;
+    if (nextIndex >= 0 && nextIndex < frames.length) {
+      setPreviewFrame(frames[nextIndex]);
+    }
   };
 
   return (
@@ -260,6 +358,21 @@ export default function Home() {
                 onReset={handleReset}
                 onError={(title, msg) => addToast("error", title, msg)}
                 isProcessing={isProcessing}
+                onCaptureFrame={handleCaptureFrame}
+                isCapturing={isCapturing}
+                trimStart={settings.trimStart}
+                trimEnd={settings.trimEnd}
+                onTrimChange={(start, end) =>
+                  setSettings((prev) => ({ ...prev, trimStart: start, trimEnd: end }))
+                }
+                onResetTrim={() =>
+                  videoMetadata &&
+                  setSettings((prev) => ({
+                    ...prev,
+                    trimStart: 0,
+                    trimEnd: videoMetadata.duration,
+                  }))
+                }
               />
 
               {videoMetadata && (
@@ -292,7 +405,10 @@ export default function Home() {
                 <FrameGallery
                   frames={frames}
                   videoName={videoMetadata?.name || "extracted_video"}
+                  filenameTemplate={settings.filenameTemplate}
                   onToggleSelect={handleToggleSelect}
+                  onSelectRange={handleSelectRange}
+                  onSelectEveryNth={handleSelectEveryNth}
                   onSelectAll={handleSelectAll}
                   onDeselectAll={handleDeselectAll}
                   onInvertSelection={handleInvertSelection}
@@ -314,6 +430,7 @@ export default function Home() {
       <FloatingActionBar
         frames={frames}
         videoName={videoMetadata?.name || "extracted_frames"}
+        filenameTemplate={settings.filenameTemplate}
         onSelectAll={handleSelectAll}
         onDeselectAll={handleDeselectAll}
         onError={(title, msg) => addToast("error", title, msg)}
@@ -322,10 +439,14 @@ export default function Home() {
       />
 
       <FramePreviewModal
-        frame={previewFrame ? (frames.find((frame) => frame.id === previewFrame.id) ?? null) : null}
+        frame={activePreviewFrame}
         videoName={videoMetadata?.name || "frame"}
+        filenameTemplate={settings.filenameTemplate}
         onClose={() => setPreviewFrame(null)}
         onToggleSelect={handleToggleSelect}
+        onNavigate={handleNavigatePreview}
+        hasPrev={activePreviewIndex > 0}
+        hasNext={activePreviewIndex >= 0 && activePreviewIndex < frames.length - 1}
       />
     </div>
   );

@@ -1,9 +1,10 @@
-import { ExtractionSettings, VideoMetadata } from "@/types";
+import { ExtractedFrame, ExtractionSettings, ResolutionScale, VideoMetadata } from "@/types";
 
 export const MAX_ALLOWED_DURATION_SECONDS = 90;
 export const MAX_EXTRACTED_FRAMES = 500;
 export const MAX_ESTIMATED_OUTPUT_BYTES = 512 * 1024 * 1024; // Soft estimate guardrail, not an exact memory measurement.
 export const VIDEO_METADATA_TIMEOUT_MS = 20_000;
+export const DEFAULT_FILENAME_TEMPLATE = "{name}_frame_{index}_{timestamp}";
 
 export function formatDuration(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "00:00.00";
@@ -44,15 +45,95 @@ export function getAspectRatio(width: number, height: number): string {
   return `${w}:${h}`;
 }
 
+/** Calculate output dimensions for a resolution scale without ever upscaling. */
+export function calculateScaledDimensions(
+  width: number,
+  height: number,
+  scale: ResolutionScale = "original"
+): { width: number; height: number } {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return { width: 0, height: 0 };
+  }
+  if (scale === "original") {
+    return { width: Math.round(width), height: Math.round(height) };
+  }
+  const maxHeight = scale === "1080p" ? 1080 : 720;
+  if (height <= maxHeight) {
+    return { width: Math.round(width), height: Math.round(height) };
+  }
+  const ratio = maxHeight / height;
+  return {
+    width: Math.max(1, Math.round(width * ratio)),
+    height: maxHeight,
+  };
+}
+
+/** Check if a timestamp is already captured within a small tolerance. */
+export function hasDuplicateTimestamp(
+  frames: Pick<ExtractedFrame, "timestamp">[],
+  timestamp: number,
+  epsilon = 0.01
+): boolean {
+  return frames.some((frame) => Math.abs(frame.timestamp - timestamp) <= epsilon);
+}
+
+/** Sanitize a filename string by stripping illegal path/OS characters. */
+export function sanitizeFilename(raw: string): string {
+  return raw
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")
+    .replace(/[. ]+$/g, "")
+    .trim();
+}
+
+/** Format a frame filename from a user template, sanitizing illegal characters. */
+export function formatFrameFilename(
+  template: string | undefined,
+  params: {
+    baseName: string;
+    index: number;
+    formattedTime: string;
+    width: number;
+    height: number;
+    extension: string;
+  }
+): string {
+  const safeBase = sanitizeFilename(params.baseName.replace(/\.[^/.]+$/, "")) || "frames";
+  const paddedIndex = String(params.index).padStart(4, "0");
+  const safeTime = params.formattedTime.replace(/:/g, "m").replace(/\./g, "s");
+  const dimensions = `${params.width}x${params.height}`;
+  const rawTemplate = template && template.trim() ? template : DEFAULT_FILENAME_TEMPLATE;
+
+  const rendered = rawTemplate
+    .replace(/\{name\}/g, safeBase)
+    .replace(/\{index\}/g, paddedIndex)
+    .replace(/\{timestamp\}/g, safeTime)
+    .replace(/\{width\}x\{height\}/g, dimensions);
+
+  const sanitized = sanitizeFilename(rendered) || `frame_${paddedIndex}`;
+  return `${sanitized}.${params.extension}`;
+}
+
 /** One shared timestamp algorithm powers both the estimate and real extraction. */
 export function buildFrameTimestamps(duration: number, settings: ExtractionSettings): number[] {
   if (!Number.isFinite(duration) || duration <= 0) return [];
 
+  const start = Math.max(0, Math.min(duration, settings.trimStart ?? 0));
+  const rawEnd =
+    settings.trimEnd !== undefined && Number.isFinite(settings.trimEnd)
+      ? Math.min(duration, settings.trimEnd)
+      : duration;
+
+  if (rawEnd <= start) return [];
+
+  const rangeDuration = rawEnd - start;
+
   if (settings.mode === "custom_count") {
     const count = Math.max(1, Math.min(MAX_EXTRACTED_FRAMES, Math.floor(settings.maxFrames || 1)));
-    if (count === 1) return [0];
-    const finalTime = Math.max(0, duration - Math.min(0.05, duration / 100));
-    return Array.from({ length: count }, (_, index) => (index / (count - 1)) * finalTime);
+    if (count === 1) return [Number(start.toFixed(4))];
+    const finalTime = Math.max(start, rawEnd - Math.min(0.05, rangeDuration / 100));
+    return Array.from({ length: count }, (_, index) =>
+      Number((start + (index / (count - 1)) * (finalTime - start)).toFixed(4))
+    );
   }
 
   const interval =
@@ -61,15 +142,15 @@ export function buildFrameTimestamps(duration: number, settings: ExtractionSetti
       : Math.max(0.1, Math.min(5, settings.interval || 1));
   const timestamps: number[] = [];
 
-  // Always capture the opening frame, and avoid asking a decoder to seek exactly to EOF.
-  for (let time = 0; time < duration; time += interval) {
+  // Always capture the opening frame of the range, and avoid asking a decoder to seek exactly to EOF.
+  for (let time = start; time < rawEnd; time += interval) {
     const roundedTime = Number(time.toFixed(4));
-    if (roundedTime >= duration) break;
+    if (roundedTime >= rawEnd) break;
     timestamps.push(roundedTime);
   }
 
   const last = timestamps[timestamps.length - 1] ?? -1;
-  const finalTime = Math.max(0, duration - Math.min(0.05, duration / 100));
+  const finalTime = Math.max(start, rawEnd - Math.min(0.05, rangeDuration / 100));
   if (last >= 0 && finalTime - last > Math.max(interval * 0.5, 0.05) + 0.001) {
     timestamps.push(Number(finalTime.toFixed(4)));
   }

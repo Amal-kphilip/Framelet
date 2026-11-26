@@ -38,10 +38,11 @@
 
 - **Client-side Canvas extraction**: Processes video frames in browser memory without uploading video files to an application server.
 - **Multiple video containers**: Accepts MP4, WebM, MOV, MKV, and AVI files (actual playback/decoding depends on your browser's installed codecs).
-- **Flexible capture modes**: Extract by time interval, frames per second (FPS), or custom frame count with presets and synchronized frame-count estimates.
-- **Format & quality control**: Export JPEG, PNG, or WebP images when supported by the browser's Canvas `toBlob()` encoder; reports an error instead of silently falling back to a mismatched MIME type.
-- **Individual & ZIP exports**: Download individual frames or export selected/all frames as a ZIP archive with a `metadata.json` manifest (source filename, MIME type, timestamps, dimensions, byte sizes, and counts).
-- **Paginated gallery**: Search by frame number or timestamp, filter by selection state, sort by timestamp or file size, and browse 48 frames per page.
+- **Flexible capture modes & trim range**: Extract by time interval or frames per second (FPS) with presets, or scrub and trim a specific start/end range with keyboard-accessible range handles.
+- **Single-frame playhead capture**: Snapshot the current playhead frame with the **Capture frame** button or `C` shortcut, with duplicate-timestamp detection and guardrail enforcement.
+- **Resolution scale & format control**: Choose Original, 1080p, or 720p output (aspect-ratio preserved, never upscaled) and export JPEG, PNG, or WebP images; reports an error instead of silently falling back to a mismatched MIME type.
+- **Customizable filenames & ZIP exports**: Configure filename templates (`{name}`, `{index}`, `{timestamp}`, `{width}x{height}`) for single downloads and ZIP archives with a matching `metadata.json` manifest.
+- **Paginated gallery & selection tools**: Search by frame number or timestamp, filter by selection state, sort by timestamp or file size, Shift-click range select, select every Nth frame (`2`, `3`, `5`, `10`), and navigate the preview modal with Left/Right arrow keys.
 - **Reliability & safety guardrails**: Enforces a 90-second source-video limit, a 500-frame extraction cap, a 512 MiB approximate output guardrail, extraction cancellation, media-event timeouts, and object-URL cleanup.
 - **Accessible editorial UI**: Keyboard focus styles, modal focus management, Escape-to-close, `prefers-reduced-motion` support, and security response headers via `next.config.mjs`.
 
@@ -155,7 +156,9 @@ npm run check
 
 ## Roadmap
 
-- [ ] Add live deployment URL and visual demo GIF
+- [x] Live deployment URL (`https://framelet.vercel.app/`)
+- [x] Trim range handles, single-frame capture, resolution scaling, and filename templates
+- [ ] Add visual demo GIF to README
 - [ ] Expand unit test coverage for ZIP metadata manifest generation
 - [ ] Optional end-to-end browser tests for extraction and export flows
 

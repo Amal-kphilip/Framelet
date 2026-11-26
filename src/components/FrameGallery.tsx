@@ -21,7 +21,10 @@ import Typography from "./Typography";
 interface FrameGalleryProps {
   frames: ExtractedFrame[];
   videoName: string;
+  filenameTemplate?: string;
   onToggleSelect: (id: string) => void;
+  onSelectRange: (ids: string[], selected: boolean) => void;
+  onSelectEveryNth: (n: number) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
   onInvertSelection: () => void;
@@ -35,7 +38,10 @@ const PAGE_SIZE = 48;
 export const FrameGallery: React.FC<FrameGalleryProps> = ({
   frames,
   videoName,
+  filenameTemplate,
   onToggleSelect,
+  onSelectRange,
+  onSelectEveryNth,
   onSelectAll,
   onDeselectAll,
   onInvertSelection,
@@ -46,6 +52,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const lastTapRef = useRef<{ id: string; time: number }>({ id: "", time: 0 });
+  const lastAnchorIdRef = useRef<string | null>(null);
 
   const selectedCount = frames.filter((frame) => frame.selected).length;
   const isAllSelected = selectedCount === frames.length && frames.length > 0;
@@ -81,12 +88,27 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>, frame: ExtractedFrame) => {
     const now = e.timeStamp;
     const lastTap = lastTapRef.current;
-    if (lastTap.id === frame.id && now - lastTap.time < 350) {
+    if (!e.shiftKey && lastTap.id === frame.id && now - lastTap.time < 350) {
       lastTapRef.current = { id: "", time: 0 };
       onPreviewFrame(frame);
       return;
     }
     lastTapRef.current = { id: frame.id, time: now };
+
+    if (e.shiftKey && lastAnchorIdRef.current) {
+      const anchorIndex = filteredFrames.findIndex((f) => f.id === lastAnchorIdRef.current);
+      const targetIndex = filteredFrames.findIndex((f) => f.id === frame.id);
+      if (anchorIndex !== -1 && targetIndex !== -1) {
+        const start = Math.min(anchorIndex, targetIndex);
+        const end = Math.max(anchorIndex, targetIndex);
+        const rangeIds = filteredFrames.slice(start, end + 1).map((f) => f.id);
+        onSelectRange(rangeIds, !frame.selected);
+        lastAnchorIdRef.current = frame.id;
+        return;
+      }
+    }
+
+    lastAnchorIdRef.current = frame.id;
     onToggleSelect(frame.id);
   };
 
@@ -124,6 +146,28 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
               <RefreshCw className="size-4" />
               <span>Invert</span>
             </button>
+
+            <div
+              role="group"
+              aria-label="Select every Nth frame"
+              className="inline-flex items-center rounded-corner border-2 border-foreground overflow-hidden bg-background"
+            >
+              <span className="px-2 text-xs text-muted-foreground font-semibold whitespace-nowrap">
+                Every
+              </span>
+              {[2, 3, 5, 10].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => onSelectEveryNth(n)}
+                  title={`Select every ${n} frames`}
+                  aria-label={`Select every ${n} frames`}
+                  className="h-9 px-2.5 text-xs font-mono font-semibold border-l-2 border-foreground bg-background hover:bg-muted text-foreground transition-colors"
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -293,7 +337,7 @@ export const FrameGallery: React.FC<FrameGalleryProps> = ({
                       type="button"
                       aria-label={`Download frame ${frame.index}`}
                       title="Download frame"
-                      onClick={() => downloadSingleFrame(frame, videoName)}
+                      onClick={() => downloadSingleFrame(frame, videoName, filenameTemplate)}
                       className="size-7 sm:size-8 inline-flex items-center justify-center rounded-corner border-2 border-foreground bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
                     >
                       <Download className="size-3.5" />

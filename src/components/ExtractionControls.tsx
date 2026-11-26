@@ -2,11 +2,14 @@
 
 import React from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { ExtractionSettings, VideoMetadata } from "@/types";
+import { ExtractionSettings, ResolutionScale, VideoMetadata } from "@/types";
 import {
   buildFrameTimestamps,
+  calculateScaledDimensions,
+  DEFAULT_FILENAME_TEMPLATE,
   estimateOutputBytes,
   formatBytes,
+  formatFrameFilename,
   MAX_ESTIMATED_OUTPUT_BYTES,
   MAX_EXTRACTED_FRAMES,
 } from "@/lib/videoUtils";
@@ -38,12 +41,23 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
   const timestamps = buildFrameTimestamps(metadata.duration, settings);
   const estimatedCount = timestamps.length;
   const overLimit = estimatedCount > MAX_EXTRACTED_FRAMES;
+  const scaledDims = calculateScaledDimensions(metadata.width, metadata.height, settings.scale);
   const estimatedBytes = estimateOutputBytes(
     estimatedCount,
-    metadata.width,
-    metadata.height,
+    scaledDims.width,
+    scaledDims.height,
     settings
   );
+  const previewExt =
+    settings.format === "image/png" ? "png" : settings.format === "image/webp" ? "webp" : "jpg";
+  const filenamePreview = formatFrameFilename(settings.filenameTemplate, {
+    baseName: metadata.name,
+    index: 1,
+    formattedTime: "00:01.00",
+    width: scaledDims.width,
+    height: scaledDims.height,
+    extension: previewExt,
+  });
   const overOutputBudget = estimatedBytes > MAX_ESTIMATED_OUTPUT_BYTES;
   const blockedBySafetyLimit = overLimit || overOutputBudget;
   const sliderValue = settings.mode === "fps" ? settings.fps : settings.interval;
@@ -272,6 +286,84 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
               className="w-full"
             />
           </div>
+
+          {/* Resolution Scale */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <Typography as="span" variant="legal" muted>
+                Resolution scale
+              </Typography>
+              <span className="text-xs font-mono font-semibold text-foreground">
+                {scaledDims.width} × {scaledDims.height}
+              </span>
+            </div>
+            <div role="group" aria-label="Resolution scale" className="grid grid-cols-3 gap-2">
+              {(
+                [
+                  { value: "original", label: "Original" },
+                  { value: "1080p", label: "1080p" },
+                  { value: "720p", label: "720p" },
+                ] as { value: ResolutionScale; label: string }[]
+              ).map((option) => {
+                const active = (settings.scale ?? "original") === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    disabled={isProcessing}
+                    aria-pressed={active}
+                    onClick={() => onSettingsChange({ ...settings, scale: option.value })}
+                    className={`h-9 px-2 rounded-corner border-2 text-xs font-semibold transition-colors ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-foreground bg-background text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Filename Template */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="filename-template" className="text-xs text-muted-foreground">
+                Filename template
+              </label>
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={() =>
+                  onSettingsChange({ ...settings, filenameTemplate: DEFAULT_FILENAME_TEMPLATE })
+                }
+                className="text-xs font-semibold text-foreground hover:underline disabled:opacity-50"
+              >
+                Reset
+              </button>
+            </div>
+            <input
+              id="filename-template"
+              type="text"
+              disabled={isProcessing}
+              value={settings.filenameTemplate ?? DEFAULT_FILENAME_TEMPLATE}
+              onChange={(event) =>
+                onSettingsChange({ ...settings, filenameTemplate: event.target.value })
+              }
+              placeholder={DEFAULT_FILENAME_TEMPLATE}
+              className="h-9 w-full rounded-corner border-2 border-foreground bg-background px-3 text-xs font-mono text-foreground placeholder:text-muted-foreground"
+            />
+            <p className="text-xs text-muted-foreground font-mono truncate" title={filenamePreview}>
+              Preview: {filenamePreview}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Tokens: <code className="font-mono">{"{name}"}</code>,{" "}
+              <code className="font-mono">{"{index}"}</code>,{" "}
+              <code className="font-mono">{"{timestamp}"}</code>,{" "}
+              <code className="font-mono">{"{width}x{height}"}</code>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -293,8 +385,8 @@ export const ExtractionControls: React.FC<ExtractionControlsProps> = ({
       {/* Action Footer */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 sm:pt-[var(--space-md)] border-t-2 border-border">
         <Typography as="p" variant="legal" muted>
-          Output: {estimatedCount.toLocaleString()} stills · {metadata.width} × {metadata.height} ·
-          Processed locally
+          Output: {estimatedCount.toLocaleString()} stills · {scaledDims.width} ×{" "}
+          {scaledDims.height} · Processed locally
         </Typography>
 
         <button
