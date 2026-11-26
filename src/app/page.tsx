@@ -13,6 +13,11 @@ import { ToastContainer } from "@/components/Toast";
 import { ShareFunctions } from "@/components/ShareFunctions";
 import { Footer } from "@/components/Footer";
 import Typography from "@/components/Typography";
+import { HeroSection } from "@/components/HeroSection";
+import { MarqueeStrip } from "@/components/MarqueeStrip";
+import { FeaturesSection } from "@/components/FeaturesSection";
+import { HowItWorksSection } from "@/components/HowItWorksSection";
+import { FAQSection } from "@/components/FAQSection";
 import { ExtractedFrame, ExtractionSettings, ToastMessage, VideoMetadata } from "@/types";
 import { captureSingleFrameViaCanvas, extractFramesViaCanvas } from "@/lib/canvasExtractor";
 import {
@@ -303,126 +308,159 @@ export default function Home() {
       <ToastContainer toasts={toasts} onDismiss={dismissToast} bottomOffset={floatingBarHeight} />
       <Navbar onReset={handleReset} hasVideo={!!videoMetadata} />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 w-full flex flex-col gap-[var(--fluid-lg-2xl)] pt-24 sm:pt-28 pb-12">
-        {/* Hero Statement */}
-        <section className="w-full">
-          <Typography variant="hero" as="h1">
-            This app extracts crisp still frames from videos directly in your browser, so your files
-            stay on your device and never get uploaded.
-          </Typography>
-        </section>
+      {/* Hero section */}
+      <HeroSection />
 
-        {/* Dropzone + Workspace */}
-        <div className="w-full flex flex-col gap-[var(--fluid-lg-xl)]">
-          {videoMetadata && isSettingsCollapsed && !isProcessing ? (
-            <section
-              aria-label="Extraction summary"
-              className="w-full border-2 border-foreground rounded-corner bg-background px-4 py-3 sm:px-[var(--space-xl)] sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-            >
-              <div className="flex items-start sm:items-center gap-2.5 min-w-0">
-                <FileVideo className="size-5 shrink-0 text-foreground mt-0.5 sm:mt-0" />
-                <div className="min-w-0">
-                  <Typography as="p" variant="label" weight={600} className="truncate">
-                    {videoMetadata.name}
-                  </Typography>
-                  <Typography as="p" variant="bodySm" muted className="font-mono">
-                    {frames.length.toLocaleString()} {frames.length === 1 ? "frame" : "frames"}{" "}
-                    &middot;{" "}
-                    {settings.format === "image/jpeg"
-                      ? "JPEG"
-                      : settings.format === "image/png"
-                        ? "PNG"
-                        : "WebP"}{" "}
-                    &middot;{" "}
-                    {settings.format === "image/png"
-                      ? "Lossless"
-                      : `${Math.round(settings.quality * 100)}%`}
-                  </Typography>
-                </div>
-              </div>
+      {/* Marquee strip */}
+      <MarqueeStrip />
 
-              <button
-                type="button"
-                onClick={() => setIsSettingsCollapsed(false)}
-                className="type-fluid type-button h-9 px-3 rounded-corner border-2 border-foreground bg-background hover:bg-muted text-foreground inline-flex items-center justify-center gap-1.5 transition-colors shrink-0 self-start sm:self-auto"
-              >
-                <SlidersHorizontal className="size-4" />
-                <span>Edit settings</span>
-              </button>
-            </section>
-          ) : (
-            <>
-              <VideoUploadZone
-                videoMetadata={videoMetadata}
-                onVideoSelected={handleVideoSelected}
-                onReset={handleReset}
-                onError={(title, msg) => addToast("error", title, msg)}
-                isProcessing={isProcessing}
-                onCaptureFrame={handleCaptureFrame}
-                isCapturing={isCapturing}
-                trimStart={settings.trimStart}
-                trimEnd={settings.trimEnd}
-                onTrimChange={(start, end) =>
-                  setSettings((prev) => ({ ...prev, trimStart: start, trimEnd: end }))
-                }
-                onResetTrim={() =>
-                  videoMetadata &&
-                  setSettings((prev) => ({
-                    ...prev,
-                    trimStart: 0,
-                    trimEnd: videoMetadata.duration,
-                  }))
-                }
-              />
+      {/* Workspace / Tool section */}
+      <main id="tool">
+        <section className="w-full py-16 sm:py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            {/* Section eyebrow */}
+            <div className="flex flex-col items-center text-center gap-3 mb-10">
+              <p className="text-xs font-display font-700 uppercase tracking-widest text-brand-accent flex items-center gap-2">
+                <span className="inline-block w-4 h-px bg-brand-accent" />
+                Workspace
+                <span className="inline-block w-4 h-px bg-brand-accent" />
+              </p>
+              <h2 className="font-display font-800 text-[clamp(1.5rem,3vw,2.25rem)] leading-[1.1] tracking-tight text-foreground">
+                Extract frames from your video
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base max-w-md leading-relaxed">
+                Drop a video, configure the capture settings, and export your frames — all locally.
+              </p>
+            </div>
 
-              {videoMetadata && (
-                <ExtractionControls
-                  metadata={videoMetadata}
-                  settings={settings}
-                  onSettingsChange={setSettings}
-                  onStartExtraction={handleStartExtraction}
-                  isProcessing={isProcessing}
+            {/* Tool glass container */}
+            <div className="glass rounded-3xl p-4 sm:p-6 lg:p-8 flex flex-col gap-[var(--fluid-lg-xl)]">
+              {videoMetadata && isSettingsCollapsed && !isProcessing ? (
+                <section
+                  aria-label="Extraction summary"
+                  className="w-full border border-brand-border rounded-2xl bg-brand-card px-4 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                >
+                  <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+                    <FileVideo className="size-5 shrink-0 text-brand-accent mt-0.5 sm:mt-0" />
+                    <div className="min-w-0">
+                      <Typography as="p" variant="label" weight={600} className="truncate">
+                        {videoMetadata.name}
+                      </Typography>
+                      <Typography as="p" variant="bodySm" muted className="font-mono">
+                        {frames.length.toLocaleString()} {frames.length === 1 ? "frame" : "frames"}{" "}
+                        &middot;{" "}
+                        {settings.format === "image/jpeg"
+                          ? "JPEG"
+                          : settings.format === "image/png"
+                            ? "PNG"
+                            : "WebP"}{" "}
+                        &middot;{" "}
+                        {settings.format === "image/png"
+                          ? "Lossless"
+                          : `${Math.round(settings.quality * 100)}%`}
+                      </Typography>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsSettingsCollapsed(false)}
+                    className="type-fluid type-button h-9 px-3 rounded-xl border border-brand-border bg-brand-card hover:border-brand-accent/40 text-foreground inline-flex items-center justify-center gap-1.5 transition-colors shrink-0 self-start sm:self-auto"
+                  >
+                    <SlidersHorizontal className="size-4" />
+                    <span>Edit settings</span>
+                  </button>
+                </section>
+              ) : (
+                <>
+                  <VideoUploadZone
+                    videoMetadata={videoMetadata}
+                    onVideoSelected={handleVideoSelected}
+                    onReset={handleReset}
+                    onError={(title, msg) => addToast("error", title, msg)}
+                    isProcessing={isProcessing}
+                    onCaptureFrame={handleCaptureFrame}
+                    isCapturing={isCapturing}
+                    trimStart={settings.trimStart}
+                    trimEnd={settings.trimEnd}
+                    onTrimChange={(start, end) =>
+                      setSettings((prev) => ({ ...prev, trimStart: start, trimEnd: end }))
+                    }
+                    onResetTrim={() =>
+                      videoMetadata &&
+                      setSettings((prev) => ({
+                        ...prev,
+                        trimStart: 0,
+                        trimEnd: videoMetadata.duration,
+                      }))
+                    }
+                  />
+
+                  {videoMetadata && (
+                    <ExtractionControls
+                      metadata={videoMetadata}
+                      settings={settings}
+                      onSettingsChange={setSettings}
+                      onStartExtraction={handleStartExtraction}
+                      isProcessing={isProcessing}
+                    />
+                  )}
+                </>
+              )}
+
+              {isProcessing && (
+                <LiquidProgressBar
+                  progress={progress}
+                  currentFrame={progressDetails.current}
+                  totalFrames={progressDetails.total}
+                  statusText={progressDetails.status}
+                  onCancel={handleCancelExtraction}
                 />
               )}
-            </>
-          )}
 
-          {isProcessing && (
-            <LiquidProgressBar
-              progress={progress}
-              currentFrame={progressDetails.current}
-              totalFrames={progressDetails.total}
-              statusText={progressDetails.status}
-              onCancel={handleCancelExtraction}
-            />
-          )}
+              <div ref={gallerySectionRef}>
+                {isProcessing ? (
+                  <FrameGallerySkeleton
+                    width={videoMetadata?.width}
+                    height={videoMetadata?.height}
+                  />
+                ) : (
+                  frames.length > 0 && (
+                    <FrameGallery
+                      frames={frames}
+                      videoName={videoMetadata?.name || "extracted_video"}
+                      filenameTemplate={settings.filenameTemplate}
+                      onToggleSelect={handleToggleSelect}
+                      onSelectRange={handleSelectRange}
+                      onSelectEveryNth={handleSelectEveryNth}
+                      onSelectAll={handleSelectAll}
+                      onDeselectAll={handleDeselectAll}
+                      onInvertSelection={handleInvertSelection}
+                      onPreviewFrame={setPreviewFrame}
+                    />
+                  )
+                )}
+              </div>
 
-          <div ref={gallerySectionRef}>
-            {isProcessing ? (
-              <FrameGallerySkeleton width={videoMetadata?.width} height={videoMetadata?.height} />
-            ) : (
-              frames.length > 0 && (
-                <FrameGallery
-                  frames={frames}
-                  videoName={videoMetadata?.name || "extracted_video"}
-                  filenameTemplate={settings.filenameTemplate}
-                  onToggleSelect={handleToggleSelect}
-                  onSelectRange={handleSelectRange}
-                  onSelectEveryNth={handleSelectEveryNth}
-                  onSelectAll={handleSelectAll}
-                  onDeselectAll={handleDeselectAll}
-                  onInvertSelection={handleInvertSelection}
-                  onPreviewFrame={setPreviewFrame}
-                />
-              )
-            )}
+              {/* Share / link row */}
+              {frames.length === 0 && !isProcessing && (
+                <div className="border-t border-brand-border pt-4">
+                  <ShareFunctions onNotify={(type, title, msg) => addToast(type, title, msg)} />
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-
-        <div className="h-[3px] w-full bg-foreground" />
-
-        <ShareFunctions onNotify={(type, title, msg) => addToast(type, title, msg)} />
+        </section>
       </main>
+
+      {/* Features section */}
+      <FeaturesSection />
+
+      {/* How it works section */}
+      <HowItWorksSection />
+
+      {/* FAQ section */}
+      <FAQSection />
 
       <Footer />
 
